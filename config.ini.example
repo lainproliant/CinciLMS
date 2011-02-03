@@ -1,0 +1,49 @@
+;
+; Configuration for the Cincinnatus Learning Management System
+;
+; NOTE: Values in this file may be overwritten by config scripts!
+; 
+; NOTE: Please hide this file from being viewed by Apache.
+;       Apache doesn't know not to show this file...
+;
+; Add the following block to ".htaccess" in the current directory
+; to hide all *.ini files here from Apache.
+;
+;  <Files ~ "^.*\.ini">
+;     Order allow,deny
+;     Deny from all
+;     Satisfy All
+;  </Files>
+;
+
+[site]
+; Session Timeout, in seconds.
+session_timeout = 900
+; The number of seconds to wait while logging in,
+; to prevent brute force attacks.
+login_delay = 1
+; The default timezone used by the system.
+default_timezone = America/New_York
+
+[db]
+; The hostname and port of the MySQL server.
+hostname = localhost
+port = 3306
+
+; The database username and password.
+username = cincilms
+password = somesortofpassword
+
+; The databse containing the Cinci LMS tables.
+database = CinciLMS
+
+; The static salt.  This is sent to the client as salt
+; for a client side SHA256 hash of the password before it is sent.
+; The server then salts this salted password with a per-user salt
+; stored in the database to validate the password.
+; Don't rely on this as a secure login... it's not.  It simply prevents
+; the password from being sent in plaintext form.  A user's salted
+; password is enough for an attacker to gain access to the site.
+; If you want a secure login, put this behind SSL.
+static_salt = deadbeefcafed00ddeadbeefcafed00ddeadbeefcafed00ddeadbeefcafed00d
+

@@ -1,0 +1,8 @@
+# Hide all *.ini files from users.
+<Files ~ "^.*\.ini">
+   Order allow,deny
+   Deny from all
+   Satisfy All
+</Files>
+
+

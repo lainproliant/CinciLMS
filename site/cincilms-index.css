@@ -1,0 +1,201 @@
+/*
+ * Stylesheet for the Cinci LMS system.
+ */
+
+/*----------------------------------------------------------------------------
+ * Form specific CSS rules.
+ */
+body 
+{
+   background: white;
+   margin: 0.25in; 
+   color: black;
+   font-family: sans-serif;
+}
+
+div.header {
+   background: black;
+   color: white;
+   padding: 8px;
+   margin-bottom: 0px;
+}
+
+div.header h1
+{
+   margin-left: auto;
+   margin-right: auto;
+   text-align: center;
+}
+
+div.content {
+   display: block;
+   overflow: hidden;
+   padding-bottom: 10px;
+}
+
+div.footer {
+   clear: both;
+   background: black;
+   color: white;
+}
+
+div.footer img.pblogo {
+   margin-right: 3px;
+   float: left;
+}
+
+div.footer p {
+   font-size: small;
+   text-align: right;
+}
+
+div.navi {
+   /*float: left;*/
+   /*min-height: 400px;*/
+   z-index: 2;
+   background: #404040;
+}
+
+div.menu {
+   /*float: left;*/
+   /*margin: 8px;*/
+   z-index: 1;
+   clear: both;
+}
+
+div.menu ul {
+   list-style: none;
+   margin: 0;
+   padding: 0;
+}
+
+div.menu a, div.menu p {
+   font-family: helvetica, arial, sans-serif;
+   font-size: small;
+   display: block;
+   border-width: 1px;
+   border-style: solid;
+   border-color: #808080 #404040 #202020 #808080;
+   margin: 0;
+   padding: 2px 3px;
+}
+
+div.menu p {
+   color: #FFF;
+   background: #000000;
+}
+
+div.menu a {
+   color: #FFF;
+   background: #E00122;
+   text-decoration: none;
+}
+
+div.menu a:hover {
+   color: #000;
+   background: #FFFFFF;
+}
+
+div.menu ul li {
+   position: relative;
+   width: 9em;
+   float: left;
+   z-index: 2;
+}
+
+div.menu ul li ul {
+   position: absolute;
+   top: 0%;
+   left: 100%;
+   width: 100%;
+   z-index: 3;
+}
+
+div.menu ul li ul.main_menu {
+   position: absolute;
+   top: 100%;
+   left: 0%;
+   width: 100%;
+   z-index: 3;
+}
+
+div.menu ul ul,
+div.menu ul li:hover ul ul
+{
+   display: none;
+}
+
+div.menu ul li:hover ul,
+div.menu ul ul li:hover ul
+{
+   display: block;
+}
+
+/*
+a:hover {
+   color: #FF9;
+   background: #330;
+}
+
+a:visited {
+   color: #FFF;
+}
+
+a:link {
+   color: #FFF;
+}
+
+a:active {
+   color: #FFF;
+}
+*/
+
+a img {
+   border: none;
+}
+
+form fieldset {
+   border: 0;
+   margin: 0;
+   padding: 0;
+}
+
+form label {
+   font-size: small;
+}
+
+form input {
+   margin-right: 8px;
+}
+
+/*----------------------------------------------------------------------------
+ * Form specific CSS rules.
+ */
+div.prompt {
+   margin: 0px auto;
+   display: table;
+}
+
+div.warning {
+   background: #FF9999;
+   border: 1px dashed red;
+   padding-left: 4em;
+   padding-right: 4em;
+   margin-top: 20px;
+}
+
+form.login label {
+   font-weight: bold;
+   width: 8em;
+   margin-right: 0.5em;
+   display: block;
+}
+
+form.login input {
+   font-size: large;
+}
+
+form.login button {
+   font-size: large;
+}
+
