@@ -15,6 +15,25 @@ import sys
 from iniparse import INIConfig
 from hashlib import sha256
 
+HELP_STRING = """
+Usage: %s [OPTION]...
+
+Resets a user's password in the CinciLMS database system.
+
+-u, --username:         The username who's password is to be reset.
+-p, --specifyPassword   Prompt for a password.  Generates a random password
+                           by default.
+-c, --config            The path to the CinciLMS config file.
+                           Default is config.ini.
+
+If --specifyPassword was not given, a random password is generated for the
+specified user and printed to standard out.  If --specifyPassword was
+given, the user is prompted for a password and the password is not printed.
+
+A valid config file is required to connect to the database, either in the 
+current directory as 'config.ini' or at the path specified by --config.
+""".strip ()
+
 PASSWORD_CHARS = range (48, 58) + range (65, 91) + range (97, 123)
 
 def randomWord (charspace = PASSWORD_CHARS, length = 6):
@@ -35,18 +54,19 @@ def main (argv):
       The main entry point.
    """
 
-   shortopts = 'pu:'
-   longopts = ['specifyPassword', 'username=']
-   iniFile = 'site/config.ini'
+   shortopts = 'pu:c:'
+   longopts = ['specifyPassword', 'username=', 'config']
 
+   # If user specified --help, print usage and exit.
+   if '--help' in argv:
+      usage ()
+
+   iniFile = 'site/config.ini'
    username = None
    password = None
    port     = 3306
    specifyPassword = False
    randomPasswordLength = 6
-
-   # The INI file data.
-   siteConfig = INIConfig (open (iniFile, 'r'))
 
    opts, args = getopt.getopt (argv, shortopts, longopts)
 
@@ -55,6 +75,11 @@ def main (argv):
          specifyPassword = True
       elif opt in ['-u', '--username']:
          username = str (val)
+      elif opt in ['-c', '--config']:
+         iniFile = str (val)
+
+   # The INI file data.
+   siteConfig = INIConfig (open (iniFile, 'r'))
 
    if username is None:
       print ('No username specified for password reset.')
@@ -124,6 +149,14 @@ def main (argv):
 
    print ('Goodbye!')
 
+   sys.exit (0)
+
+def usage ():
+   """
+      Prints usage and exits.
+   """
+
+   print HELP_STRING % sys.argv [0]
    sys.exit (0)
 
 if __name__ == '__main__':

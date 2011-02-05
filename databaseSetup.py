@@ -56,6 +56,27 @@ import sys
 from iniparse import INIConfig
 from hashlib import sha256
 
+HELP_STRING = """
+Usage: %s [OPTION]...
+
+Create and initialize the CinciLMS database system.
+
+-h, --host           The hostname of the MySQL server. Default "localhost".
+-p, --port           The port onto which to connect.  Default 3306.
+-d, --database       The name of the CinciLMS database. Default "CinciLMS".
+-u, --username       The MySQL username used by CinciLMS. Default 'cincilms'.
+-f, --force          Force recreation of the database. VERY DANGEROUS.
+-P, --dbpasswd       Prompt for a database password when initializing.
+                        Uses a randomly generated password by default.
+-A, --adminpasswd    Prompt for an admin user password when initializing.
+                        Uses a randomly generated password by default.
+--help               Prints this help message.
+
+Will prompt for confirmation if any data is to be destroyed.  Outputs a new
+configuration file for CinciLMS to 'config.ini'.  Copy this to the site
+directory if the database was (re)initialized.
+""".strip ()
+
 # ASCII upper case, lower case, and numeral characters used by
 # the randomWord () function.
 PASSWORD_CHARS = range (48, 58) + range (65, 91) + range (97, 123)
@@ -305,9 +326,13 @@ def main (argv):
    """
       The main entry point.
    """
-
+   
    shortopts = 'h:p:d:u:fPA'
    longopts = ['host=', 'port=', 'database=', 'user=', 'force', 'dbpasswd', 'adminpasswd']
+
+   # If the user specified --help, print usage and exit.
+   if '--help' in argv:
+      usage ()
 
    hostname    = 'localhost'
    portNum     = 3306
@@ -543,6 +568,15 @@ def main (argv):
    print ('Please copy this file to the CinciLMS site directory.')
    print ('Goodbye!')
    print ("")
+   sys.exit (0)
+
+
+def usage ():
+   """
+      Prints usage and exits.
+   """
+
+   print HELP_STRING % sys.argv [0]
    sys.exit (0)
 
 if __name__ == '__main__':
