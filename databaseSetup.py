@@ -163,7 +163,8 @@ create table `ContentItemAttachments` (
    `ContentID` int not null,
    `FileID` int not null,
    constraint `FK_ContentID` foreign key (`ContentID`) references `CourseContent` (`ContentID`),
-   constraint `FK_FileID` foreign key (`FileID`) references `FileManagement` (`FileID`)
+   constraint `FK_FileID` foreign key (`FileID`) references `FileManagement` (`FileID`),
+   primary key (`ContentID`, `FileID`)
 );
 """.strip ()
 
@@ -172,7 +173,7 @@ CREATE_TABLE_FACT_FOLDER_CONTENTS = """
 create table `FactFolderContents` (
    `FolderID` int not null, INDEX (`FolderID`),
    `ContentID` int not null, INDEX (`ContentID`),
-   unique index (`FolderID`, `ContentID`)
+   primary key (`FolderID`, `ContentID`)
 );
 """.strip ()
 
@@ -205,7 +206,8 @@ create table `AssignmentFileSubmissions` (
    `FileID` int not null,
    constraint `FK_AssignmentID` foreign key (`AssignmentID`) references `Assignments` (`AssignmentID`),
    constraint `FK_StudentID` foreign key (`StudentID`) references `Users` (`UserID`),
-   constraint `FK_FileID` foreign key (`FileID`) references `FileManagement` (`FileID`)
+   constraint `FK_FileID` foreign key (`FileID`) references `FileManagement` (`FileID`),
+   primary key (`AssignmentID`, `StudentID`, `CourseID`, `SubmissionDate`)
 );
 """.strip ()
 
@@ -238,7 +240,8 @@ create table `FactCourseEnrollment` (
    `AccessFlags` set ('UR','UW','MR','MW','OR','GR') not null,
    constraint `FK_UserID` foreign key (`UserID`) references `Users` (`UserID`),
    constraint `FK_CourseID` foreign key (`CourseID`) references `Courses` (`CourseID`),
-   constraint `FK_RoleID` foreign key (`RoleID`) references `CourseRoles` (`RoleID`)
+   constraint `FK_RoleID` foreign key (`RoleID`) references `CourseRoles` (`RoleID`),
+   primary key (`UserID`, `CourseID`)
 );
 """.strip ()
 
@@ -263,7 +266,8 @@ create table `Grades` (
    `StudentID` int not null,
    `Grade` decimal (5,2),
    constraint `FK_ColumnID` foreign key (`ColumnID`) references `GradeColumns` (`ColumnID`),
-   constraint `FK_StudentID` foreign key (`StudentID`) references `Users` (`UserID`)
+   constraint `FK_StudentID` foreign key (`StudentID`) references `Users` (`UserID`),
+   primary key (`ColumnID`, `StudentID`)
 );
 """.strip ()
 
