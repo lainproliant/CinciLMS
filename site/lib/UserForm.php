@@ -22,10 +22,6 @@ class UserForm extends Form {
 
       $this->setAttribute ('onSubmit', 'return userFormValidate (this);');
       
-      $fieldset = new FieldSet ($this);
-
-      $listDiv = new Div ($fieldset, 'list');
-      
       $username = NULL;
       $externalID = NULL;
       $firstName = NULL;
@@ -48,14 +44,19 @@ class UserForm extends Form {
          $systemRole = $user->systemRole;
       }
 
+      $fieldset = new FieldSet ($this);
+
+      $listDiv = new Div ($fieldset, 'list');
+      
       $div = new Div ($listDiv, 'row');
       new Label ($div, 'Username:', 'username', 'first');
       new TextInput ($div, 'username', 'username', $username);
 
       $div = new Div ($listDiv, 'row');
-      new Label ($div, 'ExternalID:', 'external_id', 'first');
+      $label = new Label ($div, NULL, 'external_id');
+      new Para ($label, 'External ID:');
+      new Para ($label, '(optional)', 'field_note');
       new TextInput ($div, 'externalID', 'externalID', $externalID);
-      new Span ($div, '(optional)', 'field_note');
 
       $div = new Div ($listDiv, 'row');
       new Label ($div, 'First Name:', 'firstName', 'first');
@@ -75,15 +76,33 @@ class UserForm extends Form {
       new TextInput ($div, 'emailAddress', 'emailAddress', $emailAddress);
       
       $div = new Div ($listDiv, 'row');
-      $listDiv = new Div ($fieldset, 'list');
       $systemRoles = enumerateSystemRoles ();
       new Label ($div, 'System Role:');
       $stack = new Div ($div, 'stack');
+      new Hr ($stack);
       foreach ($systemRoles as $roleID => $desc) {
          $radio = new RadioButton ($stack, 'systemRole', NULL, $roleID);
+         if ($systemRole == $roleID) {
+            $radio->setAttribute ('checked', '1');
+         }
+
          new TextEntity ($stack, $desc);
          new Br ($stack);
       }
+      new Hr ($stack);
+
+      $div = new Div ($listDiv, 'row');
+      new Label ($div, 'User is Active?');
+      $stack = new Div ($div, 'stack');
+      new RadioButton ($stack, 'isActive', NULL, 1, $isActive == 1);
+      new TextEntity ($stack, "Yes");
+      new Br ($stack);
+      new RadioButton ($stack, 'isActive', NULL, 0, $isActive == 0);
+      new TextEntity ($stack, "No");
+      new Br ($stack);
+      new Hr ($stack);
+
+      $listDiv = new Div ($fieldset, 'list');
 
       $div = new Div ($listDiv, 'row');
       new Label ($div, 'Notes:', 'notes', 'first top');
@@ -93,6 +112,10 @@ class UserForm extends Form {
       new Label ($div, '&nbsp;');
       new SubmitButton ($div, 'Submit');
       new ResetButton ($div, 'Reset');
+      
+      if (! empty ($user)) {
+         new HiddenField ($this, "userID", NULL, $user->userID);
+      }
    }
 }
 

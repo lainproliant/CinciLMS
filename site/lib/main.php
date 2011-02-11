@@ -49,9 +49,9 @@ function databaseError ($contentDiv, $e)
 
    $p = new XMLEntity ($div, 'p');
    new TextEntity ($p, $e->getMessage ());
-
-   $code = new XMLEntity ($div, 'code');
-   new TextEntity ($code, $e->getDBError ());
+   
+   $p = new Para ($div, sprintf ('<code>%s</code>',
+      $e->getDBError ()));
 }
 
 /*
@@ -65,6 +65,9 @@ function genericError ($contentDiv, $e)
 
    $p = new XMLEntity ($div, 'p');
    new TextEntity ($p, $e->getMessage ());
+   
+   $p = new Para ($div, sprintf ('<code>%s</code>',
+      get_class ($e)));
 }
 
 /*

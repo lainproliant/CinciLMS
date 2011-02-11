@@ -3,7 +3,7 @@
 <html xmlns='http://www.w3.org/1999/xhtml'>
    <head>
       <meta http-equiv='Content-Type' content='text/html;charset=utf-8'/>
-      <link rel='stylesheet' type='text/css' href='cincilms-index.css'/>
+      <link rel='stylesheet' type='text/css' href='index.css'/>
       <script type='text/javascript' src='lib/main.js'></script>
       <script type='text/javascript' src='lib/util/js/sprintf-0.6.js'></script>
       <script type='text/javascript' src='lib/util/js/jssha256.js'></script>

@@ -184,8 +184,8 @@ div.warning {
    margin-top: 20px;
 }
 
-form span.field_note {
-   font-size: small;
+form p.field_note {
+   font-size: x-small;
    color: #000088;
 }
 
@@ -206,6 +206,12 @@ form div.list {
 
 form div.list div.row {
    display: table-row;
+}
+
+form p {
+   margin-top: 0;
+   margin-bottom: 0;
+   line-height: 1.10;
 }
 
 form div.list div.row label,

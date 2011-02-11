@@ -267,7 +267,7 @@ class Input extends XMLEntity {
          $this->setAttribute ('id', $id);
       }
 
-      if (! empty ($value)) {
+      if (! is_null ($value)) {
          $this->setAttribute ('value', $value);
       }
    }
@@ -470,6 +470,16 @@ class Br extends XMLEntity {
    function __construct ($parent)
    {
       parent::__construct ($parent, 'br');
+   }
+}
+
+/*
+ * Hr: A convenience class for a horizontal rule.
+ */
+class Hr extends XMLEntity {
+   function __construct ($parent)
+   {
+      parent::__construct ($parent, 'hr');
    }
 }
 
