@@ -24,6 +24,12 @@ session_timeout = 900
 login_delay = 1
 ; The default timezone used by the system.
 default_timezone = America/New_York
+; Should the HTML output be pretty, i.e. indented
+; and with newlines, and not all on the same line?
+pretty = 0
+; What should the initial indent level be for pretty
+; HTML output?
+initial_il = 4
 
 [db]
 ; The hostname and port of the MySQL server.

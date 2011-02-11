@@ -13,6 +13,8 @@ include_once "util/XMLEntity.php";
 include_once "SysopClass.php";
 include_once "Exceptions.php";
 
+include_once "UserForm.php";
+
 // LRS-TODO: implement
 class AdminClass extends SysopClass {
    function __construct ()
@@ -33,4 +35,12 @@ class AdminClass extends SysopClass {
             "Search Users"          => 'searchUsers')));
    }
 
+   protected function actionNewUser ($contentDiv)
+   {
+      $div = new Div ($contentDiv, "login prompt");
+      $header = new XMLEntity ($div, 'h3');
+      new TextEntity ($header, "Create a New User");
+      new Para ($div, "Edit the user's details below, then click Submit.");
+      new UserForm ($div, '?action=submitNewUser', $this);
+   }
 }

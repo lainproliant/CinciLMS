@@ -33,7 +33,7 @@ class LoginForm extends Form {
       new Label ($div, "Password:", "password");
       new PasswordInput ($div, 'password', 'password');
    
-      $div = new Div ($listDiv, 'row button_group');
+      $div = new Div ($listDiv, 'row');
       new Label ($div, "&nbsp;");
       new SubmitButton ($div, "Login");
       new ResetButton ($div, "Reset");

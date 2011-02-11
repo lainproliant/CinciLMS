@@ -9,6 +9,8 @@
 
 class XMLEntityException extends Exception { }
 
+define ("XMLENTITY_INDENT_WIDTH", 3);
+
 /*
  * TextEntity: A generic printable text entity.
  */
@@ -23,15 +25,10 @@ class TextEntity {
          $parent->addChild ($this);
       }
    }
-
+   
    public function getString ()
    {
       return $this->text;
-   }
-
-   public function printString ()
-   {
-      print $this->getString ();
    }
 }
 
@@ -87,26 +84,53 @@ class XMLEntity {
       return $this->children;
    }
 
-   // Returns a representation of the entire entity with 
-   // child nodes as a string.
-   public function getString ()
+   /*
+    * Returns a representation of the entire entity with 
+    * child nodes as a string
+    *
+    * pretty:     Determine whether output should be pretty and indented.
+    *             Default is FALSE.
+    * il:         The initial indent level.  Also used recursively by
+    *             the pretty printing code.
+    *             Default is 0.
+    */
+   public function getString ($pretty = FALSE, $il = 0)
    {
       $html = '';
-
-      $html .= '<' . $this->tag;
+      
+      if ($pretty) {
+         $html .= str_repeat (' ', XMLENTITY_INDENT_WIDTH * $il) . '<' . $this->tag;
+      } else {
+         $html .= '<' . $this->tag;
+      }
 
       foreach ($this->attributes as $key => $value) {
          $html .= ' ' . $key . '=\'' . $value . '\'';
       }
 
       if (! empty ($this->children) or $this->no_empty_tags) {
+         $do_newline = FALSE;
          $html .= '>';
 
          foreach ($this->children as $child) {
-            $html .= $child->getString ();
-         }
+            if (get_class ($child) != "TextEntity") {
+               if ($pretty) {
+                  $html .= "\n" . $child->getString ($pretty, $il + 1);
+                  $do_newline = TRUE;
+               } else {
+                  $html .= $child->getString ($pretty, $il);
+               }
 
-         $html .= '</' . $this->tag . ">";
+            } else {
+               $html .= $child->getString ();
+            }
+         }
+         
+         if ($pretty && $do_newline) {
+            $html .= "\n" . str_repeat (' ', XMLENTITY_INDENT_WIDTH * $il) . '</' . $this->tag . '>';
+         } else {
+            $html .= '</' . $this->tag . '>';
+         }
       } else {
          $html .= "/>";
       }
@@ -114,9 +138,17 @@ class XMLEntity {
       return $html;
    }
 
-   public function printString ()
+   /*
+    * Prints a representation of the entire entity with 
+    * child nodes as a string
+    *
+    * pretty:        Determine whether output should be pretty and indented.
+    * initial_il:    The initial indent level.  Default is 0.
+    */
+   public function printString ($pretty = FALSE, $initial_il = 0)
    {
-      echo $this->getString ();
+      print $this->getString ($pretty, $initial_il);
+      print "\n";
    }
 }
 

@@ -26,11 +26,10 @@
             </h1>
          </div>
          
-         <div id='container'>
-            <!-- Begin PHP generated markup -->
-            <?php include "lib/main.php"?>
+         <!-- Begin PHP generated markup -->
+         <?php include "lib/main.php"?>
+         <!-- End PHP generated markup -->
 
-            <!-- End PHP generated markup -->
          </div>
       </div>
 

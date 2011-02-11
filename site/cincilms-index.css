@@ -154,6 +154,9 @@ a img {
    border: none;
 }
 
+/*----------------------------------------------------------------------------
+ * Form specific CSS rules.
+ */
 form fieldset {
    border: 0;
    margin: 0;
@@ -168,9 +171,6 @@ form input {
    margin-right: 8px;
 }
 
-/*----------------------------------------------------------------------------
- * Form specific CSS rules.
- */
 div.prompt {
    margin: 0px auto;
    display: table;
@@ -184,18 +184,43 @@ div.warning {
    margin-top: 20px;
 }
 
-form.login label {
-   font-weight: bold;
+form span.field_note {
+   font-size: small;
+   color: #000088;
+}
+
+form label {
+   padding-right: 8px;
+}
+
+form textarea {
+   min-width: 15em;
+   min-height: 4em;
+}
+
+form div.list {
+   font-size: medium;
+   display: table;
+   margin-bottom: 8px;
+}
+
+form div.list div.row {
+   display: table-row;
+}
+
+form div.list div.row label,
+form div.list div.row input,
+form div.list div.row span {
+   display: table-cell;
+}
+
+/*----------------------------------------------------------------------------
+ * UserForm specific CSS rules.
+ */
+form.user_form label.first {
    width: 8em;
-   margin-right: 0.5em;
-   display: block;
 }
 
-form.login input {
-   font-size: large;
+form.user_form label.top {
+   vertical-align: top;
 }
-
-form.login button {
-   font-size: large;
-}
-

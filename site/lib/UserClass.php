@@ -55,7 +55,7 @@ class UserClass extends NonUserClass {
       $header = new XMLEntity ($div, 'h3');
       new TextEntity ($header, "Change Password");
       $p = new XMLEntity ($div, 'p');
-      new TextEntity ($p, "To change your password, fill out the form below, then click Change Password.");
+      new TextEntity ($p, "To change your password, fill out the form below, <br/>then click Change Password.");
       new ChangePasswordForm ($div, '?action=submitPassword');
    }
 
@@ -75,7 +75,8 @@ class UserClass extends NonUserClass {
       $username = $_SESSION['username'];
       
       // Fetch the user.
-      $user = User::byUsername ($username);
+      $user = new User ();
+      $user->byUsername ($username);
 
       // Check the current password to prevent an unauthorized password change.
       if (! $user->checkPassword ($old_password)) {

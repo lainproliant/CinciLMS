@@ -39,6 +39,18 @@ function globalSiteConfig ()
 }
 
 /*
+ * Returns a list of SystemRole IDs and descriptive
+ * names for them.
+ */
+function enumerateSystemRoles ()
+{
+   return array (
+      SYSTEM_ROLE_USER => "User",
+      SYSTEM_ROLE_SYSOP => "Sysop",
+      SYSTEM_ROLE_ADMIN => "Admin");
+}
+
+/*
  * Creates an AuthorityClass object for the given system role.
  *
  * $system_role:     The user's system role.

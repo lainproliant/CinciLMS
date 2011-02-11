@@ -155,8 +155,9 @@ function main ()
    globalSiteConfig ();
 
    // Build the main page structure.
-   $naviDiv = new Div (NULL, 'navi');
-   $contentDiv = new Div (NULL, 'content');
+   $containerDiv = new Div (NULL, 'container');
+   $naviDiv = new Div ($containerDiv, 'navi');
+   $contentDiv = new Div ($containerDiv, 'content');
    
    // A variable for the user class.
    $class = new NonUserClass ();
@@ -208,8 +209,9 @@ function main ()
    populateMenu ($menuList, $class, $class->getMenu (), TRUE);
    populateMenu ($contextMenuList, $class, $class->getContextMenu ());
    
-   $naviDiv->printString ();
-   $contentDiv->printString ();
+   $containerDiv->printString ( 
+      $SiteConfig ['site']['pretty'], 
+      $SiteConfig ['site']['initial_il']);
 }
 
 // Call the main method.
