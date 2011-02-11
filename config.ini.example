@@ -29,7 +29,7 @@ default_timezone = America/New_York
 pretty = 0
 ; What should the initial indent level be for pretty
 ; HTML output?
-initial_il = 4
+initial_il = 3
 
 [db]
 ; The hostname and port of the MySQL server.

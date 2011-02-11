@@ -88,7 +88,7 @@ PASSWORD_CHARS = range (48, 58) + range (65, 91) + range (97, 123)
 CREATE_TABLE_USERS = """
 create table `Users` (
    `UserID` int not null auto_increment primary key,
-   `ExternalID` int default null, INDEX (`ExternalID`),
+   `ExternalID` varchar (32) default null, INDEX (`ExternalID`),
    `Username` varchar (32), UNIQUE INDEX (`Username`),
    `FirstName` varchar (255),
    `MiddleInitial` char (1),
