@@ -61,7 +61,8 @@ class NonUserClass extends AuthorityClass {
       
       // Attempt to retrieve the user salt for the specified user.
       try {
-         $user = User::byUsername ($username);
+         $user = new User ();
+         $user->byUsername ($username);
 
       } catch (UsernameException $e) {
          throw new CinciLoginException ("The username and password you provided were incorrect.");
@@ -74,18 +75,18 @@ class NonUserClass extends AuthorityClass {
       }
 
       // We must confirm that the user is still active, otherwise login should fail.
-      if (! $user->IsActive) {
+      if (! $user->isActive) {
          throw new CinciLoginException ("This account has been disabled because the user is not active.  Please contact a system administrator.");
       }
 
       // Login was successful!  Create a new session. 
       session_destroy ();
       session_start ();
-      $_SESSION['username'] = $user->Username;
+      $_SESSION['username'] = $user->username;
       $_SESSION['timestamp'] = time ();
-      $_SESSION['system_role'] = $user->SystemRole;
-      $_SESSION['first_name'] = $user->FirstName;
-      $_SESSION['last_name'] = $user->LastName;
+      $_SESSION['system_role'] = $user->systemRole;
+      $_SESSION['first_name'] = $user->firstName;
+      $_SESSION['last_name'] = $user->lastName;
 
       // LRS-TODO: This needs to be replaced with a delay page that occurs before login.
       // Trigger an HTTP refresh after 2 seconds.
