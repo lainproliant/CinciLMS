@@ -29,7 +29,6 @@ function randomPassword ($length = 6)
    return $random_password;
 }
 
-// LRS-TODO: implement
 class AdminClass extends SysopClass {
    function __construct ()
    {

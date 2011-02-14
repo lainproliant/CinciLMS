@@ -472,9 +472,16 @@ def main (argv):
    cursor = db.cursor ()
    cursor.execute ('use %s' % database)
    
-   for name, tableDef in TABLES_TO_CREATE:
-      print ('Creating %s table...' % name)
-      cursor.execute (tableDef)
+   try: 
+      for name, tableDef in TABLES_TO_CREATE:
+         print ('Creating %s table...' % name)
+         cursor.execute (tableDef)
+   except Exception, excVal:
+      print ('Error while creating database tables!')
+      print ('MySQL Error %d: %s' % (excVal.args [0], excVal.args [1]))
+      print ('Aborting.')
+      sys.exit (1)
+
    print ('All tables created successfully.')
    print ("")
 
