@@ -88,7 +88,7 @@ PASSWORD_CHARS = range (48, 58) + range (65, 91) + range (97, 123)
 CREATE_TABLE_USERS = """
 create table `Users` (
    `UserID` int not null auto_increment primary key,
-   `ExternalID` varchar (32) default null, INDEX (`ExternalID`),
+   `ExternalID` int default null, INDEX (`ExternalID`),
    `Username` varchar (32), UNIQUE INDEX (`Username`),
    `FirstName` varchar (255),
    `MiddleInitial` char (1),
@@ -131,9 +131,9 @@ create table `CourseContent` (
    `TypeID` int not null,
    `Name` varchar (1023),
    `AccessFlags` set ('UR','UW','MR','MW','OR','GR') not null,
-   constraint `FK_ParentID` foreign key (`ParentID`) references `CourseContent` (`ContentID`),
-   constraint `FK_OwnerID` foreign key (`OwnerID`) references `Users` (`UserID`) on delete cascade,
-   constraint `FK_TypeID` foreign key (`TypeID`) references `ContentTypes` (`ContentTypeID`)
+   constraint `FK_ContentParentID` foreign key (`ParentID`) references `CourseContent` (`ContentID`),
+   constraint `FK_ContentOwnerID` foreign key (`OwnerID`) references `Users` (`UserID`) on delete cascade,
+   constraint `FK_ContentTypeID` foreign key (`TypeID`) references `ContentTypes` (`ContentTypeID`)
 );
 """.strip ()
 
@@ -142,8 +142,8 @@ CREATE_TABLE_CONTENT_LINKS = """
 create table `ContentLinks` (
    `LinkID` int not null primary key,
    `DestinationID` int not null,
-   constraint `FK_LinkID` foreign key (`LinkID`) references `CourseContent` (`ContentID`),
-   constraint `FK_DestinationID` foreign key (`DestinationID`) references `CourseContent` (`DestinationID`)
+   constraint `FK_ContentLinkID` foreign key (`LinkID`) references `CourseContent` (`ContentID`),
+   constraint `FK_LinkDestinationID` foreign key (`DestinationID`) references `CourseContent` (`ContentID`)
 );
 """.strip ()
 
@@ -153,7 +153,7 @@ create table `ContentItems` (
    `ItemID` int not null primary key,
    `Title` varchar (1023) not null,
    `Text` text not null,
-   constraint `FK_ItemID` foreign key (`ItemID`) references `CourseContent` (`ContentID`) on delete cascade
+   constraint `FK_ContentItemID` foreign key (`ItemID`) references `CourseContent` (`ContentID`) on delete cascade
 );
 """.strip ()
 
@@ -162,8 +162,8 @@ CREATE_TABLE_CONTENT_ITEM_ATTACHMENTS = """
 create table `ContentItemAttachments` (
    `ContentID` int not null,
    `FileID` int not null,
-   constraint `FK_ContentID` foreign key (`ContentID`) references `CourseContent` (`ContentID`),
-   constraint `FK_FileID` foreign key (`FileID`) references `FileManagement` (`FileID`),
+   constraint `FK_AttachmentContentID` foreign key (`ContentID`) references `CourseContent` (`ContentID`),
+   constraint `FK_AttachmentFileID` foreign key (`FileID`) references `FileManagement` (`FileID`),
    primary key (`ContentID`, `FileID`)
 );
 """.strip ()
@@ -192,7 +192,7 @@ create table `Assignments` (
    `TypeID` int not null,
    `PointsPossible` int default 100,
    `DueDate` date default null,
-   constraint `FK_TypeID` foreign key (`TypeID`) references `AssignmentTypes` (`AssignmentTypeID`)
+   constraint `FK_AssignmentTypeID` foreign key (`TypeID`) references `AssignmentTypes` (`AssignmentTypeID`)
 );
 """.strip ()
 
@@ -204,9 +204,9 @@ create table `AssignmentFileSubmissions` (
    `CourseID` int not null,
    `SubmissionDate` date not null,
    `FileID` int not null,
-   constraint `FK_AssignmentID` foreign key (`AssignmentID`) references `Assignments` (`AssignmentID`),
-   constraint `FK_StudentID` foreign key (`StudentID`) references `Users` (`UserID`),
-   constraint `FK_FileID` foreign key (`FileID`) references `FileManagement` (`FileID`),
+   constraint `FK_SubmissionAssignmentID` foreign key (`AssignmentID`) references `Assignments` (`AssignmentID`),
+   constraint `FK_SubmissionStudentID` foreign key (`StudentID`) references `Users` (`UserID`),
+   constraint `FK_SubmissionFileID` foreign key (`FileID`) references `FileManagement` (`FileID`),
    primary key (`AssignmentID`, `StudentID`, `CourseID`, `SubmissionDate`)
 );
 """.strip ()
@@ -215,11 +215,10 @@ create table `AssignmentFileSubmissions` (
 CREATE_TABLE_COURSES = """
 create table `Courses` (
    `CourseID` int not null auto_increment primary key,
-   `CourseCode` varchar (32), UNIQUE INDEX (`CourseCode`),
    `CourseName` varchar (255),
    `EntryPointID` int not null,
    `AccessFlags` int not null,
-   constraint `FK_EntryPointID` foreign key (`EntryPointID`) references `CourseContent` (`ContentID`)
+   constraint `FK_CourseEntryPointID` foreign key (`EntryPointID`) references `CourseContent` (`ContentID`)
 );
 """.strip ()
 
@@ -239,9 +238,9 @@ create table `FactCourseEnrollment` (
    `CourseID` int not null, INDEX (`CourseID`),
    `RoleID` int not null,
    `AccessFlags` set ('UR','UW','MR','MW','OR','GR') not null,
-   constraint `FK_UserID` foreign key (`UserID`) references `Users` (`UserID`),
-   constraint `FK_CourseID` foreign key (`CourseID`) references `Courses` (`CourseID`),
-   constraint `FK_RoleID` foreign key (`RoleID`) references `CourseRoles` (`RoleID`),
+   constraint `FK_EnrollmentUserID` foreign key (`UserID`) references `Users` (`UserID`),
+   constraint `FK_EnrollmentCourseID` foreign key (`CourseID`) references `Courses` (`CourseID`),
+   constraint `FK_EnrollmentRoleID` foreign key (`RoleID`) references `CourseRoles` (`RoleID`),
    primary key (`UserID`, `CourseID`)
 );
 """.strip ()
@@ -255,8 +254,8 @@ create table `GradeColumns` (
    `PointsPossible` int,
    `AssignmentID` int default null,
    `SortOrder` int default null,
-   constraint `FK_CourseID` foreign key (`CourseID`) references `Courses` (`CourseID`),
-   constraint `FK_AssignmentID` foreign key (`AssignmentID`) references `Assignments` (`AssignmentID`)
+   constraint `FK_ColumnCourseID` foreign key (`CourseID`) references `Courses` (`CourseID`),
+   constraint `FK_ColumnAssignmentID` foreign key (`AssignmentID`) references `Assignments` (`AssignmentID`)
 );
 """.strip ()
 
@@ -266,8 +265,8 @@ create table `Grades` (
    `ColumnID` int not null,
    `StudentID` int not null,
    `Grade` decimal (5,2),
-   constraint `FK_ColumnID` foreign key (`ColumnID`) references `GradeColumns` (`ColumnID`),
-   constraint `FK_StudentID` foreign key (`StudentID`) references `Users` (`UserID`),
+   constraint `FK_GradeColumnID` foreign key (`ColumnID`) references `GradeColumns` (`ColumnID`),
+   constraint `FK_GradeStudentID` foreign key (`StudentID`) references `Users` (`UserID`),
    primary key (`ColumnID`, `StudentID`)
 );
 """.strip ()
@@ -472,16 +471,9 @@ def main (argv):
    cursor = db.cursor ()
    cursor.execute ('use %s' % database)
    
-   try: 
-      for name, tableDef in TABLES_TO_CREATE:
-         print ('Creating %s table...' % name)
-         cursor.execute (tableDef)
-   except Exception, excVal:
-      print ('Error while creating database tables!')
-      print ('MySQL Error %d: %s' % (excVal.args [0], excVal.args [1]))
-      print ('Aborting.')
-      sys.exit (1)
-
+   for name, tableDef in TABLES_TO_CREATE:
+      print ('Creating %s table...' % name)
+      cursor.execute (tableDef)
    print ('All tables created successfully.')
    print ("")
 
