@@ -215,6 +215,7 @@ create table `AssignmentFileSubmissions` (
 CREATE_TABLE_COURSES = """
 create table `Courses` (
    `CourseID` int not null auto_increment primary key,
+   `CourseCode` varchar (32), UNIQUE INDEX (`CourseCode`),
    `CourseName` varchar (255),
    `EntryPointID` int not null,
    `AccessFlags` int not null,
