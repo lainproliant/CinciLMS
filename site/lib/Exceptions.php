@@ -28,7 +28,7 @@ class CinciException extends Exception {
 class CinciDatabaseException extends CinciException {
    private $dberror;
 
-   function __construct ($header, $message, $error)
+   function __construct ($header, $message, $error = NULL)
    {
       parent::__construct ($header, $message);
       $this->dberror = $error;

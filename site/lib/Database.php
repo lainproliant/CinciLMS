@@ -32,7 +32,8 @@ function databaseConnect ()
    
    if (mysqli_connect_errno ()) {
       // Translate the error into a CinciDatabaseException.
-      throw new CinciDatabaseException ("There was an error connecting to the database.",
+      throw new CinciDatabaseException ("Database Connection Error!",
+         "There was an error connecting to the database.",
          mysqli_connect_error ());
    }
 

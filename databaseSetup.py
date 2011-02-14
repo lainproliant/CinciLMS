@@ -543,13 +543,18 @@ def main (argv):
    unsaltedPasswordHash = sha256 (staticSalt + newAdminPassword).hexdigest ()
 
    passwordHash = sha256 (newAdminUserSalt + unsaltedPasswordHash).hexdigest ()
-
+   
+   cursor = db.cursor ()
    cursor.execute ("insert into `Users` (`Username`, `FirstName`, `LastName`, \
       `SystemRole`, `PasswordSalt`, `PasswordHash`) values ('admin', %s, %s, 2, %s, %s)",
       (adminFirstName, adminLastName, newAdminUserSalt, passwordHash))
    adminID = cursor.lastrowid
 
+   print ('LRS-DEBUG: Rows Inserted = %d' % cursor.rowcount)
    print ("")
+   
+   db.commit ()
+   db.close ()
 
    if not specifyAdminPassword:
       print ("The admin user's password is: %s" % (newAdminPassword))
