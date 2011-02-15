@@ -217,7 +217,7 @@ create table `Courses` (
    `CourseID` int not null auto_increment primary key,
    `CourseName` varchar (255),
    `EntryPointID` int not null,
-   `AccessFlags` int not null,
+   `AccessFlags` set ('UR','UW','MR','MW','OR','GR') not null,
    constraint `FK_CourseEntryPointID` foreign key (`EntryPointID`) references `CourseContent` (`ContentID`)
 );
 """.strip ()
@@ -227,7 +227,7 @@ CREATE_TABLE_COURSE_ROLES = """
 create table `CourseRoles` (
    `RoleID` int not null primary key,
    `RoleName` varchar (255),
-   `DefaultAccess` set ('UR','UW','MR','MW','OR','GR') not null
+   `DefaultAccess` set ('CR','CW','GrR','GrW','EnR','EnW') not null
 );
 """.strip ()
 
@@ -237,7 +237,7 @@ create table `FactCourseEnrollment` (
    `UserID` int not null, INDEX (`UserID`),
    `CourseID` int not null, INDEX (`CourseID`),
    `RoleID` int not null,
-   `AccessFlags` set ('UR','UW','MR','MW','OR','GR') not null,
+   `AccessFlags` set ('CR','CW','GrR','GrW','EnR','EnW')  not null,
    constraint `FK_EnrollmentUserID` foreign key (`UserID`) references `Users` (`UserID`),
    constraint `FK_EnrollmentCourseID` foreign key (`CourseID`) references `Courses` (`CourseID`),
    constraint `FK_EnrollmentRoleID` foreign key (`RoleID`) references `CourseRoles` (`RoleID`),
@@ -302,8 +302,8 @@ INIT_ASSIGNMENT_TYPES = (
       ('1', 'Project Assignment'),)
 
 INIT_COURSE_ROLES = (
-      ('1', 'Student',        'UR,UW,MR,MW'),
-      ('2', 'Instructor',     'MR'))
+      ('1', 'Student',        'CR,EnR'),
+      ('2', 'Instructor',     'CR,CW,GrR,GrW,EnR,EnW'))
 
 #-----------------------------------------------------------------------------
 def randomWord (charspace = PASSWORD_CHARS, length = 6):
