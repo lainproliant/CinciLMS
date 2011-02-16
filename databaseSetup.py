@@ -100,7 +100,7 @@ create table `Users` (
    `LastLogin` date default null,
    `IsActive` tinyint (1) not null default 1,
    `SystemRole` int not null default 0
-);
+) ENGINE=InnoDB;
 """.strip ()
 
 #-----------------------------------------------------------------------------
@@ -110,7 +110,7 @@ create table `FileManagement` (
    `OwnerID` int not null,
    `StorageFileName` varchar (255),
    `OriginalFileName` varchar (255)
-);
+) ENGINE=InnoDB;
 """.strip ()
 
 #-----------------------------------------------------------------------------
@@ -119,7 +119,7 @@ create table `ContentTypes` (
    `ContentTypeID` int not null primary key,
    `TypeName` varchar (255),
    `DefaultAccess` set ('UR','UW','MR','MW','OR','GR') not null default 'UR,UW,MR'
-);
+) ENGINE=InnoDB;
 """.strip ()
 
 #-----------------------------------------------------------------------------
@@ -134,7 +134,7 @@ create table `CourseContent` (
    constraint `FK_ContentParentID` foreign key (`ParentID`) references `CourseContent` (`ContentID`),
    constraint `FK_ContentOwnerID` foreign key (`OwnerID`) references `Users` (`UserID`) on delete cascade,
    constraint `FK_ContentTypeID` foreign key (`TypeID`) references `ContentTypes` (`ContentTypeID`)
-);
+) ENGINE=InnoDB;
 """.strip ()
 
 #-----------------------------------------------------------------------------
@@ -144,7 +144,7 @@ create table `ContentLinks` (
    `DestinationID` int not null,
    constraint `FK_ContentLinkID` foreign key (`LinkID`) references `CourseContent` (`ContentID`),
    constraint `FK_LinkDestinationID` foreign key (`DestinationID`) references `CourseContent` (`ContentID`)
-);
+) ENGINE=InnoDB;
 """.strip ()
 
 #-----------------------------------------------------------------------------
@@ -154,7 +154,7 @@ create table `ContentItems` (
    `Title` varchar (1023) not null,
    `Text` text not null,
    constraint `FK_ContentItemID` foreign key (`ItemID`) references `CourseContent` (`ContentID`) on delete cascade
-);
+) ENGINE=InnoDB;
 """.strip ()
 
 #-----------------------------------------------------------------------------
@@ -165,7 +165,7 @@ create table `ContentItemAttachments` (
    constraint `FK_AttachmentContentID` foreign key (`ContentID`) references `CourseContent` (`ContentID`),
    constraint `FK_AttachmentFileID` foreign key (`FileID`) references `FileManagement` (`FileID`),
    primary key (`ContentID`, `FileID`)
-);
+) ENGINE=InnoDB;
 """.strip ()
 
 #-----------------------------------------------------------------------------
@@ -174,7 +174,7 @@ create table `FactFolderContents` (
    `FolderID` int not null, INDEX (`FolderID`),
    `ContentID` int not null, INDEX (`ContentID`),
    primary key (`FolderID`, `ContentID`)
-);
+) ENGINE=InnoDB;
 """.strip ()
 
 #-----------------------------------------------------------------------------
@@ -182,7 +182,7 @@ CREATE_TABLE_ASSIGNMENT_TYPES = """
 create table `AssignmentTypes` (
    `AssignmentTypeID` int not null primary key,
    `TypeName` varchar (255)
-);
+) ENGINE=InnoDB;
 """.strip ()
 
 #-----------------------------------------------------------------------------
@@ -193,7 +193,7 @@ create table `Assignments` (
    `PointsPossible` int default 100,
    `DueDate` date default null,
    constraint `FK_AssignmentTypeID` foreign key (`TypeID`) references `AssignmentTypes` (`AssignmentTypeID`)
-);
+) ENGINE=InnoDB;
 """.strip ()
 
 #-----------------------------------------------------------------------------
@@ -208,7 +208,7 @@ create table `AssignmentFileSubmissions` (
    constraint `FK_SubmissionStudentID` foreign key (`StudentID`) references `Users` (`UserID`),
    constraint `FK_SubmissionFileID` foreign key (`FileID`) references `FileManagement` (`FileID`),
    primary key (`AssignmentID`, `StudentID`, `CourseID`, `SubmissionDate`)
-);
+) ENGINE=InnoDB;
 """.strip ()
 
 #-----------------------------------------------------------------------------
@@ -219,7 +219,7 @@ create table `Courses` (
    `EntryPointID` int not null,
    `AccessFlags` set ('UR','UW','MR','MW','OR','GR') not null,
    constraint `FK_CourseEntryPointID` foreign key (`EntryPointID`) references `CourseContent` (`ContentID`)
-);
+) ENGINE=InnoDB;
 """.strip ()
 
 #-----------------------------------------------------------------------------
@@ -228,7 +228,7 @@ create table `CourseRoles` (
    `RoleID` int not null primary key,
    `RoleName` varchar (255),
    `DefaultAccess` set ('CR','CW','GrR','GrW','EnR','EnW') not null
-);
+) ENGINE=InnoDB;
 """.strip ()
 
 #-----------------------------------------------------------------------------
@@ -242,7 +242,7 @@ create table `FactCourseEnrollment` (
    constraint `FK_EnrollmentCourseID` foreign key (`CourseID`) references `Courses` (`CourseID`),
    constraint `FK_EnrollmentRoleID` foreign key (`RoleID`) references `CourseRoles` (`RoleID`),
    primary key (`UserID`, `CourseID`)
-);
+) ENGINE=InnoDB;
 """.strip ()
 
 #-----------------------------------------------------------------------------
@@ -256,7 +256,7 @@ create table `GradeColumns` (
    `SortOrder` int default null,
    constraint `FK_ColumnCourseID` foreign key (`CourseID`) references `Courses` (`CourseID`),
    constraint `FK_ColumnAssignmentID` foreign key (`AssignmentID`) references `Assignments` (`AssignmentID`)
-);
+) ENGINE=InnoDB;
 """.strip ()
 
 #-----------------------------------------------------------------------------
@@ -268,7 +268,7 @@ create table `Grades` (
    constraint `FK_GradeColumnID` foreign key (`ColumnID`) references `GradeColumns` (`ColumnID`),
    constraint `FK_GradeStudentID` foreign key (`StudentID`) references `Users` (`UserID`),
    primary key (`ColumnID`, `StudentID`)
-);
+) ENGINE=InnoDB;
 """.strip ()
 
 #-----------------------------------------------------------------------------
