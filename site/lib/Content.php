@@ -7,6 +7,8 @@
  * Released under the GNU General Public License, version 3.
  */
 
+include_once "Exceptions.php";
+
 include_once "VO/ContentVO.php";
 
 define ('CONTENT_TYPE_ITEM', 1);
@@ -14,39 +16,55 @@ define ('CONTENT_TYPE_ASSIGNMENT', 2);
 define ('CONTENT_TYPE_FOLDER', 3);
 define ('CONTENT_TYPE_LINK', 4);
 
-class ContentItem extends ContentItemVO {
-   public function __construct ($courseContent = NULL, $parentID = NULL, $ownerID = NULL, $name = NULL)
+class ContentException extends CinciException {
+   function __construct ($contentID)
    {
-      parent::__construct ();
-      
-      if (empty ($courseContent)) {
-         $courseContent = new CourseContentVO ();
-         $courseContent->contentID = NULL;
-         $courseContent->parentID = $parentID;
-         $courseContent->ownerID = $ownerID;
-         $courseContent->typeID = CONTENT_TYPE_ITEM;
-         $courseContent->name = $name;
-         
-         // LRS-TODO: Move to insert method.
-         $contentTypeInfo = ContentTypesVO::byTypeID (CONTENT_TYPE_ITEM);
-         $courseContent->accessFlags = $contentTypeInfo->defaultAccess;
-      }
-
-      $this->courseContent = $courseContent;
-   }
-
-   public function insert ()
-   {
-      // Insert the CourseContent object first!
-      $contentTypeInfo = ContentTypesVO::byTypeID (CONTENT_TYPE_ITEM);
-      $courseContent->accessFlags = $contentTypeInfo->defaultAccess;
-
-      // Fetch the new content ID for this object.
-      $courseContent->insert ();
-      $this->itemID = $courseContent->contentID;
-
-      // Do the insert for this type of object.
-      parent::insert ();
+      parent::construct ("Content Error!",
+         sprintf ("There was an error interpreting course content with ID %d.", $contentID));
    }
 }
+
+
+class CourseContent extends CourseContentVO {
+   /*
+    * Fetches the title and text of the ContentItem.
+    * Throws a ContentException if the content object
+    * does not refer to a content item, or DAOException
+    * if there was an error fetching the info from the
+    * database.
+    */
+   public function getContentItemInfo ()
+   {
+      if ($this->contentID != CONTENT_TYPE_ITEM) {
+         throw new ContentException ($this->contentID);
+      }
+
+      $item = ContentItemsVO::byItemID ($this->contentID);
+      return $item;
+   }
+
+   /*
+    * Fetches a list of child item IDs for this item
+    * as a folder.
+    * Throws a ContentException if the content object
+    * is not a folder, or DAOException if ther was
+    * an error fetching the info from the database.
+    */
+   public function getFolderContents ()
+   {
+      if ($this->contentID != CONTENT_ITEM_FOLDER) {
+         throw new ContentException ($this->contentID);
+      }
+
+      $folderContents = array ();
+      $entries = FactFolderContentsVO::listByFolderID ($this->contentID);
+
+      foreach ($entries as $entry) {
+         $folderContents [] = $entry->contentID;
+      }
+
+      return $folderContents;
+   }
+}
+      
 
