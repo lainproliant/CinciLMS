@@ -32,10 +32,10 @@ function accessDenied ($contentDiv)
 {
    $div = new Div ($contentDiv, 'warning prompt');
    $h3 = new XMLEntity ($div, 'h3');
-   new TextEntity ($h3, "Access Denied");
+   new TextEntity ($h3, "Unauthorized Action");
 
    $p = new XMLEntity ($div, 'p');
-   new TextEntity ($p, "You are not authorized to access the requested resource.");
+   new TextEntity ($p, "You are not authorized to perform the specified action.");
 }
 
 /*
@@ -193,7 +193,7 @@ function main ()
       // The login was unsuccessful, notify the user.
       loginFailed ($contentDiv, $e);
       $class->showLogin ($contentDiv);
-   
+
    } catch (CinciDatabaseException $e) {
       // There was a database error, notify the user.
       databaseError ($contentDiv, $e);

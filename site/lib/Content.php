@@ -107,7 +107,7 @@ abstract class CourseContentSubtype extends CourseContent {
     * Create an appropriate value object so that subtype
     * information can be saved.  Must be implemented.
     * Subclass implementations may return NULL to inform
-    * that there is not an appropriate.
+    * that there is not an appropriate value object type.
     */
    protected abstract function createVO ();
 }
@@ -167,6 +167,49 @@ class ContentFolder extends CourseContentSubtype {
       }
 
       return $folderContents;
+   }
+
+   /*
+    * Resolves the given path relative to this folder.
+    *
+    * pathArray:        The path to resolve as an array.
+    * user:             The user for which permissions will be determined.
+    * courseEnrollment: The enrollment record for the user in this course.
+    *
+    * Returns a CourseContentSubtype for the content retrieved.
+    * Throws a CinciAccessException if the path doesn't exist or the
+    * given user doesn't have access.
+    */
+   public function resolvePath ($pathArray, $user, $courseEnrollment)
+   {
+      $path = array_shift ($pathArray);
+
+      $folderContents = FactFolderContentsVO::byFolderID_Path (
+         $this->contentID, $path);
+
+      if (empty ($folderContents->contentID)) {
+         // The specified path doesn't exist.
+         throw new CinciAccessException ("Access Denied",
+            "You are not authorized to access the requested content.");
+      }
+
+      $content = CourseContent::byContentID (
+         $folderContents->contentID)->resolve ();
+
+      if (! empty ($pathArray)) {
+         if ($content->typeID != CONTENT_TYPE_FOLDER) {
+            // The path says we need to recurse further, but the current
+            // node in the directory tree is not a folder!
+            throw new CinciAccessException ("Access Denied",
+               "You are not authorized to access the requested content.");
+         }
+         
+         // Recurse into the next directory.
+         return $content->resolvePath ($pathArray, $user);
+
+      } else {
+         return $content;
+      }
    }
    
    /*

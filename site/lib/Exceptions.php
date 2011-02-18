@@ -48,4 +48,12 @@ class CinciLoginException extends CinciException {
    }
 }
 
+// An exception for access and permissions errors.
+class CinciAccessExcption extends CinciException {
+   function __construct ($message)
+   {
+      parent::__construct ("Access Denied", $message);
+   }
+}
+
 ?>
