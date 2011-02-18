@@ -25,10 +25,12 @@ class CourseForm extends Form {
       $this->setAttribute ('onSubmit', 'return courseFormValidate (this);');
       
       $courseName = NULL; 
+      $courseCode = NULL;
       $accessFlags = 'UR,UW,MR';
 
       if (! empty ($course)) {
          $courseName = $course->courseName;
+         $courseCode = $course->courseCode;
          $accessFlags = $course->accessFlags;
       }
 
@@ -39,6 +41,10 @@ class CourseForm extends Form {
       $div = new Div ($listDiv, 'row');
       new Label ($div, 'Course Name:', 'courseName', 'first');
       new TextInput ($div, 'courseName', 'courseName', $courseName);
+      
+      $div = new Div ($listDiv, 'row');
+      new Label ($div, 'Course Code:', 'courseCode', 'first');
+      new TextInput ($div, 'courseCode', 'courseCode', $courseCode);
 
       $div = new Div ($listDiv, 'row');
       $coursePermissions = enumerateCoursePermissions ();

@@ -4,30 +4,32 @@ include_once "DAO/UsersDAO.php";
 class UsersVO {
    var $userID, $externalID, $username, $firstName, $middleInitial, $lastName, $emailAddress, $passwordSalt, $passwordHash, $notes, $lastLogin, $isActive, $systemRole;
    
-   public function byUserID ($userID) {
+   public static function byUserID ($userID) {
       $dao = new UsersDAO ();
-      $this->fromResult ($dao->byUserID ($userID));
+      return self::fromResult ($dao->byUserID ($userID));
    }
    
-   public function byUsername ($username) {
+   public static function byUsername ($username) {
       $dao = new UsersDAO ();
-      $this->fromResult ($dao->byUsername ($username));
+      return self::fromResult ($dao->byUsername ($username));
    }
    
-   protected function fromResult ($result) {
-      $this->userID = $result ["UserID"];
-      $this->externalID = $result ["ExternalID"];
-      $this->username = $result ["Username"];
-      $this->firstName = $result ["FirstName"];
-      $this->middleInitial = $result ["MiddleInitial"];
-      $this->lastName = $result ["LastName"];
-      $this->emailAddress = $result ["EmailAddress"];
-      $this->passwordSalt = $result ["PasswordSalt"];
-      $this->passwordHash = $result ["PasswordHash"];
-      $this->notes = $result ["Notes"];
-      $this->lastLogin = $result ["LastLogin"];
-      $this->isActive = $result ["IsActive"];
-      $this->systemRole = $result ["SystemRole"];
+   protected static function fromResult ($result) {
+      $obj = new static ();
+      $obj->userID = $result ["UserID"];
+      $obj->externalID = $result ["ExternalID"];
+      $obj->username = $result ["Username"];
+      $obj->firstName = $result ["FirstName"];
+      $obj->middleInitial = $result ["MiddleInitial"];
+      $obj->lastName = $result ["LastName"];
+      $obj->emailAddress = $result ["EmailAddress"];
+      $obj->passwordSalt = $result ["PasswordSalt"];
+      $obj->passwordHash = $result ["PasswordHash"];
+      $obj->notes = $result ["Notes"];
+      $obj->lastLogin = $result ["LastLogin"];
+      $obj->isActive = $result ["IsActive"];
+      $obj->systemRole = $result ["SystemRole"];
+      return $obj;
    }
    
    protected function toData () {

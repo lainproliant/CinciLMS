@@ -178,33 +178,31 @@ class ContentItemAttachmentsVO {
 }
 
 class FactFolderContentsVO {
-   var $folderID, $contentID;
+   var $folderID, $contentID, $path;
    
    public static function byFolderID_ContentID ($folderID, $contentID) {
       $dao = new FactFolderContentsDAO ();
       return self::fromResult ($dao->byFolderID_ContentID ($folderID, $contentID));
    }
    
+   public static function byFolderID_Path ($folderID, $path) {
+      $dao = new FactFolderContentsDAO ();
+      return self::fromResult ($dao->byFolderID_Path ($folderID, $path));
+   }
+   
    protected static function fromResult ($result) {
       $obj = new static ();
       $obj->folderID = $result ["FolderID"];
       $obj->contentID = $result ["ContentID"];
+      $obj->path = $result ["Path"];
       return $obj;
-   }
-   
-   public static function listByFolderID ($folderID) {
-      $dao = new FactFolderContentsDAO ();
-      $objs = array ();
-      foreach ($dao->listByFolderID ($folderID) as $result) {
-         $objs [] = self::fromResult ($result);
-      }
-      return $objs;
    }
    
    protected function toData () {
       $data = array ();
       $data ["FolderID"] = $this->folderID;
       $data ["ContentID"] = $this->contentID;
+      $data ["Path"] = $this->path;
       return $data;
    }
    

@@ -61,13 +61,12 @@ class NonUserClass extends AuthorityClass {
       
       // Attempt to retrieve the user salt for the specified user.
       try {
-         $user = new User ();
-         $user->byUsername ($username);
+         $user = User::byUsername ($username);
 
       } catch (UsernameException $e) {
          throw new CinciLoginException ("The username and password you provided were incorrect.");
       }
-      
+
       // Do the passwords match?
       if (! $user->checkPassword ($password)) {
          // The password was incorrect.
@@ -83,6 +82,7 @@ class NonUserClass extends AuthorityClass {
       session_destroy ();
       session_start ();
       $_SESSION['username'] = $user->username;
+      $_SESSION['userid'] = $user->userID;
       $_SESSION['timestamp'] = time ();
       $_SESSION['system_role'] = $user->systemRole;
       $_SESSION['first_name'] = $user->firstName;

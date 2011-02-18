@@ -37,9 +37,11 @@ class UsersDAO {
          elseif (is_float ($val)) { $bindTypes .= 'd'; }
       }
       $query = sprintf ("select UserID, ExternalID, Username, FirstName, MiddleInitial, LastName, EmailAddress, PasswordSalt, PasswordHash, Notes, LastLogin, IsActive, SystemRole from Users where %s", implode (" and ", array_keys ($params)));
-      $query .= $postfix;
+      $query .= ' ' . $postfix;
       $bindParamArgs = array (&$bindTypes);
-      foreach ($params as $key => $value) { $bindParamArgs [$key] = &$params [$key]; }
+      foreach ($params as $key => $value) {
+         $bindParamArgs [$key] = &$params [$key];
+      }
       $stmt = $this->db->prepare ($query);
       call_user_func_array (array ($stmt, "bind_param"), $bindParamArgs);
       $stmt->execute ();
@@ -53,7 +55,7 @@ class UsersDAO {
    
    public function insert ($data) {
       $stmt = $this->db->prepare ("insert into Users (ExternalID, Username, FirstName, MiddleInitial, LastName, EmailAddress, PasswordSalt, PasswordHash, Notes, LastLogin, IsActive, SystemRole) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-      $stmt->bind_param ("ssssssssssii", $data ["ExternalID"], $data ["Username"], $data ["FirstName"], $data ["MiddleInitial"], $data ["LastName"], $data ["EmailAddress"], $data ["PasswordSalt"], $data ["PasswordHash"], $data ["Notes"], $data ["LastLogin"], $data ["IsActive"], $data ["SystemRole"]);
+      $stmt->bind_param ("isssssssssii", $data ["ExternalID"], $data ["Username"], $data ["FirstName"], $data ["MiddleInitial"], $data ["LastName"], $data ["EmailAddress"], $data ["PasswordSalt"], $data ["PasswordHash"], $data ["Notes"], $data ["LastLogin"], $data ["IsActive"], $data ["SystemRole"]);
       $stmt->execute ();
       if ($stmt->affected_rows != 1) {
          throw new DAOException ("Couldn't insert record in the table \"Users\"", $stmt->error, $stmt->affected_rows);
@@ -63,7 +65,7 @@ class UsersDAO {
    
    public function save ($data) {
       $stmt = $this->db->prepare ("update Users set ExternalID = ?, Username = ?, FirstName = ?, MiddleInitial = ?, LastName = ?, EmailAddress = ?, PasswordSalt = ?, PasswordHash = ?, Notes = ?, LastLogin = ?, IsActive = ?, SystemRole = ? where UserID = ?");
-      $stmt->bind_param ("ssssssssssiii", $data ["ExternalID"], $data ["Username"], $data ["FirstName"], $data ["MiddleInitial"], $data ["LastName"], $data ["EmailAddress"], $data ["PasswordSalt"], $data ["PasswordHash"], $data ["Notes"], $data ["LastLogin"], $data ["IsActive"], $data ["SystemRole"], $data ["UserID"]);
+      $stmt->bind_param ("isssssssssiii", $data ["ExternalID"], $data ["Username"], $data ["FirstName"], $data ["MiddleInitial"], $data ["LastName"], $data ["EmailAddress"], $data ["PasswordSalt"], $data ["PasswordHash"], $data ["Notes"], $data ["LastLogin"], $data ["IsActive"], $data ["SystemRole"], $data ["UserID"]);
       $stmt->execute ();
       if ($stmt->affected_rows != 1) {
          throw new DAOException ("Couldn't save record in table \"Users\"", $stmt->error, $stmt->affected_rows);

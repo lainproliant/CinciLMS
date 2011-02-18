@@ -317,28 +317,23 @@ class FactFolderContentsDAO {
    }
    
    public function byFolderID_ContentID ($folderID, $contentID) {
-      $stmt = $this->db->prepare ("select FolderID, ContentID from FactFolderContents where FolderID = ? and ContentID = ?");
+      $stmt = $this->db->prepare ("select FolderID, ContentID, Path from FactFolderContents where FolderID = ? and ContentID = ?");
       $stmt->bind_param ("ii", $folderID, $contentID);
       $stmt->execute ();
-      $stmt->bind_result ($results ["FolderID"], $results ["ContentID"]);
+      $stmt->bind_result ($results ["FolderID"], $results ["ContentID"], $results ["Path"]);
       $stmt->fetch ();
       $stmt->close ();
       return $results;
    }
    
-   public function listByFolderID ($folderID) {
-      $resultsList = array ();
-      $results = array ();
-      $stmt = $this->db->prepare ("select FolderID, ContentID from FactFolderContents where FolderID = ?");
-      $stmt->bind_param ("i", $folderID);
+   public function byFolderID_Path ($folderID, $path) {
+      $stmt = $this->db->prepare ("select FolderID, ContentID, Path from FactFolderContents where FolderID = ? and Path = ?");
+      $stmt->bind_param ("is", $folderID, $path);
       $stmt->execute ();
-      $lambda = create_function ('$a', 'return $a;');
-      $stmt->bind_result ($results ["FolderID"], $results ["ContentID"]);
-      while ($stmt->fetch ()) {
-         $resultsList [] = array_map ($lambda, $results);
-      }
+      $stmt->bind_result ($results ["FolderID"], $results ["ContentID"], $results ["Path"]);
+      $stmt->fetch ();
       $stmt->close ();
-      return $resultsList;
+      return $results;
    }
    
    public function search ($params, $postfix = "") {
@@ -350,7 +345,7 @@ class FactFolderContentsDAO {
          elseif (is_string ($val)) { $bindTypes .= 's'; }
          elseif (is_float ($val)) { $bindTypes .= 'd'; }
       }
-      $query = sprintf ("select FolderID, ContentID from FactFolderContents where %s", implode (" and ", array_keys ($params)));
+      $query = sprintf ("select FolderID, ContentID, Path from FactFolderContents where %s", implode (" and ", array_keys ($params)));
       $query .= ' ' . $postfix;
       $bindParamArgs = array (&$bindTypes);
       foreach ($params as $key => $value) {
@@ -359,7 +354,7 @@ class FactFolderContentsDAO {
       $stmt = $this->db->prepare ($query);
       call_user_func_array (array ($stmt, "bind_param"), $bindParamArgs);
       $stmt->execute ();
-      $stmt->bind_result ($results ["FolderID"], $results ["ContentID"]);
+      $stmt->bind_result ($results ["FolderID"], $results ["ContentID"], $results ["Path"]);
       while ($stmt->fetch ()) {
          $resultsList [] = $results;
       }
@@ -368,8 +363,8 @@ class FactFolderContentsDAO {
    }
    
    public function insert ($data) {
-      $stmt = $this->db->prepare ("insert into FactFolderContents (FolderID, ContentID) values (?, ?)");
-      $stmt->bind_param ("ii", $data ["FolderID"], $data ["ContentID"]);
+      $stmt = $this->db->prepare ("insert into FactFolderContents (FolderID, ContentID, Path) values (?, ?, ?)");
+      $stmt->bind_param ("iis", $data ["FolderID"], $data ["ContentID"], $data ["Path"]);
       $stmt->execute ();
       if ($stmt->affected_rows != 1) {
          throw new DAOException ("Couldn't insert record in the table \"FactFolderContents\"", $stmt->error, $stmt->affected_rows);
@@ -378,8 +373,8 @@ class FactFolderContentsDAO {
    }
    
    public function save ($data) {
-      $stmt = $this->db->prepare ("update FactFolderContents set  where FolderID = ? and ContentID = ?");
-      $stmt->bind_param ("ii", $data ["FolderID"], $data ["ContentID"]);
+      $stmt = $this->db->prepare ("update FactFolderContents set Path = ? where FolderID = ? and ContentID = ?");
+      $stmt->bind_param ("sii", $data ["Path"], $data ["FolderID"], $data ["ContentID"]);
       $stmt->execute ();
       if ($stmt->affected_rows != 1) {
          throw new DAOException ("Couldn't save record in table \"FactFolderContents\"", $stmt->error, $stmt->affected_rows);

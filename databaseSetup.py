@@ -173,6 +173,8 @@ CREATE_TABLE_FACT_FOLDER_CONTENTS = """
 create table `FactFolderContents` (
    `FolderID` int not null, INDEX (`FolderID`),
    `ContentID` int not null, INDEX (`ContentID`),
+   `Path` varchar (255) not null,
+   UNIQUE INDEX IDX_PathIndex (`FolderID`, `Path`),
    primary key (`FolderID`, `ContentID`)
 ) ENGINE=InnoDB;
 """.strip ()
@@ -215,8 +217,9 @@ create table `AssignmentFileSubmissions` (
 CREATE_TABLE_COURSES = """
 create table `Courses` (
    `CourseID` int not null auto_increment primary key,
+   `CourseCode` varchar (32) not null, UNIQUE INDEX (`CourseCode`),
    `CourseName` varchar (255),
-   `EntryPointID` int not null,
+   `EntryPointID` int,
    `AccessFlags` set ('UR','UW','MR','MW','OR','GR') not null,
    constraint `FK_CourseEntryPointID` foreign key (`EntryPointID`) references `CourseContent` (`ContentID`)
 ) ENGINE=InnoDB;
@@ -234,8 +237,8 @@ create table `CourseRoles` (
 #-----------------------------------------------------------------------------
 CREATE_TABLE_FACT_COURSE_ENROLLMENT = """
 create table `FactCourseEnrollment` (
-   `UserID` int not null, INDEX (`UserID`),
-   `CourseID` int not null, INDEX (`CourseID`),
+   `UserID` int not null,
+   `CourseID` int not null,
    `RoleID` int not null,
    `AccessFlags` set ('CR','CW','GrR','GrW','EnR','EnW')  not null,
    constraint `FK_EnrollmentUserID` foreign key (`UserID`) references `Users` (`UserID`),

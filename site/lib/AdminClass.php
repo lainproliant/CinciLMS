@@ -62,8 +62,7 @@ class AdminClass extends SysopClass {
       new TextEntity ($header, "Edit User");
       new Para ($div, "Edit the user's details below, then click Submit.");
 
-      $user = new User ();
-      $user->byUserID ($_GET ['userID']);
+      $user = User::byUserID ($_GET ['userID']);
       new UserForm ($div, '?action=submitUserEdit', $this, $user);
    }
 

@@ -14,6 +14,22 @@ include_once "UserClass.php";
 include_once "Exceptions.php";
 include_once "CourseForm.php";
 include_once "Course.php";
+include_once "Content.php";
+
+/*
+ * Replace all instances of any non-alphanumeric or 
+ * underscore character with an underscore.
+ * Useful for limiting the characters in course
+ * content path names.
+ *
+ * $string:    The string to filter.
+ *
+ * Returns a filtered version of the string.
+ */
+function anumfilter ($string)
+{
+   return preg_replace ('/[^A-Za-z0-9_-]/', '_', $string);
+}
 
 class SysopClass extends UserClass {
    function __construct ()
@@ -43,15 +59,30 @@ class SysopClass extends UserClass {
    protected function submitNewCourse ($contentDiv) {
       $course = new Course ();
 
-      # TODO: Create the course entry point here.
       $course->courseName = $_POST ['courseName'];
+      $course->courseCode = $_POST ['courseCode'];
       $course->accessFlags = implode (',', $_POST ['accessFlags']);
-
+      
+      // Get a user instance to confirm that the user actually
+      // exists when we create the course in their name.
+      $user = User::byUserID ($_SESSION ['userid']);
+         
+      // Create an entry point as the root folder of the course's content.
+      $entryPoint = new ContentFolder ();
+      $entryPoint->name = "course-root";
+      $entryPoint->ownerID = $user->userID;
+      $entryPoint->insert ();
       
       try {
          $course->insert ();
 
+         // Enroll the user as an instructor in the course.
+         $course->enrollUser ($user, COURSE_ROLE_INSTRUCTOR);
+
       } catch (DAOException $e) {
+         // Destroy the entry point we created for the course.
+         $entryPoint->delete ();
+
          throw new CinciDatabaseException ("Course Creation Error", 
             "There was an error creating the new course.",
             $e->error);
