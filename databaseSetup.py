@@ -201,6 +201,7 @@ create table `Assignments` (
 #-----------------------------------------------------------------------------
 CREATE_TABLE_ASSIGNMENT_FILE_SUBMISSIONS = """
 create table `AssignmentFileSubmissions` (
+   `SubmissionID` int not null auto_increment primary key,
    `AssignmentID` int not null,
    `StudentID` int not null,
    `CourseID` int not null,
@@ -209,7 +210,6 @@ create table `AssignmentFileSubmissions` (
    constraint `FK_SubmissionAssignmentID` foreign key (`AssignmentID`) references `Assignments` (`AssignmentID`),
    constraint `FK_SubmissionStudentID` foreign key (`StudentID`) references `Users` (`UserID`),
    constraint `FK_SubmissionFileID` foreign key (`FileID`) references `FileManagement` (`FileID`),
-   primary key (`AssignmentID`, `StudentID`, `CourseID`, `SubmissionDate`)
 ) ENGINE=InnoDB;
 """.strip ()
 
