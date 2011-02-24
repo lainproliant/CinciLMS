@@ -15,6 +15,10 @@ include_once "Exceptions.php";
 include_once "UserForm.php";
 include_once "User.php";
 
+# LRS-DEBUG: Remove after debug_testData is removed.
+include_once "Course.php";
+include_once "Content.php";
+
 function randomPassword ($length = 6)
 {
    $random_password = "";
@@ -38,7 +42,8 @@ class AdminClass extends SysopClass {
          'newUser'                  => 'actionNewUser',
          'editUser'                 => 'actionEditUser',
          'submitNewUser'            => 'submitNewUser',
-         'submitUserEdit'           => 'submitUserEdit'));
+         'submitUserEdit'           => 'submitUserEdit',
+         'debug_testData'           => 'debug_testData'));
 
       $this->getMenu ()->addItem (
          "Users", new ActionMenu (array (
@@ -80,13 +85,13 @@ class AdminClass extends SysopClass {
       $user->emailAddress = $_POST ['emailAddress'];
       $user->systemRole = $_POST ['systemRole'];
       $user->isActive = $_POST ['isActive'];
-      
-      $user->passwordSalt = hash ('sha256', openssl_random_pseudo_bytes (64, $strong_crypto));
-      $random_password = randomPassword ();
 
-      $user->passwordHash = hash ('sha256', $user->passwordSalt .
-         hash ('sha256', $SiteConfig ['db']['static_salt'] . $random_password));
-         
+      $random_password = randomPassword ();
+      $salted_password = hash ('sha256', $SiteConfig ['db']['static_salt'] . $random_password);
+     
+      $user->generateSalt ();
+      $user->setPassword ($salted_password);
+
       try {
          $user->insert ();
 
@@ -136,4 +141,45 @@ class AdminClass extends SysopClass {
       new Para ($div, sprintf (
          "The user \"%s\" was edited successfully.", htmlentities ($user->username)));
    }
+   
+   # LRS-DEBUG: Generate test users and enrollments.
+   protected function debug_testData ($contentDiv)
+   {
+      global $SiteConfig;
+
+      $usernames = array ('bob', 'alice', 'eve');
+      $users = array ();
+
+      foreach ($usernames as $username) {
+         $user = new User ();
+         $user->username = $username;
+         $user->firstName = $username;
+         
+         $salted_password = hash ('sha256',
+            $SiteConfig ['db']['static_salt'] . $username);
+
+         $user->setPassword ($salted_password);
+
+         $user->systemRole = SYSTEM_ROLE_USER;
+         $user->isActive = 1;
+
+         $user->insert ();
+
+         $users [] = $user;
+      }
+      
+      for ($x = 0; $x < 9; $x++) {
+         $course = Course::createNewCourse (
+            sprintf ("Test Course %03s", $x),
+            sprintf ("lrs_debug_test_%03s", $x),
+            COURSE_DEFAULT_PERMISSIONS,
+            $users [$x % 3]
+         );
+
+         $course->enrollUser ($users [$x % 3], COURSE_ROLE_INSTRUCTOR);
+         $course->enrollUser ($users [($x + 1) % 3], COURSE_ROLE_STUDENT);
+      }
+   }
 }
+
+?>

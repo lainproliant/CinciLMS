@@ -11,8 +11,29 @@ include_once "VO/CoursesVO.php";
 
 define ("COURSE_ROLE_STUDENT", 1);
 define ("COURSE_ROLE_INSTRUCTOR", 2);
+define ("COURSE_ROLE_BUILDER", 3);
+define ("COURSE_ROLE_ASSISTANT", 4);
 
+define ("COURSE_DEFAULT_PERMISSIONS", "UR,UW,MR");
+
+/*
+ * Enumerate permissions used for courses.
+ */
 function enumerateCoursePermissions ()
+{
+   return array (
+      'UR'    => 'Builder Read',
+      'UW'    => 'Builder Write',
+      'MR'    => 'Student Read',
+      'MW'    => 'Student Write',
+      'OR'    => 'Others Read',
+      'GR'    => 'Guests Read');
+}
+
+/*
+ * Enumerate permissions used for course content.
+ */
+function enumerateCourseContentPermissions ()
 {
    return array (
       'UR'    => 'Owner Read',
@@ -23,7 +44,64 @@ function enumerateCoursePermissions ()
       'GR'    => 'Guests Read');
 }
 
+/*
+ * Enumerate per-user permissions for course enrollments.
+ */
+function enumerateUserPermissions ()
+{
+   return array (
+      'CR'     => 'Course Read',
+      'CW'     => 'Course Write',
+      'GrR'    => 'Grades Read',
+      'GrW'    => 'Grades Write',
+      'EnR'    => 'Enrollment Read',
+      'EnW'    => 'Enrollment Write');
+}
+
 class Course extends CoursesVO {
+   /*
+    * Acts as a live constructor for the course.  Creates a new course,
+    * inserts it into the database.
+    *
+    * courseName:       The name of the course.
+    * courseCode:       The course code.  Must be unique among courses.
+    * accessFlags:      The course access flags.
+    * creator:          The User VO for the creator of the course.
+    *
+    * Returns a VO for the new course.  Throws DAOException if the course
+    * could not be inserted.
+    */
+   public static function createNewCourse ($courseName, $courseCode, 
+      $accessFlags, $creator)
+   {
+      $course = new static ();
+
+      $course->courseName = $courseName;
+      $course->courseCode = $courseCode;
+      $course->accessFlags = $accessFlags; 
+
+      // Create an entry point as the root folder of the course's content.
+      $entryPoint = new ContentFolder ();
+      $entryPoint->name = "course-root";
+      $entryPoint->ownerID = $creator->userID;
+      $entryPoint->insert ();
+
+      $course->entryPointID = $entryPoint->contentID;
+      
+      try {
+         $course->insert ();
+
+      } catch (DAOException $e) {
+         // Delete the entry point we created for the course, then
+         // re-throw the exception.
+         $entryPoint->delete ();
+
+         throw $e;
+      }
+
+      return $course;
+   }
+
    /*
     * Enrolls the given user in the course with the given role.
     *

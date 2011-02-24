@@ -209,7 +209,7 @@ create table `AssignmentFileSubmissions` (
    `FileID` int not null,
    constraint `FK_SubmissionAssignmentID` foreign key (`AssignmentID`) references `Assignments` (`AssignmentID`),
    constraint `FK_SubmissionStudentID` foreign key (`StudentID`) references `Users` (`UserID`),
-   constraint `FK_SubmissionFileID` foreign key (`FileID`) references `FileManagement` (`FileID`),
+   constraint `FK_SubmissionFileID` foreign key (`FileID`) references `FileManagement` (`FileID`)
 ) ENGINE=InnoDB;
 """.strip ()
 
@@ -221,7 +221,7 @@ create table `Courses` (
    `CourseName` varchar (255),
    `EntryPointID` int,
    `AccessFlags` set ('UR','UW','MR','MW','OR','GR') not null,
-   constraint `FK_CourseEntryPointID` foreign key (`EntryPointID`) references `CourseContent` (`ContentID`)
+   constraint `FK_CourseEntryPointID` foreign key (`EntryPointID`) references `CourseContent` (`ContentID`) on delete cascade
 ) ENGINE=InnoDB;
 """.strip ()
 
@@ -240,9 +240,9 @@ create table `FactCourseEnrollment` (
    `UserID` int not null,
    `CourseID` int not null,
    `RoleID` int not null,
-   `AccessFlags` set ('CR','CW','GrR','GrW','EnR','EnW')  not null,
-   constraint `FK_EnrollmentUserID` foreign key (`UserID`) references `Users` (`UserID`),
-   constraint `FK_EnrollmentCourseID` foreign key (`CourseID`) references `Courses` (`CourseID`),
+   `AccessFlags` set ('CR','CW','GrR','GrW')  not null,
+   constraint `FK_EnrollmentUserID` foreign key (`UserID`) references `Users` (`UserID`) on delete cascade,
+   constraint `FK_EnrollmentCourseID` foreign key (`CourseID`) references `Courses` (`CourseID`) on delete cascade,
    constraint `FK_EnrollmentRoleID` foreign key (`RoleID`) references `CourseRoles` (`RoleID`),
    primary key (`UserID`, `CourseID`)
 ) ENGINE=InnoDB;
@@ -257,8 +257,8 @@ create table `GradeColumns` (
    `PointsPossible` int,
    `AssignmentID` int default null,
    `SortOrder` int default null,
-   constraint `FK_ColumnCourseID` foreign key (`CourseID`) references `Courses` (`CourseID`),
-   constraint `FK_ColumnAssignmentID` foreign key (`AssignmentID`) references `Assignments` (`AssignmentID`)
+   constraint `FK_ColumnCourseID` foreign key (`CourseID`) references `Courses` (`CourseID`) on delete cascade,
+   constraint `FK_ColumnAssignmentID` foreign key (`AssignmentID`) references `Assignments` (`AssignmentID`) on delete cascade
 ) ENGINE=InnoDB;
 """.strip ()
 
@@ -305,7 +305,7 @@ INIT_ASSIGNMENT_TYPES = (
       ('1', 'Project Assignment'),)
 
 INIT_COURSE_ROLES = (
-      ('1', 'Student',        'CR,EnR'),
+      ('1', 'Student',        'CR,CW,EnR'),
       ('2', 'Instructor',     'CR,CW,GrR,GrW,EnR,EnW'))
 
 #-----------------------------------------------------------------------------
@@ -381,8 +381,6 @@ def main (argv):
          database = str (val)
       elif opt in ['-u', '--user']:
          user = str (val)
-      elif opt in ['-z', '--zipcsv']:
-         zipCodeCSV = str (val)
       elif opt in ['-f', '--force']:
          # This is incredibly dangerous!  Don't do it!
          forceRecreation = True
@@ -553,7 +551,6 @@ def main (argv):
       (adminFirstName, adminLastName, newAdminUserSalt, passwordHash))
    adminID = cursor.lastrowid
 
-   print ('LRS-DEBUG: Rows Inserted = %d' % cursor.rowcount)
    print ("")
    
    db.commit ()

@@ -37,6 +37,7 @@ class SysopClass extends UserClass {
       parent::__construct ();
 
       $this->addActions (array (
+         '_sysopReadWrite'    => NULL,
          'newCourse'          => 'actionNewCourse',
          'editCourse'         => 'actionEditCourse',
          'submitNewCourse'    => 'submitNewCourse',
@@ -57,32 +58,23 @@ class SysopClass extends UserClass {
    }
 
    protected function submitNewCourse ($contentDiv) {
-      $course = new Course ();
-
-      $course->courseName = $_POST ['courseName'];
-      $course->courseCode = $_POST ['courseCode'];
-      $course->accessFlags = implode (',', $_POST ['accessFlags']);
       
       // Get a user instance to confirm that the user actually
       // exists when we create the course in their name.
-      $user = User::byUserID ($_SESSION ['userid']);
-         
-      // Create an entry point as the root folder of the course's content.
-      $entryPoint = new ContentFolder ();
-      $entryPoint->name = "course-root";
-      $entryPoint->ownerID = $user->userID;
-      $entryPoint->insert ();
+      $creator = User::byUserID ($_SESSION ['userid']);
+      $accessFlags = implode (',', $_POST ['accessFlags']);
       
       try {
-         $course->insert ();
+         $course = Course::createNewCourse (
+            $_POST ['courseName'],
+            $_POST ['courseCode'],
+            $accessFlags,
+            $creator);
 
          // Enroll the user as an instructor in the course.
-         $course->enrollUser ($user, COURSE_ROLE_INSTRUCTOR);
+         $course->enrollUser ($creator, COURSE_ROLE_INSTRUCTOR);
 
       } catch (DAOException $e) {
-         // Destroy the entry point we created for the course.
-         $entryPoint->delete ();
-
          throw new CinciDatabaseException ("Course Creation Error", 
             "There was an error creating the new course.",
             $e->error);

@@ -26,7 +26,7 @@ class CourseForm extends Form {
       
       $courseName = NULL; 
       $courseCode = NULL;
-      $accessFlags = 'UR,UW,MR';
+      $accessFlags = COURSE_DEFAULT_PERMISSIONS;
 
       if (! empty ($course)) {
          $courseName = $course->courseName;

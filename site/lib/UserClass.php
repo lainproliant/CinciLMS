@@ -18,8 +18,9 @@ class UserClass extends NonUserClass {
       parent::__construct ();
 
       $this->addActions (array (
-         'logout'                   => 'actionLogout',
          'changePassword'           => 'actionChangePassword',
+         'logout'                   => 'actionLogout',
+         'view'                     => 'actionView',
          'submitPassword'           => 'submitPassword'));
 
       // The user is already logged in under this class.
@@ -59,6 +60,11 @@ class UserClass extends NonUserClass {
       new ChangePasswordForm ($div, '?action=submitPassword');
    }
 
+   protected function actionView ($contentDiv)
+   {
+      // LRS-TODO: Implement this method.
+   }
+
    protected function submitPassword ($contentDiv)
    {
       global $SiteConfig;
@@ -75,8 +81,7 @@ class UserClass extends NonUserClass {
       $username = $_SESSION['username'];
       
       // Fetch the user.
-      $user = new User ();
-      $user->byUsername ($username);
+      $user = User::byUsername ($username);
 
       // Check the current password to prevent an unauthorized password change.
       if (! $user->checkPassword ($old_password)) {
@@ -111,7 +116,6 @@ class UserClass extends NonUserClass {
       $p = new Para ($div,
          "Click a course below to begin.");
    }
-
 }
 
 ?>

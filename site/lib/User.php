@@ -19,14 +19,32 @@ class User extends UsersVO {
       return $this->passwordHash == hash ('sha256', $this->passwordSalt . $password);
    }
 
-   /*
-    * Changes the user's password to the given server-salted password
-    * and saves it back to the database.
+   /* 
+    * A convenience method.  Changes the user's password to the 
+    * given server-salted password and saves it back to the database.
     */
    public function changePassword ($password)
    {
-      $this->passwordHash = hash ('sha256', $this->passwordSalt . $password);
+      $this->setPassword ($password);
       $this->save ();
+   }
+   
+   /* 
+    * Changes the user's password to the given server-salted password
+    * without saving.
+    */
+   public function setPassword ($password)
+   {
+      $this->passwordHash = hash ('sha256', $this->passwordSalt . $password);
+   }
+
+   /*
+    * Generates the per-user salt for the given user.  This method
+    * should be called on new User objects before insertion.
+    */
+   public function generateSalt ()
+   {
+      $this->passwordSalt = hash ('sha256', openssl_random_pseudo_bytes (64, $strong_crypto));
    }
 }
 

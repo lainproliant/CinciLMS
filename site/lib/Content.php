@@ -48,6 +48,185 @@ class CourseContent extends CourseContentVO {
          return new ContentLink ($this);
       }
    }
+
+   /*
+    * Checks read permissions on the item based on system permissions
+    * course permissions, user permissions, and item permissions.
+    *
+    * user:             The system user. 
+    * course:           The course in which the item is contained.
+    * courseEnrollment: The user's enrollment in the course.
+    *
+    * Returns True if the item can be read, False otherwise.
+    */
+   public function checkReadAccess ($user, $course = NULL, $courseEnrollment = NULL)
+   {
+      // Check for sysop and admin special read/write permissions.
+      // If authorized, return True.
+      if ($user->authorizeCheck ('_sysopReadWrite')) {
+         return TRUE;
+      }
+
+      $itemPermissions = explode (',', $this->accessFlags);
+      $userPermissions = empty ($courseEnrollment) ?
+         explode (',', CONTENT_DEFAULT_ACCESS) :
+         explode (',', $courseEnrollment->accessFlags);
+      $coursePermissions = empty ($course) ? 
+         array () :
+         explode (',', $course->accessFlags);
+
+      $userID = empty ($courseEnrollment) ?
+         NULL :
+         $courseEnrollment->userID;
+
+      // Confirm that course read permissions are enabled for the user.
+      if (in_array ('CR', $userPermissions)) {
+         // What is the user's course role?
+         switch ($user->roleID) {
+         case COURSE_ROLE_INSTRUCTOR:
+            // Instructors always have full read permission to their courses
+            // and items therein, unless their user read permissions are
+            // disabled.
+            return TRUE;
+
+         case COURSE_ROLE_STUDENT:
+            // Check the member read permissions for the course.
+            if (in_array ('MR', $coursePermissions)) {
+               // Does the user own this content?
+               if ($this->ownerID == $userID) {
+                  // Are owner read permissions enabled for the item?
+                  if (in_array ('UR', $itemPermissions)) {
+                     // Access granted.
+                     return TRUE;
+                  }
+               }
+
+               // The user does not own the content or owner read permissions are disabled.
+               // Are member read permissions enabled for the item?
+               if (in_array ('UR', $itemPermissions)) {
+                  // Access granted.
+                  return TRUE;
+               } else {
+                  // Access denied.
+                  return FALSE;
+               }
+
+            } else {
+               // Access denied, because the course is locked from members.
+               return FALSE;
+            }
+
+         case COURSE_ROLE_BUILDER:
+         case COURSE_ROLE_ASSISTANT:
+            // Check the user read permissions for the course and the item.
+            if (in_array ('UR', $coursePermissions) and in_array ('UR', $itemPermissions)) {
+               // Access granted to the builder/TA user.
+               return TRUE;
+            } else {
+               // Access denied, because the course is locked from builders/TAs
+               // or the item is locked from builders/TAs.
+               return FALSE;
+            }
+
+         default:
+            // Encountered an unknown user role type.  Access denied.
+            return FALSE;
+         }
+      } else {
+         // Course read permissions are disabled for the user.  Access denied.
+         return FALSE;
+      }
+
+   }
+
+   /*
+    * Checks write permissions on the item based on system permissions
+    * course permissions, user permissions, and item permissions.
+    *
+    * user:             The system user. 
+    * course:           The course in which the item is contained.
+    * courseEnrollment: The user's enrollment in the course.
+    *
+    * Returns True if the item can be written, False otherwise.
+    */
+   public function checkWriteAccess ($user, $course, $courseEnrollment = NULL)
+   {
+      // Check for sysop and admin special read/write permissions.
+      // If authorized, return True.
+      if ($user->authorizeCheck ('_sysopReadWrite')) {
+         return TRUE;
+      }
+
+      $itemPermissions = explode (',', $this->accessFlags);
+      $userPermissions = empty ($courseEnrollment) ?
+         array () :
+         explode (',', $courseEnrollment->accessFlags);
+      $coursePermissions = empty ($course) ? 
+         array () :
+         explode (',', $course->accessFlags);
+
+      $userID = empty ($courseEnrollment) ?
+         NULL :
+         $courseEnrollment->userID;
+
+      // Confirm that course write permissions are enabled for the user.
+      if (in_array ('CW', $userPermissions)) {
+         // What is the user's course role?
+         switch ($user->roleID) {
+         case COURSE_ROLE_INSTRUCTOR:
+            // Instructors always have full write permission to their courses
+            // and items therein, unless their user read permissions are
+            // disabled.
+            return TRUE;
+
+         case COURSE_ROLE_STUDENT:
+         case COURSE_ROLE_ASSISTANT:
+            // Check the member write permissions for the course.
+            if (in_array ('MW', $coursePermissions)) {
+               // Does the user own this content?
+               if ($this->ownerID == $userID) {
+                  // Are owner write permissions enabled for the item?
+                  if (in_array ('UW', $itemPermissions)) {
+                     // Access granted.
+                     return TRUE;
+                  }
+               }
+
+               // The user does not own the content or owner write permissions are disabled.
+               // Are member write permissions enabled for the item?
+               if (in_array ('UW', $itemPermissions)) {
+                  // Access granted.
+                  return TRUE;
+               } else {
+                  // Access denied.
+                  return FALSE;
+               }
+
+            } else {
+               // Access denied, because the course is locked from members.
+               return FALSE;
+            }
+
+         case COURSE_ROLE_BUILDER:
+            // Check the user write permissions for the course and the item.
+            if (in_array ('UW', $coursePermissions) and in_array ('UW', $itemPermissions)) {
+               // Access granted to the builder/TA user.
+               return TRUE;
+            } else {
+               // Access denied, because the course is locked from builders/TAs
+               // or the item is locked from builders/TAs.
+               return FALSE;
+            }
+
+         default:
+            // Encountered an unknown user role type.  Access denied.
+            return FALSE;
+         }
+      } else {
+         // Course write permissions are disabled for the user.  Access denied.
+         return FALSE;
+      }
+   }
 }
 
 abstract class CourseContentSubtype extends CourseContent {
@@ -72,17 +251,17 @@ abstract class CourseContentSubtype extends CourseContent {
          $this->accessFlags = CONTENT_DEFAULT_ACCESS;
       }
    }
-   
+
    /* 
     * Overridden method to insert a new CourseContent object
-    * and its appropraite subtype data.
+    * and its appropriate subtype data.
     */
    public function insert ()
    {
       parent::insert ();
 
       $vo = $this->createVO ();
-      
+
       if (! empty ($vo)) {
          $vo->insert ();
       }
@@ -173,15 +352,36 @@ class ContentFolder extends CourseContentSubtype {
     * Resolves the given path relative to this folder.
     *
     * pathArray:        The path to resolve as an array.
-    * user:             The user for which permissions will be determined.
+    * user:             The system user for which permissions will be determined.
+    * course:           The course containing the content.
     * courseEnrollment: The enrollment record for the user in this course.
     *
     * Returns a CourseContentSubtype for the content retrieved.
     * Throws a CinciAccessException if the path doesn't exist or the
     * given user doesn't have access.
     */
-   public function resolvePath ($pathArray, $user, $courseEnrollment)
-   {
+
+   // TODO: Check for permissions upon content access, folder, or
+   //       link dereference.
+
+   public function resolvePath ($pathArray, $user, $course, $courseEnrollment = NULL, $cdCheckSet = NULL) 
+   {      
+      // A set for circular dependancy checking.
+      if (empty ($crCheckSet)) {
+         $crCheckSet = new SplObjectStorage ();
+      }
+
+      
+      if ($cdCheckSet->contains ($this->contentID)) {
+         // A circular dependency was detected. throw an exception.
+         throw new CinciException ("Circular Dependency Error",
+            "The given path contains a circular path dependency. Please contact a system administrator.");
+
+      } else {
+         // Add the current directory to the circular dependency check set.
+         $cdCheckSet->attach ($this->contentID);
+      }
+
       $path = array_shift ($pathArray);
 
       $folderContents = FactFolderContentsVO::byFolderID_Path (
@@ -195,7 +395,20 @@ class ContentFolder extends CourseContentSubtype {
 
       $content = CourseContent::byContentID (
          $folderContents->contentID)->resolve ();
+      
+      do {
+         if (! $content->checkReadAccess ($user, $course, $courseEnrollment)) {
+            // Access to the resource was denied.  Throw an exception.
+            throw new CinciAccesException ("Access Denied",
+               "You are not authorized to access the requested content.");   
+         }
+         
+         if ($content->typeID == CONTENT_TYPE_LINK) {
+            $content = $content->dereference ();
+         }
 
+      } while ($content->typeID == CONTENT_TYPE_LINK); 
+      
       if (! empty ($pathArray)) {
          if ($content->typeID != CONTENT_TYPE_FOLDER) {
             // The path says we need to recurse further, but the current
@@ -203,7 +416,7 @@ class ContentFolder extends CourseContentSubtype {
             throw new CinciAccessException ("Access Denied",
                "You are not authorized to access the requested content.");
          }
-         
+
          // Recurse into the next directory.
          return $content->resolvePath ($pathArray, $user);
 
@@ -211,7 +424,7 @@ class ContentFolder extends CourseContentSubtype {
          return $content;
       }
    }
-   
+
    /*
     * Folders in and of themselves do not have a unique value
     * object.  There is a fact table, FactFolderContents, which
@@ -237,12 +450,23 @@ class ContentLink extends CourseContentSubtype {
    }
 
    /*
-    * Fetches the destination ID of the given course link.
+    * Dereferences the link and returns the course content
+    * to which it points.
     */
-   public function getDestination ()
+   public function dereference ()
    {
       $link = ContentLinksVO::byLinkID ($this->contentID);
-      return $link->destinationID;
+
+      $content = CourseContent::byContentID (
+         $link->destinationID)->resolve ();
+
+      if (empty ($content->contentID)) {
+         // The content to which this link points does not exist.
+         throw new CinciAccessException ("Link Error",
+            "The course content link is broken and cannot be dereferenced.");
+      }
+
+      return $content;
    }
 
    protected function createVO ()
