@@ -37,14 +37,14 @@ class CourseContent extends CourseContentVO {
       case CONTENT_TYPE_ITEM:
          return new ContentItem ($this);
 
-      case CONTENT_ITEM_ASSIGNMENT:
+      case CONTENT_TYPE_ASSIGNMENT:
          throw new CinciException ("Not Implemented",
             "Assignment items are not yet implemented.");
 
-      case CONTENT_ITEM_FOLDER:
+      case CONTENT_TYPE_FOLDER:
          return new ContentFolder ($this);
 
-      case CONTENT_ITEM_LINK:
+      case CONTENT_TYPE_LINK:
          return new ContentLink ($this);
       }
    }
@@ -53,20 +53,23 @@ class CourseContent extends CourseContentVO {
     * Checks read permissions on the item based on system permissions
     * course permissions, user permissions, and item permissions.
     *
+    * authority:        The user's current AuthorityClass instance.
     * user:             The system user. 
     * course:           The course in which the item is contained.
     * courseEnrollment: The user's enrollment in the course.
     *
     * Returns True if the item can be read, False otherwise.
     */
-   public function checkReadAccess ($user, $course = NULL, $courseEnrollment = NULL)
+   public function checkReadAccess ($authority, $user,
+      $course = NULL, $courseEnrollment = NULL)
    {
-      // Check for sysop and admin special read/write permissions.
-      // If authorized, return True.
-      if ($user->authorizeCheck ('_sysopReadWrite')) {
+      // If the authority contains '_sysopReadWrite' permissions, grant access.
+      if ($authority->authorizeCheck ('_sysopReadWrite')) {
          return TRUE;
       }
-
+      
+      // Explode (split into an array) each of the access flag sets,
+      // or provide defaults if a course or enrollment was not specified.
       $itemPermissions = explode (',', $this->accessFlags);
       $userPermissions = empty ($courseEnrollment) ?
          explode (',', CONTENT_DEFAULT_ACCESS) :
@@ -140,23 +143,40 @@ class CourseContent extends CourseContentVO {
    }
 
    /*
+    * Placeholder method.  Displays the class and name of the content
+    * in a paragraph element.
+    *
+    * Subtypes should implement display () to render themselves
+    * in the provided content div.
+    */
+   public function display ($contentDiv)
+   {
+      new Para ($contentDiv, sprintf (
+         "[Content as %s: %s]", get_class ($this), $this->name));
+   }
+
+   /*
     * Checks write permissions on the item based on system permissions
     * course permissions, user permissions, and item permissions.
     *
+    * authority:        The user's current AuthorityClass instance.
     * user:             The system user. 
     * course:           The course in which the item is contained.
     * courseEnrollment: The user's enrollment in the course.
     *
     * Returns True if the item can be written, False otherwise.
     */
-   public function checkWriteAccess ($user, $course, $courseEnrollment = NULL)
+   public function checkWriteAccess ($authority, $user,
+      $course = NULL, $courseEnrollment = NULL)
    {
-      // Check for sysop and admin special read/write permissions.
-      // If authorized, return True.
-      if ($user->authorizeCheck ('_sysopReadWrite')) {
+      // If the authority contains '_sysopReadWrite' permissions, grant access.
+      // Otherwise, if no courseEnrollment was provided, deny access.
+      if ($authority->authorizeCheck ('_sysopReadWrite')) {
          return TRUE;
       }
 
+      // Explode (split into an array) each of the access flag sets,
+      // or provide defaults if a course or enrollment was not specified.
       $itemPermissions = explode (',', $this->accessFlags);
       $userPermissions = empty ($courseEnrollment) ?
          array () :
@@ -331,6 +351,35 @@ class ContentFolder extends CourseContentSubtype {
          $this->typeID = CONTENT_TYPE_FOLDER;
       }
    }
+   
+   /*
+    * Adds the given CourseContent object to this folder.
+    *
+    * content:       The content to add to the folder.
+    * path:          A path to the content.  Derived from the content name
+    *                if not provided.
+    * 
+    * Returns a new FactFolderContentsVO object representing the
+    * content within the folder.  Throws a DAOException if the
+    * item could not be added to the folder, possibly because
+    * an item exists exists at the given path.
+    */
+   public function addContent ($content, $path = NULL)
+   {
+      if (empty ($path)) {
+         $path = anumfilter ($content->name);
+      }
+
+      $folderEntry = new FactFolderContentsVO ();
+      $folderEntry->folderID = $this->contentID;
+      $folderEntry->contentID = $content->contentID;
+      $folderEntry->path = $path;
+
+      $folderEntry->insert ();
+
+      $content->parentID = $this->contentID;
+      $content->save ();
+   }
 
    /*
     * Fetches a list of item IDs of the items contained
@@ -352,7 +401,8 @@ class ContentFolder extends CourseContentSubtype {
     * Resolves the given path relative to this folder.
     *
     * pathArray:        The path to resolve as an array.
-    * user:             The system user for which permissions will be determined.
+    * authority:        The user's current AuthorityClass instance.
+    * user:             The user for which permissions will be determined.
     * course:           The course containing the content.
     * courseEnrollment: The enrollment record for the user in this course.
     *
@@ -364,61 +414,62 @@ class ContentFolder extends CourseContentSubtype {
    // TODO: Check for permissions upon content access, folder, or
    //       link dereference.
 
-   public function resolvePath ($pathArray, $user, $course, $courseEnrollment = NULL, $cdCheckSet = NULL) 
+   public function resolvePath ($pathArray, $authority, $user, $course,
+      $courseEnrollment = NULL, $cdCheckSet = NULL) 
    {      
-      // A set for circular dependancy checking.
-      if (empty ($crCheckSet)) {
-         $crCheckSet = new SplObjectStorage ();
+      // A set for circular dependency checking.
+      if (empty ($cdCheckSet)) {
+         $cdCheckSet = array ();
       }
 
-      
-      if ($cdCheckSet->contains ($this->contentID)) {
+      if (array_key_exists ($this->contentID, $cdCheckSet)) {
          // A circular dependency was detected. throw an exception.
          throw new CinciException ("Circular Dependency Error",
-            "The given path contains a circular path dependency. Please contact a system administrator.");
+            "The given path contains a circular path dependency.  Please contact a system administrator to resolve this problem.");
 
       } else {
          // Add the current directory to the circular dependency check set.
-         $cdCheckSet->attach ($this->contentID);
+         $cdCheckSet [$this->contentID] = 1;
       }
 
       $path = array_shift ($pathArray);
+      
+      print sprintf (
+         "LRS-DEBUG: path = '%s'", $path);
 
       $folderContents = FactFolderContentsVO::byFolderID_Path (
          $this->contentID, $path);
 
       if (empty ($folderContents->contentID)) {
          // The specified path doesn't exist.
-         throw new CinciAccessException ("Access Denied",
-            "You are not authorized to access the requested content.");
+         throw new CinciAccessException ("The requested content does not exist.");
       }
 
       $content = CourseContent::byContentID (
          $folderContents->contentID)->resolve ();
       
-      do {
-         if (! $content->checkReadAccess ($user, $course, $courseEnrollment)) {
-            // Access to the resource was denied.  Throw an exception.
-            throw new CinciAccesException ("Access Denied",
-               "You are not authorized to access the requested content.");   
-         }
-         
-         if ($content->typeID == CONTENT_TYPE_LINK) {
-            $content = $content->dereference ();
-         }
-
-      } while ($content->typeID == CONTENT_TYPE_LINK); 
+      if (! $content->checkReadAccess ($authority, $user, $course, $courseEnrollment)) {
+         // Access to the resource was denied.  Throw an exception.
+         throw new CinciAccesException ("Access Denied",
+            "You are not authorized to access the requested content.");   
+      }
       
+      if ($content->typeID == CONTENT_TYPE_LINK) {
+         $content = $content->dereference (
+            $authority, $user, $course, $courseEnrollment, $cdCheckSet);
+      }
+
       if (! empty ($pathArray)) {
          if ($content->typeID != CONTENT_TYPE_FOLDER) {
             // The path says we need to recurse further, but the current
             // node in the directory tree is not a folder!
-            throw new CinciAccessException ("Access Denied",
+            throw new CinciAccessException (
                "You are not authorized to access the requested content.");
          }
 
          // Recurse into the next directory.
-         return $content->resolvePath ($pathArray, $user);
+         return $content->resolvePath ($pathArray, $authority, $user,
+            $courseEnrollment, $cdCheckSet);
 
       } else {
          return $content;
@@ -452,9 +503,32 @@ class ContentLink extends CourseContentSubtype {
    /*
     * Dereferences the link and returns the course content
     * to which it points.
+    *
+    * authority:        The current AuthorityClass instance for the user.
+    * user:             The user for which permissions will be determined.
+    * course:           The course in context of which this content is accessed.
+    * courseEnrolment:  The enrollment record for the user in this course.
+    * cdCheckSet:       A Set of ContentIDs used to prevent circular dependencies.
+    *                   Pass in a Set if you are parsing a directory hierarchy
+    *                   and dereferencing links.
     */
-   public function dereference ()
+   public function dereference ($authority, $user, $course,
+      $courseEnrollment = NULL, $cdCheckSet = NULL)
    {
+      // A set for circular dependency checking.
+      if (empty ($cdCheckSet)) {
+         $cdCheckSet = array ();
+      }
+
+      if (array_key_exists ($this->contentID, $cdCheckSet)) {
+         // A circular dependency was detected in the link, throw an exception.
+         throw new CinciException ("Circular Dependency Error",
+            "The given path contains a link which causes a circular dependency.  Please contact a system administrator to resolve this problem.");
+      } else {
+         // Add this link to the circular dependency check set.
+         $cdCheckSet [$this->contentID] = 1;
+      }
+
       $link = ContentLinksVO::byLinkID ($this->contentID);
 
       $content = CourseContent::byContentID (
@@ -462,8 +536,13 @@ class ContentLink extends CourseContentSubtype {
 
       if (empty ($content->contentID)) {
          // The content to which this link points does not exist.
-         throw new CinciAccessException ("Link Error",
+         throw new CinciException ("Link Error",
             "The course content link is broken and cannot be dereferenced.");
+      }
+
+      if (! $content->checkReadAccess ($authority, $user, $course, $courseEnrollment)) {
+         // Access to the destination content was denied.
+         throw new CinciAccessException ("You are not authorized to access the requested content.");
       }
 
       return $content;

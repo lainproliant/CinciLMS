@@ -131,7 +131,7 @@ create table `CourseContent` (
    `TypeID` int not null,
    `Name` varchar (1023),
    `AccessFlags` set ('UR','UW','MR','MW','OR','GR') not null,
-   constraint `FK_ContentParentID` foreign key (`ParentID`) references `CourseContent` (`ContentID`),
+   constraint `FK_ContentParentID` foreign key (`ParentID`) references `CourseContent` (`ContentID`) on delete cascade,
    constraint `FK_ContentOwnerID` foreign key (`OwnerID`) references `Users` (`UserID`) on delete cascade,
    constraint `FK_ContentTypeID` foreign key (`TypeID`) references `ContentTypes` (`ContentTypeID`)
 ) ENGINE=InnoDB;
@@ -142,7 +142,7 @@ CREATE_TABLE_CONTENT_LINKS = """
 create table `ContentLinks` (
    `LinkID` int not null primary key,
    `DestinationID` int not null,
-   constraint `FK_ContentLinkID` foreign key (`LinkID`) references `CourseContent` (`ContentID`),
+   constraint `FK_ContentLinkID` foreign key (`LinkID`) references `CourseContent` (`ContentID`) on delete cascade,
    constraint `FK_LinkDestinationID` foreign key (`DestinationID`) references `CourseContent` (`ContentID`)
 ) ENGINE=InnoDB;
 """.strip ()
@@ -162,7 +162,7 @@ CREATE_TABLE_CONTENT_ITEM_ATTACHMENTS = """
 create table `ContentItemAttachments` (
    `ContentID` int not null,
    `FileID` int not null,
-   constraint `FK_AttachmentContentID` foreign key (`ContentID`) references `CourseContent` (`ContentID`),
+   constraint `FK_AttachmentContentID` foreign key (`ContentID`) references `CourseContent` (`ContentID`) on delete cascade,
    constraint `FK_AttachmentFileID` foreign key (`FileID`) references `FileManagement` (`FileID`),
    primary key (`ContentID`, `FileID`)
 ) ENGINE=InnoDB;
@@ -207,8 +207,8 @@ create table `AssignmentFileSubmissions` (
    `CourseID` int not null,
    `SubmissionDate` date not null,
    `FileID` int not null,
-   constraint `FK_SubmissionAssignmentID` foreign key (`AssignmentID`) references `Assignments` (`AssignmentID`),
-   constraint `FK_SubmissionStudentID` foreign key (`StudentID`) references `Users` (`UserID`),
+   constraint `FK_SubmissionAssignmentID` foreign key (`AssignmentID`) references `Assignments` (`AssignmentID`) on delete cascade,
+   constraint `FK_SubmissionStudentID` foreign key (`StudentID`) references `Users` (`UserID`) on delete cascade,
    constraint `FK_SubmissionFileID` foreign key (`FileID`) references `FileManagement` (`FileID`)
 ) ENGINE=InnoDB;
 """.strip ()
@@ -268,8 +268,8 @@ create table `Grades` (
    `ColumnID` int not null,
    `StudentID` int not null,
    `Grade` decimal (5,2),
-   constraint `FK_GradeColumnID` foreign key (`ColumnID`) references `GradeColumns` (`ColumnID`),
-   constraint `FK_GradeStudentID` foreign key (`StudentID`) references `Users` (`UserID`),
+   constraint `FK_GradeColumnID` foreign key (`ColumnID`) references `GradeColumns` (`ColumnID`) on delete cascade,
+   constraint `FK_GradeStudentID` foreign key (`StudentID`) references `Users` (`UserID`) on delete cascade,
    primary key (`ColumnID`, `StudentID`)
 ) ENGINE=InnoDB;
 """.strip ()

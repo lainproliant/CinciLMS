@@ -171,7 +171,7 @@ function main ()
     
       // If no action is specified, display a welcome page.
       $actionToAuthorize = 'welcome';
-      if (isset ($_GET['action'])) {
+      if (isset ($_GET ['action'])) {
          $actionToAuthorize = $_GET['action'];
       }
 

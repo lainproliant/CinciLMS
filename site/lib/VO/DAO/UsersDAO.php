@@ -17,7 +17,7 @@ class UsersDAO {
    }
    
    public function byUsername ($username) {
-      $result = array ();
+      $results = array ();
       $stmt = $this->db->prepare ("select UserID, ExternalID, Username, FirstName, MiddleInitial, LastName, EmailAddress, PasswordSalt, PasswordHash, Notes, LastLogin, IsActive, SystemRole from Users where Username = ?");
       $stmt->bind_param ("s", $username);
       $stmt->execute ();

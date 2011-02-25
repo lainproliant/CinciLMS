@@ -9,7 +9,7 @@ class CourseContentVO {
       return self::fromResult ($dao->byContentID ($contentID));
    }
    
-   protected static function fromResult ($result) {
+   public static function fromResult ($result) {
       $obj = new static ();
       $obj->contentID = $result ["ContentID"];
       $obj->parentID = $result ["ParentID"];
@@ -35,6 +35,7 @@ class CourseContentVO {
       $dao = new CourseContentDAO ();
       $this->contentID = $dao->insert ($this->toData ());
    }
+   
    public function save () {
       $dao = new CourseContentDAO ();
       $dao->save ($this->toData ());
@@ -54,7 +55,7 @@ class ContentItemsVO {
       return self::fromResult ($dao->byItemID ($itemID));
    }
    
-   protected static function fromResult ($result) {
+   public static function fromResult ($result) {
       $obj = new static ();
       $obj->itemID = $result ["ItemID"];
       $obj->title = $result ["Title"];
@@ -74,6 +75,7 @@ class ContentItemsVO {
       $dao = new ContentItemsDAO ();
       $dao->insert ($this->toData ());
    }
+   
    public function save () {
       $dao = new ContentItemsDAO ();
       $dao->save ($this->toData ());
@@ -93,7 +95,7 @@ class ContentLinksVO {
       return self::fromResult ($dao->byLinkID ($linkID));
    }
    
-   protected static function fromResult ($result) {
+   public static function fromResult ($result) {
       $obj = new static ();
       $obj->linkID = $result ["LinkID"];
       $obj->destinationID = $result ["DestinationID"];
@@ -120,6 +122,7 @@ class ContentLinksVO {
       $dao = new ContentLinksDAO ();
       $dao->insert ($this->toData ());
    }
+   
    public function save () {
       $dao = new ContentLinksDAO ();
       $dao->save ($this->toData ());
@@ -139,7 +142,7 @@ class ContentItemAttachmentsVO {
       return self::fromResult ($dao->byContentID_FileID ($contentID, $fileID));
    }
    
-   protected static function fromResult ($result) {
+   public static function fromResult ($result) {
       $obj = new static ();
       $obj->contentID = $result ["ContentID"];
       $obj->fileID = $result ["FileID"];
@@ -166,6 +169,7 @@ class ContentItemAttachmentsVO {
       $dao = new ContentItemAttachmentsDAO ();
       $dao->insert ($this->toData ());
    }
+   
    public function save () {
       $dao = new ContentItemAttachmentsDAO ();
       $dao->save ($this->toData ());
@@ -190,7 +194,7 @@ class FactFolderContentsVO {
       return self::fromResult ($dao->byFolderID_Path ($folderID, $path));
    }
    
-   protected static function fromResult ($result) {
+   public static function fromResult ($result) {
       $obj = new static ();
       $obj->folderID = $result ["FolderID"];
       $obj->contentID = $result ["ContentID"];
@@ -210,6 +214,7 @@ class FactFolderContentsVO {
       $dao = new FactFolderContentsDAO ();
       $dao->insert ($this->toData ());
    }
+   
    public function save () {
       $dao = new FactFolderContentsDAO ();
       $dao->save ($this->toData ());

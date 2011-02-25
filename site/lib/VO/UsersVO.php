@@ -14,7 +14,7 @@ class UsersVO {
       return self::fromResult ($dao->byUsername ($username));
    }
    
-   protected static function fromResult ($result) {
+   public static function fromResult ($result) {
       $obj = new static ();
       $obj->userID = $result ["UserID"];
       $obj->externalID = $result ["ExternalID"];
@@ -54,6 +54,7 @@ class UsersVO {
       $dao = new UsersDAO ();
       $this->userID = $dao->insert ($this->toData ());
    }
+   
    public function save () {
       $dao = new UsersDAO ();
       $dao->save ($this->toData ());

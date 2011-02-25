@@ -12,10 +12,21 @@ include_once "util/XMLEntity.php";
 include_once "NonUserClass.php";
 include_once "Exceptions.php";
 
+include_once "User.php";
+include_once "Course.php";
+include_once "Content.php";
+
 class UserClass extends NonUserClass {
    function __construct ()
    {
       parent::__construct ();
+
+      // Fetch the user and enrollments for this user. 
+      $this->user = User::byUserID ($_SESSION ['userid']);
+
+      $enrollments_courses = $this->user->getCourseEnrollments ();
+      $this->enrollments = $enrollments_courses [0];
+      $this->courses = $enrollments_courses [1];
 
       $this->addActions (array (
          'changePassword'           => 'actionChangePassword',
@@ -27,20 +38,51 @@ class UserClass extends NonUserClass {
       // No need for login processing, remove login functions.
       $this->removeActions (array (
          'login', 'submitLogin'));
-
+         
       // Add menu items for account functions.
       $this->getMenu ()->addItem (
          "Account", new ActionMenu (array (
+            "Home"               => new HyperlinkAction ($_SERVER ['PHP_SELF']),
             "Change Password"    => 'changePassword',
             "Logout"             => 'logout'
          ))
       );
+      
+      // Show the courses menu.
+      $this->addCoursesMenu ();
+   }
+   
+   /*
+    * Gets the User object associated with the current user.
+    * Fetched initially upon loading.
+    */
+   protected function getUser ()
+   {
+      return $this->user;
+   }
+
+   /*
+    * Gets the list of FactCourseEnrollmentVO objects for each 
+    * course in which the user is enrolled.
+    */
+   protected function getUserCourseEnrollments ()
+   {
+      return $this->enrollments;
+   }
+
+   /*
+    * Gets the list of Course objects for each course in which
+    * the user is enrolled.
+    */
+   protected function getUserCourses ()
+   {
+      return $this->courses;
    }
 
    protected function actionLogout ($contentDiv)
    {
       session_destroy ();
-      
+
       $div = new Div ($contentDiv, 'prompt');
       $header = new XMLEntity ($div, 'h3');
       new TextEntity ($header, "Logged Out");
@@ -62,7 +104,50 @@ class UserClass extends NonUserClass {
 
    protected function actionView ($contentDiv)
    {
-      // LRS-TODO: Implement this method.
+      // Get the path of the item to be viewed.  The first name
+      // in the path is the code of a course, and the remainder
+      // of the names are a path relative to the course-root
+      // of said course.  The path is separated by forward slashes.
+
+      if (empty ($_GET ['path'])) {
+         throw new CinciException ("View Error", "No path specified.");
+      }
+
+      // Convert the path to an array, and remove any empty path
+      // names therein.  This allows leniency in leading and trailing
+      // slashes, e.g. "/course/folder/" is the same as "course/folder".
+      $pathArray = explode ('/', $_GET ['path']);
+      $pathArray = array_diff ($pathArray, array (''));
+
+      if (count ($pathArray) < 1) {
+         throw new CinciException ("View Error", "No path specified.");
+      }
+
+      $courseCode = array_shift ($pathArray);
+
+      $user = User::byUserID ($_SESSION ['userid']);
+      $course = Course::byCourseCode ($courseCode);
+      $enrollment = $course->getEnrollment ($user);
+
+      // If the user is not enrolled in the course, and the user does not
+      // have '_sysopReadWrite' permissions, deny access.   
+      if (empty ($enrollment) and !$this->authorizeCheck ('_sysopReadWrite')) {
+         throw new CinciAccessException (
+            "You are not authorized to access this course.");
+      }
+
+      // If the item doesn't exist, a CinciAccessException will be thrown.
+      $entryPoint = CourseContent::byContentID ($course->entryPointID)->resolve ();
+      $content = NULL;
+
+      if (count ($pathArray) > 0) {
+         $content = $entryPoint->resolvePath ($pathArray, $this, $user, $enrollment);
+      } else {
+         $content = $entryPoint;
+      }
+
+      // Ask the content to display itself as a Div in the given content div.
+      $content->display ($contentDiv);
    }
 
    protected function submitPassword ($contentDiv)
@@ -79,7 +164,7 @@ class UserClass extends NonUserClass {
       $new_password = $_POST['new_password_A'];
 
       $username = $_SESSION['username'];
-      
+
       // Fetch the user.
       $user = User::byUsername ($username);
 
@@ -92,7 +177,7 @@ class UserClass extends NonUserClass {
       // The password was correct, attempt to change it.
       // Salting and re-hashing is taken care of by the User class.
       $user->changePassword ($new_password);
-      
+
       // The password was changed successfully!
       $div = new Div ($contentDiv, 'prompt');
       $header = new XMLEntity ($div, 'h3');
@@ -100,7 +185,7 @@ class UserClass extends NonUserClass {
       $p = new XMLEntity ($div, 'p');
       new TextEntity ($p, "Success!  Your password has been changed.");
    }
-   
+
    /*
     * Overridden function from NonUserClass.
     *
@@ -114,8 +199,44 @@ class UserClass extends NonUserClass {
       new TextEntity ($header, sprintf (
          'Welcome, %s!', htmlentities ($_SESSION ['first_name'])));
       $p = new Para ($div,
-         "Click a course below to begin.");
+         "Click a course in the My Courses menu above to begin.");
+
+      $this->showCoursesList ($div);
    }
+   
+   /*
+    * Prints a list of Div links to the user's enrolled courses.
+    */
+   protected function showCoursesList ($contentDiv)
+   {
+      $courses = $this->getUserCourses ();
+      $enrollments = $this->getUserCourseEnrollments ();
+      $roles = enumerateCourseRoles ();
+
+      for ($x = 0; $x < count ($courses); $x++) {
+         $link = new Hyperlink ($contentDiv, sprintf (
+            "?action=view&path=%s", htmlentities ($courses [$x]->courseCode)));
+
+         $item = new Span ($link, $courses [$x]->courseName, "content-item");
+      }
+   }
+
+   /*
+    * Adds a courses menu to the user's menu bar.
+    */
+   protected function addCoursesMenu ()
+   {
+      $coursesMenu = new ActionMenu (); 
+
+      foreach ($this->getUserCourses () as $course) {
+         $coursesMenu->addItem (
+            htmlentities ($course->courseName),
+            new HyperlinkAction (sprintf ("?action=view&path=%s", htmlentities ($course->courseCode)))
+         );
+      }
+
+      $this->getMenu ()->addItem ("My Courses", $coursesMenu);
+   } 
 }
 
 ?>

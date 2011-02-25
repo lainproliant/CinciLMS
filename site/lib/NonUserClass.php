@@ -27,7 +27,7 @@ class NonUserClass extends AuthorityClass {
          'submitLogin'     => 'submitLogin');
 
       $this->addActions ($actionMethods);
-
+      
       $this->getMenu ()->addItem ("Login", 'login');
    }
    

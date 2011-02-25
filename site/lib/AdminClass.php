@@ -178,6 +178,20 @@ class AdminClass extends SysopClass {
 
          $course->enrollUser ($users [$x % 3], COURSE_ROLE_INSTRUCTOR);
          $course->enrollUser ($users [($x + 1) % 3], COURSE_ROLE_STUDENT);
+         
+         $folder = CourseContent::byContentID (
+            $course->entryPointID)->resolve ();
+
+         for ($y = 0; $y < 2; $y++) {
+            $subfolder = new ContentFolder ();
+            $subfolder->name = sprintf ("Level %d", $y);
+            $subfolder->ownerID = $users [$x % 3]->userID;
+
+            $subfolder->insert ();
+            $folder->addContent ($subfolder);
+
+            $folder = $subfolder;
+         }
       }
    }
 }

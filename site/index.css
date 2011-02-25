@@ -69,6 +69,19 @@ div.menu ul {
    padding: 0;
 }
 
+span.content-item {
+   display: block;
+   border-width: 1px;
+   border-style: solid;
+   border-color: #808080 #404040 #202020 #808080;
+
+   margin: 8px;
+   height: 32px;
+
+   text-align: right;
+   vertical-align: center;
+}
+
 div.menu a, div.menu p {
    font-family: helvetica, arial, sans-serif;
    font-size: small;

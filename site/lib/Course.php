@@ -17,6 +17,18 @@ define ("COURSE_ROLE_ASSISTANT", 4);
 define ("COURSE_DEFAULT_PERMISSIONS", "UR,UW,MR");
 
 /*
+ * Enumerate names of course roles.
+ */
+function enumerateCourseRoles ()
+{
+   return array (
+      COURSE_ROLE_STUDENT     => 'Student',
+      COURSE_ROLE_INSTRUCTOR  => 'Instructor',
+      COURSE_ROLE_BUILDER     => 'Course Builder',
+      COURSE_ROLE_ASSISTANT   => 'Teaching Assistant');
+}
+
+/*
  * Enumerate permissions used for courses.
  */
 function enumerateCoursePermissions ()
@@ -150,6 +162,28 @@ class Course extends CoursesVO {
    public function getUserEnrollments ()
    {
       return FactCourseEnrollmentVO::listByCourseID ($this->courseID);
+   }
+
+   /*
+    * Checks to see if the given user is enrolled in the course.
+    *
+    * Returns a FactCourseEnrollmentVO instance for the user's enrollment
+    * if they are enrolled, or NULL if they are not enrolled.
+    *
+    * Throws DAOException if there is an error querying the database.
+    */
+   public function getEnrollment ($user)
+   {
+      $enrollment = FactCourseEnrollmentVO::byUserID_CourseID (
+         $user->userID, $this->courseID);
+
+      // If the query failed, a primary key will be NULL.
+      if (empty ($enrollment->userID)) {
+         // The user is not enrolled in this course.  Return NULL.
+         return NULL;
+      } else {
+         return $enrollment;
+      }
    }
 }
 

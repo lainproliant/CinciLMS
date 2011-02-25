@@ -672,4 +672,20 @@ function xml_header ($version = "1.0", $encoding = "UTF-8")
    print sprintf ("<?xml version=\"%s\" encoding=\"%s\" ?>\n", $version, $encoding);
 }
 
+/*
+ * Replace all instances of any non-alphanumeric or 
+ * underscore character with an underscore.
+ * Useful for limiting the characters in course
+ * content path names.
+ *
+ * $string:    The string to filter.
+ *
+ * Returns a filtered version of the string.
+ */
+function anumfilter ($string)
+{
+   return preg_replace ('/[^A-Za-z0-9_-]/', '_', $string);
+}
+
+
 ?>

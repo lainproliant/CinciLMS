@@ -17,7 +17,7 @@ class CoursesDAO {
    }
    
    public function byCourseCode ($courseCode) {
-      $result = array ();
+      $results = array ();
       $stmt = $this->db->prepare ("select CourseID, CourseCode, CourseName, EntryPointID, AccessFlags from Courses where CourseCode = ?");
       $stmt->bind_param ("s", $courseCode);
       $stmt->execute ();
@@ -165,36 +165,6 @@ class FactCourseEnrollmentDAO {
       $stmt->fetch ();
       $stmt->close ();
       return $results;
-   }
-   
-   public function listByUserID ($userID) {
-      $resultsList = array ();
-      $results = array ();
-      $stmt = $this->db->prepare ("select UserID, CourseID, RoleID, AccessFlags from FactCourseEnrollment where UserID = ?");
-      $stmt->bind_param ("i", $userID);
-      $stmt->execute ();
-      $lambda = create_function ('$a', 'return $a;');
-      $stmt->bind_result ($results ["UserID"], $results ["CourseID"], $results ["RoleID"], $results ["AccessFlags"]);
-      while ($stmt->fetch ()) {
-         $resultsList [] = array_map ($lambda, $results);
-      }
-      $stmt->close ();
-      return $resultsList;
-   }
-   
-   public function listByCourseID ($courseID) {
-      $resultsList = array ();
-      $results = array ();
-      $stmt = $this->db->prepare ("select UserID, CourseID, RoleID, AccessFlags from FactCourseEnrollment where CourseID = ?");
-      $stmt->bind_param ("i", $courseID);
-      $stmt->execute ();
-      $lambda = create_function ('$a', 'return $a;');
-      $stmt->bind_result ($results ["UserID"], $results ["CourseID"], $results ["RoleID"], $results ["AccessFlags"]);
-      while ($stmt->fetch ()) {
-         $resultsList [] = array_map ($lambda, $results);
-      }
-      $stmt->close ();
-      return $resultsList;
    }
    
    public function search ($params, $postfix = "") {

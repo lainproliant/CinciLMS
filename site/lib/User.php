@@ -7,6 +7,7 @@
  * Released under the GNU General Public License, version 3.
  */
 
+include_once "CourseJoin.php";
 include_once "VO/UsersVO.php";
 
 class User extends UsersVO {
@@ -45,6 +46,15 @@ class User extends UsersVO {
    public function generateSalt ()
    {
       $this->passwordSalt = hash ('sha256', openssl_random_pseudo_bytes (64, $strong_crypto));
+   }
+
+   /*
+    * Gets a list of the enrollments and courses for this user.
+    */
+   public function getCourseEnrollments ()
+   {
+      return CourseJoin::joinUserID_CourseEnrollment (
+         $this->userID);
    }
 }
 

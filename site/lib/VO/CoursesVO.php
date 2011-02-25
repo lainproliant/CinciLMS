@@ -14,7 +14,7 @@ class CoursesVO {
       return self::fromResult ($dao->byCourseCode ($courseCode));
    }
    
-   protected static function fromResult ($result) {
+   public static function fromResult ($result) {
       $obj = new static ();
       $obj->courseID = $result ["CourseID"];
       $obj->courseCode = $result ["CourseCode"];
@@ -38,6 +38,7 @@ class CoursesVO {
       $dao = new CoursesDAO ();
       $this->courseID = $dao->insert ($this->toData ());
    }
+   
    public function save () {
       $dao = new CoursesDAO ();
       $dao->save ($this->toData ());
@@ -57,7 +58,7 @@ class CourseRolesVO {
       return self::fromResult ($dao->byRoleID ($roleID));
    }
    
-   protected static function fromResult ($result) {
+   public static function fromResult ($result) {
       $obj = new static ();
       $obj->roleID = $result ["RoleID"];
       $obj->roleName = $result ["RoleName"];
@@ -77,6 +78,7 @@ class CourseRolesVO {
       $dao = new CourseRolesDAO ();
       $dao->insert ($this->toData ());
    }
+   
    public function save () {
       $dao = new CourseRolesDAO ();
       $dao->save ($this->toData ());
@@ -96,31 +98,13 @@ class FactCourseEnrollmentVO {
       return self::fromResult ($dao->byUserID_CourseID ($userID, $courseID));
    }
    
-   protected static function fromResult ($result) {
+   public static function fromResult ($result) {
       $obj = new static ();
       $obj->userID = $result ["UserID"];
       $obj->courseID = $result ["CourseID"];
       $obj->roleID = $result ["RoleID"];
       $obj->accessFlags = $result ["AccessFlags"];
       return $obj;
-   }
-   
-   public static function listByUserID ($userID) {
-      $dao = new FactCourseEnrollmentDAO ();
-      $objs = array ();
-      foreach ($dao->listByUserID ($userID) as $result) {
-         $objs [] = self::fromResult ($result);
-      }
-      return $objs;
-   }
-   
-   public static function listByCourseID ($courseID) {
-      $dao = new FactCourseEnrollmentDAO ();
-      $objs = array ();
-      foreach ($dao->listByCourseID ($courseID) as $result) {
-         $objs [] = self::fromResult ($result);
-      }
-      return $objs;
    }
    
    protected function toData () {
@@ -136,6 +120,7 @@ class FactCourseEnrollmentVO {
       $dao = new FactCourseEnrollmentDAO ();
       $dao->insert ($this->toData ());
    }
+   
    public function save () {
       $dao = new FactCourseEnrollmentDAO ();
       $dao->save ($this->toData ());

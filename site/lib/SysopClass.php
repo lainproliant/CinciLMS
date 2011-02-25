@@ -16,21 +16,6 @@ include_once "CourseForm.php";
 include_once "Course.php";
 include_once "Content.php";
 
-/*
- * Replace all instances of any non-alphanumeric or 
- * underscore character with an underscore.
- * Useful for limiting the characters in course
- * content path names.
- *
- * $string:    The string to filter.
- *
- * Returns a filtered version of the string.
- */
-function anumfilter ($string)
-{
-   return preg_replace ('/[^A-Za-z0-9_-]/', '_', $string);
-}
-
 class SysopClass extends UserClass {
    function __construct ()
    {
