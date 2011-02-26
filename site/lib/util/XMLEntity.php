@@ -524,7 +524,7 @@ class ListItem extends XMLEntity {
 }
 
 /*
- * Table: A convenience function for a table.
+ * Table: A convenience class for a table.
  */
 class Table extends XMLEntity {
    function __construct ($parent, $class = NULL)
@@ -553,7 +553,7 @@ class Table extends XMLEntity {
 }
 
 /*
- * TableHeader: A convenience function for a table header.
+ * TableHeader: A convenience class for a table header.
  */
 class TableHeader extends XMLEntity {
    function __construct ($parent, $text, $class = NULL)
@@ -569,7 +569,7 @@ class TableHeader extends XMLEntity {
 }
 
 /*
- * TableRow: A convenience function for a table row.
+ * TableRow: A convenience class for a table row.
  */
 class TableRow extends XMLEntity {
    function __construct ($parent, $class = NULL)

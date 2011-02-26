@@ -93,6 +93,12 @@ div.menu a, div.menu p {
    padding: 2px 3px;
 }
 
+div.menu p img {
+   position: absolute;
+   right: 4px;
+   top: 3px;
+}
+
 div.menu p {
    color: #FFF;
    background: #000000;
@@ -104,9 +110,41 @@ div.menu a {
    text-decoration: none;
 }
 
-div.menu a:hover {
+div.menu a:hover,
+div.menu p:hover {
    color: #000;
    background: #FFFFFF;
+}
+
+div.menu p.disabled,
+div.menu p.disabled:hover {
+   color: #A0A0A0;
+   background: #404040;
+   text-align: center;
+}
+
+div.menu ul {
+   position: absolute;
+   display: none;
+   top: 0%;
+   left: 100%;
+   width: 100%;
+   z-index: 3;
+}
+
+div.menu ul.L0 {
+   position: relative;
+   top: 0%;
+   left: 0%;
+   width: 100%;
+}
+
+div.menu ul.L1 {
+   position: absolute;
+   top: 100%;
+   left: 0%;
+   width: 100%;
+   z-index: 3;
 }
 
 div.menu ul li {
@@ -116,30 +154,18 @@ div.menu ul li {
    z-index: 2;
 }
 
-div.menu ul li ul {
-   position: absolute;
-   top: 0%;
-   left: 100%;
-   width: 100%;
-   z-index: 3;
-}
-
-div.menu ul li ul.main_menu {
-   position: absolute;
-   top: 100%;
-   left: 0%;
-   width: 100%;
-   z-index: 3;
-}
-
-div.menu ul ul,
-div.menu ul li:hover ul ul
-{
-   display: none;
-}
-
-div.menu ul li:hover ul,
-div.menu ul ul li:hover ul
+/*
+ * Pure CSS menus are nice, but there isn't a proper way to
+ * define them recursively forever, as the display:block style
+ * will always cascade the entire way down, so we will need
+ * a rule for each level.
+ */
+div.menu ul.L0,
+div.menu ul.L0 li:hover ul.L1,
+div.menu ul.L1 li:hover ul.L2,
+div.menu ul.L2 li:hover ul.L3,
+div.menu ul.L3 li:hover ul.L4,
+div.menu ul.L4 li:hover ul.L5
 {
    display: block;
 }

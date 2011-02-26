@@ -21,12 +21,8 @@ class UserClass extends NonUserClass {
    {
       parent::__construct ();
 
-      // Fetch the user and enrollments for this user. 
-      $this->user = User::byUserID ($_SESSION ['userid']);
-
-      $enrollments_courses = $this->user->getCourseEnrollments ();
-      $this->enrollments = $enrollments_courses [0];
-      $this->courses = $enrollments_courses [1];
+      // Load the user's course enrollment information from the database. 
+      $this->loadUserInfo ();
 
       $this->addActions (array (
          'changePassword'           => 'actionChangePassword',
@@ -43,15 +39,27 @@ class UserClass extends NonUserClass {
       $this->getMenu ()->addItem (
          "Account", new ActionMenu (array (
             "Home"               => new HyperlinkAction ($_SERVER ['PHP_SELF']),
+            "My Courses"         => $this->generateCoursesMenu (),
             "Change Password"    => 'changePassword',
+            "sep1"               => '---',
             "Logout"             => 'logout'
          ))
       );
-      
-      // Show the courses menu.
-      $this->addCoursesMenu ();
    }
    
+   /*
+    * Fetches the user info and enrollments for the user.
+    */ 
+   protected function loadUserInfo ()
+   {
+      // Fetch the user and enrollments for this user. 
+      $this->user = User::byUserID ($_SESSION ['userid']);
+
+      $enrollments_courses = $this->user->getCourseEnrollments ();
+      $this->enrollments = $enrollments_courses [0];
+      $this->courses = $enrollments_courses [1];
+   }
+
    /*
     * Gets the User object associated with the current user.
     * Fetched initially upon loading.
@@ -65,7 +73,7 @@ class UserClass extends NonUserClass {
     * Gets the list of FactCourseEnrollmentVO objects for each 
     * course in which the user is enrolled.
     */
-   protected function getUserCourseEnrollments ()
+   protected function getCourseEnrollments ()
    {
       return $this->enrollments;
    }
@@ -74,7 +82,7 @@ class UserClass extends NonUserClass {
     * Gets the list of Course objects for each course in which
     * the user is enrolled.
     */
-   protected function getUserCourses ()
+   protected function getCourses ()
    {
       return $this->courses;
    }
@@ -129,6 +137,10 @@ class UserClass extends NonUserClass {
       $course = Course::byCourseCode ($courseCode);
       $enrollment = $course->getEnrollment ($user);
 
+      if (empty ($course->courseID)) {
+         throw new CinciAccessException ("The specified course does not exist.");
+      }
+
       // If the user is not enrolled in the course, and the user does not
       // have '_sysopReadWrite' permissions, deny access.   
       if (empty ($enrollment) and !$this->authorizeCheck ('_sysopReadWrite')) {
@@ -141,7 +153,7 @@ class UserClass extends NonUserClass {
       $content = NULL;
 
       if (count ($pathArray) > 0) {
-         $content = $entryPoint->resolvePath ($pathArray, $this, $user, $enrollment);
+         $content = $entryPoint->resolvePath ($pathArray, $this, $user, $course, $enrollment);
       } else {
          $content = $entryPoint;
       }
@@ -209,8 +221,8 @@ class UserClass extends NonUserClass {
     */
    protected function showCoursesList ($contentDiv)
    {
-      $courses = $this->getUserCourses ();
-      $enrollments = $this->getUserCourseEnrollments ();
+      $courses = $this->getCourses ();
+      $enrollments = $this->getCourseEnrollments ();
       $roles = enumerateCourseRoles ();
 
       for ($x = 0; $x < count ($courses); $x++) {
@@ -224,18 +236,23 @@ class UserClass extends NonUserClass {
    /*
     * Adds a courses menu to the user's menu bar.
     */
-   protected function addCoursesMenu ()
+   protected function generateCoursesMenu ()
    {
       $coursesMenu = new ActionMenu (); 
-
-      foreach ($this->getUserCourses () as $course) {
+      
+      if (count ($this->getCourses () > 0)) { 
+         foreach ($this->getCourses () as $course) {
+            $coursesMenu->addItem (
+               htmlentities ($course->courseName),
+               new HyperlinkAction (sprintf ("?action=view&path=%s", htmlentities ($course->courseCode)))
+            );
+         }
+      } else {
          $coursesMenu->addItem (
-            htmlentities ($course->courseName),
-            new HyperlinkAction (sprintf ("?action=view&path=%s", htmlentities ($course->courseCode)))
-         );
+            "[No Courses]", NULL);
       }
 
-      $this->getMenu ()->addItem ("My Courses", $coursesMenu);
+      return $coursesMenu;
    } 
 }
 

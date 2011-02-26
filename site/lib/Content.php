@@ -54,14 +54,16 @@ class CourseContent extends CourseContentVO {
     * course permissions, user permissions, and item permissions.
     *
     * authority:        The user's current AuthorityClass instance.
-    * user:             The system user. 
+    * user:             The User instance.  Can be NULL, in which case
+    *                   the user is treated as a guest.
     * course:           The course in which the item is contained.
     * courseEnrollment: The user's enrollment in the course.
+    *                   Can be NULL, in which case the user is treated
+    *                   as a guest.
     *
     * Returns True if the item can be read, False otherwise.
     */
-   public function checkReadAccess ($authority, $user,
-      $course = NULL, $courseEnrollment = NULL)
+   public function checkReadAccess ($authority, $user, $course, $courseEnrollment)
    {
       // If the authority contains '_sysopReadWrite' permissions, grant access.
       if ($authority->authorizeCheck ('_sysopReadWrite')) {
@@ -69,23 +71,29 @@ class CourseContent extends CourseContentVO {
       }
       
       // Explode (split into an array) each of the access flag sets,
-      // or provide defaults if a course or enrollment was not specified.
-      $itemPermissions = explode (',', $this->accessFlags);
-      $userPermissions = empty ($courseEnrollment) ?
-         explode (',', CONTENT_DEFAULT_ACCESS) :
-         explode (',', $courseEnrollment->accessFlags);
-      $coursePermissions = empty ($course) ? 
+      // or provide defaults if a course enrollment was not specified.
+      $itemPermissions =   explode (',', $this->accessFlags);
+      $coursePermissions = explode (',', $course->accessFlags);
+      $userPermissions =   empty ($courseEnrollment) ?
          array () :
-         explode (',', $course->accessFlags);
-
-      $userID = empty ($courseEnrollment) ?
+         explode (',', $courseEnrollment->accessFlags);
+   
+      // Determine the user's role in the course.  If there is no course enrollment,
+      // the user is assumed to be a guest.
+      $courseRole = empty ($courseEnrollment) ?
+         COURSE_ROLE_GUEST :
+         $courseEnrollment->roleID;
+      
+      // Determine the user ID if there is one.
+      $userID = empty ($user) ?
          NULL :
-         $courseEnrollment->userID;
-
+         $user->userID;
+      
       // Confirm that course read permissions are enabled for the user.
+      // LRS-TODO: Implement guest read access for content.
       if (in_array ('CR', $userPermissions)) {
          // What is the user's course role?
-         switch ($user->roleID) {
+         switch ($courseRole) {
          case COURSE_ROLE_INSTRUCTOR:
             // Instructors always have full read permission to their courses
             // and items therein, unless their user read permissions are
@@ -132,7 +140,7 @@ class CourseContent extends CourseContentVO {
             }
 
          default:
-            // Encountered an unknown user role type.  Access denied.
+            // Encountered an unmanaged user role type.  Access denied.
             return FALSE;
          }
       } else {
@@ -160,14 +168,16 @@ class CourseContent extends CourseContentVO {
     * course permissions, user permissions, and item permissions.
     *
     * authority:        The user's current AuthorityClass instance.
-    * user:             The system user. 
+    * user:             The User instance.  Can be NULL, in which case
+    *                   the user is treated as a guest.
     * course:           The course in which the item is contained.
     * courseEnrollment: The user's enrollment in the course.
+    *                   Can be NULL, in which case the user is treated
+    *                   as a guest.
     *
     * Returns True if the item can be written, False otherwise.
     */
-   public function checkWriteAccess ($authority, $user,
-      $course = NULL, $courseEnrollment = NULL)
+   public function checkWriteAccess ($authority, $user, $course, $courseEnrollment)
    {
       // If the authority contains '_sysopReadWrite' permissions, grant access.
       // Otherwise, if no courseEnrollment was provided, deny access.
@@ -176,23 +186,28 @@ class CourseContent extends CourseContentVO {
       }
 
       // Explode (split into an array) each of the access flag sets,
-      // or provide defaults if a course or enrollment was not specified.
-      $itemPermissions = explode (',', $this->accessFlags);
-      $userPermissions = empty ($courseEnrollment) ?
+      // or provide defaults if a course enrollment was not specified.
+      $itemPermissions =   explode (',', $this->accessFlags);
+      $coursePermissions = explode (',', $course->accessFlags);
+      $userPermissions =   empty ($courseEnrollment) ?
          array () :
          explode (',', $courseEnrollment->accessFlags);
-      $coursePermissions = empty ($course) ? 
-         array () :
-         explode (',', $course->accessFlags);
 
-      $userID = empty ($courseEnrollment) ?
+      // Determine the user's role in the course.  If there is no course enrollment,
+      // the user is assumed to be a guest.
+      $courseRole = empty ($courseEnrollment) ?
+         COURSE_ROLE_GUEST :
+         $courseEnrollment->roleID;
+
+      // Determine the user ID if there is one.
+      $userID = empty ($user) ?
          NULL :
-         $courseEnrollment->userID;
+         $user->userID;
 
       // Confirm that course write permissions are enabled for the user.
       if (in_array ('CW', $userPermissions)) {
          // What is the user's course role?
-         switch ($user->roleID) {
+         switch ($courseRole) {
          case COURSE_ROLE_INSTRUCTOR:
             // Instructors always have full write permission to their courses
             // and items therein, unless their user read permissions are
@@ -239,7 +254,7 @@ class CourseContent extends CourseContentVO {
             }
 
          default:
-            // Encountered an unknown user role type.  Access denied.
+            // Encountered an unmanaged user role type.  Access denied.
             return FALSE;
          }
       } else {
@@ -434,9 +449,6 @@ class ContentFolder extends CourseContentSubtype {
 
       $path = array_shift ($pathArray);
       
-      print sprintf (
-         "LRS-DEBUG: path = '%s'", $path);
-
       $folderContents = FactFolderContentsVO::byFolderID_Path (
          $this->contentID, $path);
 
@@ -450,7 +462,7 @@ class ContentFolder extends CourseContentSubtype {
       
       if (! $content->checkReadAccess ($authority, $user, $course, $courseEnrollment)) {
          // Access to the resource was denied.  Throw an exception.
-         throw new CinciAccesException ("Access Denied",
+         throw new CinciAccessException (
             "You are not authorized to access the requested content.");   
       }
       
@@ -463,13 +475,13 @@ class ContentFolder extends CourseContentSubtype {
          if ($content->typeID != CONTENT_TYPE_FOLDER) {
             // The path says we need to recurse further, but the current
             // node in the directory tree is not a folder!
-            throw new CinciAccessException (
-               "You are not authorized to access the requested content.");
+            throw new CinciAccessException (sprintf (
+               "The content named \"%s\" is not a folder.", $content->name));
          }
 
          // Recurse into the next directory.
          return $content->resolvePath ($pathArray, $authority, $user,
-            $courseEnrollment, $cdCheckSet);
+            $course, $courseEnrollment, $cdCheckSet);
 
       } else {
          return $content;
@@ -542,7 +554,7 @@ class ContentLink extends CourseContentSubtype {
 
       if (! $content->checkReadAccess ($authority, $user, $course, $courseEnrollment)) {
          // Access to the destination content was denied.
-         throw new CinciAccessException ("You are not authorized to access the requested content.");
+         throw new CinciAccessException ("You are not authorized to access the content linked to by this item.");
       }
 
       return $content;

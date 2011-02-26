@@ -67,7 +67,7 @@ class AuthorityClass {
    }
 
    /*
-    * Returns a reference to a specila context menu which can
+    * Returns a reference to a special context menu which can
     * be used to list context-specific menu options.
     */
    public function getContextMenu ()
@@ -176,6 +176,14 @@ class ActionMenu {
    public function getItemNames ()
    {
       return array_keys ($this->children);
+   }
+
+   /*
+    * Returns the number of menu items in this menu.
+    */
+   public function getCount ()
+   {
+      return count ($this->children);
    }
 }
 

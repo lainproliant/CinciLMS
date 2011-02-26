@@ -44,11 +44,10 @@ class AdminClass extends SysopClass {
          'submitNewUser'            => 'submitNewUser',
          'submitUserEdit'           => 'submitUserEdit',
          'debug_testData'           => 'debug_testData'));
-
-      $this->getMenu ()->addItem (
-         "Users", new ActionMenu (array (
-            "Create a New User"     => 'newUser',
-            "Search Users"          => 'searchUsers')));
+      
+      
+      $this->getMenu ()->getItem ("System")->getItem ("Create")->addItem (
+         "New User", 'newUser');
    }
 
    protected function actionNewUser ($contentDiv)
@@ -74,6 +73,10 @@ class AdminClass extends SysopClass {
    protected function submitNewUser ($contentDiv)
    {
       global $SiteConfig;
+
+      if (empty ($_POST)) {
+         throw new CinciException ("New User Error", "No user information provided.");
+      }
 
       $user = new User ();
 
@@ -113,6 +116,10 @@ class AdminClass extends SysopClass {
    protected function submitUserEdit ($contentDiv)
    {
       global $SiteConfig;
+      
+      if (empty ($_POST)) {
+         throw new CinciException ("Edit User Error", "No user information provided.");
+      }
 
       $user = new User ();
       $user->byUserID ($_POST ['userID']);
@@ -166,6 +173,14 @@ class AdminClass extends SysopClass {
          $user->insert ();
 
          $users [] = $user;
+
+         $course = Course::createNewCourse (
+            sprintf ("%s's course", $username),
+            sprintf ("lrs_debug_test_%s", $username),
+            COURSE_DEFAULT_PERMISSIONS,
+            $user);
+
+         $course->enrollUser ($user, COURSE_ROLE_INSTRUCTOR);
       }
       
       for ($x = 0; $x < 9; $x++) {

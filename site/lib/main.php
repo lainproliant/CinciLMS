@@ -94,7 +94,7 @@ function loginFailed ($contentDiv, $e)
  *                and should be given the 'main_menu' CSS class.
  *                This is FALSE by default.
  */
-function populateMenu ($menuList, $class, $userMenu, $mainMenu = FALSE)
+function populateMenu ($menuList, $class, $userMenu, $level = 1)
 {
    foreach ($userMenu->getItemNames () as $name) {
       $menuItem = $userMenu->getItem ($name);
@@ -102,28 +102,38 @@ function populateMenu ($menuList, $class, $userMenu, $mainMenu = FALSE)
       if (is_object ($menuItem) and get_class ($menuItem) == "ActionMenu") {
          $header = new Para (NULL, $name);
          $listItem = $menuList->addListItem ($header);
-         $subMenu = new UnorderedList ($listItem);
-         
-         // Are these the top level main menu entries?
-         // Main menu entries have special CSS rules, i.e. their submenus
-         // fall downward instead of to the right.  Assign an appropriate
-         // menu class to the new unordered list.
-         if ($mainMenu == TRUE) {
-            $subMenu->setAttribute ("class", "main_menu");
+
+         if ($level > 1) {
+            new Image ($header, 'menu-right.png', 'submenu');
+         } else {
+            new Image ($header, 'menu-down.png', 'submenu');
          }
 
-         populateMenu ($subMenu, $class, $menuItem);
+         $subMenu = new UnorderedList ($listItem);
+         $subMenu->setAttribute ('class', sprintf ("L%d", $level));
+
+         if ($menuItem->getCount () > 0) {
+            populateMenu ($subMenu, $class, $menuItem, $level + 1);
+         } else {
+            $para = new Para (NULL, '[empty]', 'disabled');
+            $subMenu->addListItem ($para);
+         }
       
       } elseif (is_object ($menuItem) and get_class ($menuItem) == "HyperlinkAction") {
          $link = new TextLink (NULL,
             $menuItem->getHyperlink (), $name);
          $menuList->addListItem ($link);
-      } elseif ($class->authorizeCheck ($menuItem)) {
-         
+
+      } elseif (is_string ($menuItem) and $menuItem == "---") {
+         $li = new ListItem ($menuList);
+         $li->setAttribute ('class', 'separator');
+
+      } elseif (is_string ($menuItem) and $class->authorizeCheck ($menuItem)) {
          $link = new TextLink (NULL,
             sprintf ("?action=%s", $menuItem), $name);
          $menuList->addListItem ($link);
       }
+         
    }
 }
 
@@ -205,6 +215,7 @@ function main ()
    
    $menuDiv = new Div ($naviDiv, 'menu');
    $menuList = new UnorderedList ($menuDiv);
+   $menuList->setAttribute ('class', 'L0');
    $menuDiv = new Div ($naviDiv, 'menu');
    $contextMenuList = new UnorderedList ($menuDiv);
 

@@ -13,6 +13,7 @@ define ("COURSE_ROLE_STUDENT", 1);
 define ("COURSE_ROLE_INSTRUCTOR", 2);
 define ("COURSE_ROLE_BUILDER", 3);
 define ("COURSE_ROLE_ASSISTANT", 4);
+define ("COURSE_ROLE_GUEST", 5);
 
 define ("COURSE_DEFAULT_PERMISSIONS", "UR,UW,MR");
 
@@ -176,7 +177,7 @@ class Course extends CoursesVO {
    {
       $enrollment = FactCourseEnrollmentVO::byUserID_CourseID (
          $user->userID, $this->courseID);
-
+      
       // If the query failed, a primary key will be NULL.
       if (empty ($enrollment->userID)) {
          // The user is not enrolled in this course.  Return NULL.
