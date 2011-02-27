@@ -104,9 +104,9 @@ function populateMenu ($menuList, $class, $userMenu, $level = 1)
          $listItem = $menuList->addListItem ($header);
 
          if ($level > 1) {
-            new Image ($header, 'menu-right.png', 'submenu');
+            new Image ($header, 'images/menu-right.png', 'submenu');
          } else {
-            new Image ($header, 'menu-down.png', 'submenu');
+            new Image ($header, 'images/menu-down.png', 'submenu');
          }
 
          $subMenu = new UnorderedList ($listItem);

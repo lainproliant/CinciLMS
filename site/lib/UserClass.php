@@ -38,8 +38,8 @@ class UserClass extends NonUserClass {
       // Add menu items for account functions.
       $this->getMenu ()->addItem (
          "Account", new ActionMenu (array (
-            "Home"               => new HyperlinkAction ($_SERVER ['PHP_SELF']),
             "My Courses"         => $this->generateCoursesMenu (),
+            "Home"               => new HyperlinkAction ($_SERVER ['PHP_SELF']),
             "Change Password"    => 'changePassword',
             "sep1"               => '---',
             "Logout"             => 'logout'
@@ -247,9 +247,6 @@ class UserClass extends NonUserClass {
                new HyperlinkAction (sprintf ("?action=view&path=%s", htmlentities ($course->courseCode)))
             );
          }
-      } else {
-         $coursesMenu->addItem (
-            "[No Courses]", NULL);
       }
 
       return $coursesMenu;
