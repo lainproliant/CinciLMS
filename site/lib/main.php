@@ -43,7 +43,7 @@ function accessDenied ($contentDiv)
  */
 function databaseError ($contentDiv, $e)
 {
-   $div = new Div ($contentDiv, 'warning prompt');
+   $div = new Div ($contentDiv, 'error prompt');
    $h3 = new XMLEntity ($div, 'h3');
    new TextEntity ($h3, $e->getHeader ());
 
@@ -52,6 +52,7 @@ function databaseError ($contentDiv, $e)
    
    $p = new Para ($div, sprintf ('<code>%s</code>',
       $e->getDBError ()));
+   
 }
 
 /*
@@ -59,7 +60,7 @@ function databaseError ($contentDiv, $e)
  */
 function genericError ($contentDiv, $e)
 {
-   $div = new Div ($contentDiv, 'warning prompt');
+   $div = new Div ($contentDiv, 'error prompt');
    $h3 = new XMLEntity ($div, 'h3');
    new TextEntity ($h3, $e->getHeader ());
 
@@ -75,13 +76,30 @@ function genericError ($contentDiv, $e)
  */
 function loginFailed ($contentDiv, $e)
 {
-   $div = new Div ($contentDiv, 'warning prompt');
+   $div = new Div ($contentDiv, 'error prompt');
    $h3 = new XMLEntity ($div, 'h3');
    new TextEntity ($h3, "Login Failed");
 
    $p = new XMLEntity ($div, 'p');
    new TextEntity ($p, $e->getMessage ());
 }
+
+/*
+ * sessionExpired: Prints a message nofitying the user that their
+ *                 session has expired.
+ */
+function sessionExpired ($contentDiv)
+{
+   $div = new Div ($contentDiv, 'warning prompt');
+   $h3 = new XMLEntity ($div, 'h3');
+   new TextEntity ($h3, "Session Expired");
+
+   $p = new XMLEntity ($div, 'p');
+   new TextEntity ($p, "Your session has expired.  Please ");
+   new TextLink ($p, "?action=login", "click here");
+   new TextEntity ($p, " to login again.");
+}
+
 
 /*
  * populateMenu: Recursively fills an unordered list with a list of 
@@ -135,22 +153,6 @@ function populateMenu ($menuList, $class, $userMenu, $level = 1)
       }
          
    }
-}
-
-/*
- * sessionExpired: Prints a message nofitying the user that their
- *                 session has expired.
- */
-function sessionExpired ($contentDiv)
-{
-   $div = new Div ($contentDiv, 'warning prompt');
-   $h3 = new XMLEntity ($div, 'h3');
-   new TextEntity ($h3, "Session Expired");
-
-   $p = new XMLEntity ($div, 'p');
-   new TextEntity ($p, "Your session has expired.  Please ");
-   new TextLink ($p, "?action=login", "click here");
-   new TextEntity ($p, " to login again.");
 }
 
 /*

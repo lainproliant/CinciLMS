@@ -8,6 +8,7 @@
  */
 
 include_once "VO/CoursesVO.php";
+include_once "Content.php";
 
 define ("COURSE_ROLE_STUDENT", 1);
 define ("COURSE_ROLE_INSTRUCTOR", 2);
@@ -185,6 +186,52 @@ class Course extends CoursesVO {
       } else {
          return $enrollment;
       }
+   }
+
+   /*
+    * Displays the contents of the course and its course-root folder in 
+    * the given div.
+    *
+    * contentDiv:       The div in which to display.
+    * authority:        The user's AuthorityClass instance.
+    * user:             The user for which permissions and behavior
+    *                   will be defined.
+    * pathArray:        The path to be displayed relative to the course root.
+    *                   If pathArray is not specified, the course root is displayed.
+    */
+   public function display ($contentDiv, $authority, $user, $pathArray)
+   {
+      $enrollment = $this->getEnrollment ($user);
+
+      if (empty ($enrollment) and ! $this->authorizeCheck ('_sysopReadWrite')) {
+         throw new CinciAccessException (
+            "You are not authorized to access this course.");
+      }
+
+      // If the entry point doesn't exist, a CinciAccessException will be thrown.
+      $entryPoint = CourseContent::byContentID ($this->entryPointID)->resolve ();
+
+      if (empty ($entryPoint->contentID)) {
+         throw new CinciAccessException (
+            "The course's course-root is missing.  Please contact a system administrator.");
+      }
+      
+      // Fully resolve the path provided.
+      $content = $entryPoint;
+
+      if (count ($pathArray) > 0) {
+         $content = $entryPoint->resolvePath ($pathArray, $authority, $user, $this, $enrollment);
+      }
+
+      // Construct an absolute path to pass to the item.
+      $absolutePath = $this->courseCode;
+
+      if (! empty ($pathArray)) {
+         $absolutePath = htmlentities ($this->courseCode . '/' . implode ('/', $pathArray));
+      }
+
+      // Ask the path to print itself.
+      $content->display ($contentDiv, $absolutePath, $authority, $user, $this, $enrollment);
    }
 }
 

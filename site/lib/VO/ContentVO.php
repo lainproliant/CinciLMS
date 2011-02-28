@@ -2,7 +2,7 @@
 include_once "DAO/ContentDAO.php";
 
 class CourseContentVO {
-   var $contentID, $parentID, $ownerID, $typeID, $name, $accessFlags;
+   var $contentID, $parentID, $ownerID, $typeID, $name, $accessFlags, $creationTime;
    
    public static function byContentID ($contentID) {
       $dao = new CourseContentDAO ();
@@ -17,6 +17,7 @@ class CourseContentVO {
       $obj->typeID = $result ["TypeID"];
       $obj->name = $result ["Name"];
       $obj->accessFlags = $result ["AccessFlags"];
+      $obj->creationTime = $result ["CreationTime"];
       return $obj;
    }
    
@@ -28,6 +29,7 @@ class CourseContentVO {
       $data ["TypeID"] = $this->typeID;
       $data ["Name"] = $this->name;
       $data ["AccessFlags"] = $this->accessFlags;
+      $data ["CreationTime"] = $this->creationTime;
       return $data;
    }
    

@@ -67,19 +67,7 @@ div.menu ul {
    list-style: none;
    margin: 0;
    padding: 0;
-}
-
-span.content-item {
-   display: block;
-   border-width: 1px;
-   border-style: solid;
-   border-color: #808080 #404040 #202020 #808080;
-
-   margin: 8px;
-   height: 32px;
-
-   text-align: right;
-   vertical-align: center;
+   background-color: black;
 }
 
 div.menu a, div.menu p {
@@ -154,6 +142,10 @@ div.menu ul li {
    z-index: 2;
 }
 
+div.menu li.separator {
+   height: 4px;
+}
+
 /*
  * Pure CSS menus are nice, but there isn't a proper way to
  * define them recursively forever, as the display:block style
@@ -215,12 +207,29 @@ div.prompt {
    display: table;
 }
 
+div.error,
 div.warning {
-   background: #FF9999;
-   border: 1px dashed red;
    padding-left: 4em;
    padding-right: 4em;
    margin-top: 20px;
+}
+
+div.error {
+   background: #FF9999;
+   border: 1px dashed red;
+   background-image: url('images/error.png');
+   background-repeat: no-repeat;
+   background-position: 8px 4px;
+}
+
+div.warning {
+   background: #FFFF99;
+   margin-top: 20px;
+   border: 1px dashed #AAAA44;
+   background-image: url('images/warning.png');
+   background-repeat: no-repeat;
+   background-position: 8px 4px;
+
 }
 
 form p.field_note {
@@ -269,3 +278,60 @@ form.user_form label.first {
 form.user_form label.top {
    vertical-align: top;
 }
+
+
+/*----------------------------------------------------------------------------
+ * CSS Rules for Content Items.
+ */
+.breadcrumb a {
+   color: black;
+}
+
+.breadcrumb a:hover {
+   color: #E01222;
+}
+
+.content-item {
+   background-color: #F0D0C0;
+   display: block;
+   margin: 1em;
+   padding-left: 4em;
+   padding-right: 4em;
+
+   min-height: 50px;
+
+   text-align: left;
+
+   text-decoration: none;
+}
+
+a.content-item:hover {
+   background-color: #D0C0A0;
+}
+
+.content-item span.title {
+   font-weight: bold;
+   line-height: 50px;
+   font-size: large;
+   vertical-align: middle;
+   color: black;
+}
+
+.course {
+   background-image: url('images/course.png');
+   background-repeat: no-repeat;
+   background-position: 8px 4px;
+}
+
+a.course:hover {
+   background-image: url('images/course-open.png');
+}
+
+.folder {
+   background-image: url('images/content-folder.png');
+   background-repeat: no-repeat;
+   background-position: 8px 4px;
+}
+
+a.folder:hover {
+   background-image: url('images/content-folder-open.png');

@@ -10,6 +10,7 @@
 include_once "Exceptions.php";
 
 include_once "VO/ContentVO.php";
+include_once "FolderJoin.php";
 
 define ('CONTENT_TYPE_ITEM', 1);
 define ('CONTENT_TYPE_ASSIGNMENT', 2);
@@ -151,19 +152,6 @@ class CourseContent extends CourseContentVO {
    }
 
    /*
-    * Placeholder method.  Displays the class and name of the content
-    * in a paragraph element.
-    *
-    * Subtypes should implement display () to render themselves
-    * in the provided content div.
-    */
-   public function display ($contentDiv)
-   {
-      new Para ($contentDiv, sprintf (
-         "[Content as %s: %s]", get_class ($this), $this->name));
-   }
-
-   /*
     * Checks write permissions on the item based on system permissions
     * course permissions, user permissions, and item permissions.
     *
@@ -285,6 +273,13 @@ abstract class CourseContentSubtype extends CourseContent {
          $this->name = NULL;
          $this->accessFlags = CONTENT_DEFAULT_ACCESS;
       }
+
+      /*
+       * A pseudo-column representing the path of the item.
+       * This column is populated when content items
+       * are retrieved via ContentFolder::getFolderContents ().
+       */
+      $this->pathName = NULL;
    }
 
    /* 
@@ -316,6 +311,20 @@ abstract class CourseContentSubtype extends CourseContent {
          $vo->save ();
       }
    }
+   
+   /* ABSTRACT
+    * Displays the course content in the provided Div.
+    * Subclasses must implement this method.
+    */
+   public abstract function display ($contentDiv, $path, $authority, $user,
+      $course, $enrollment);
+
+   /* ABSTRACT
+    * Displays a iconified representation of the content in
+    * the provided Div.  Subclasses must implement this method.
+    */
+   public abstract function displayItem ($contentDiv, $path, $authority, $user,
+      $course, $enrollment);
 
    /* ABSTRACT
     * Create an appropriate value object so that subtype
@@ -346,6 +355,20 @@ class ContentItem extends CourseContentSubtype {
       $item = ContentItemsVO::byItemID ($this->contentID);
       return $item;
    }
+
+   /* LRS-TODO: Implement
+    * Displays the course content in the provided Div.
+    * Subclasses must implement this method.
+    */
+   public function display ($contentDiv, $path, $authority, $user,
+      $course, $enrollment) { }
+
+   /* LRS-TODO: Implement
+    * Displays a iconified representation of the content in
+    * the provided Div.  Subclasses must implement this method.
+    */
+   public function displayItem ($contentDiv, $path, $authority, $user,
+      $course, $enrollment) { }
 
    protected function createVO ()
    {
@@ -397,19 +420,21 @@ class ContentFolder extends CourseContentSubtype {
    }
 
    /*
-    * Fetches a list of item IDs of the items contained
-    * within the folder.
+    * Fetches a list of resolved CourseContent items contained within this
+    * folder.  The CourseContent items will have a non-NULL pathName,
+    * which can be used to determine the relative path of the items.
     */
    public function getFolderContents ()
    {
-      $folderContents = array ();
-      $entries = FactFolderContentsVO::listByFolderID ($this->contentID);
+      $courseContents = array ();
+      $folderContents = FolderJoin::joinFolderID_FolderContents ($this->contentID);
 
-      foreach ($entries as $entry) {
-         $folderContents [] = $entry->contentID;
+      for ($x = 0; $x < count ($folderContents [0]); $x++) {
+         $folderContents [1][$x]->pathName = $folderContents [0][$x]->path;
+         $courseContents [] = $folderContents [1][$x];
       }
 
-      return $folderContents;
+      return $courseContents;
    }
 
    /*
@@ -428,7 +453,6 @@ class ContentFolder extends CourseContentSubtype {
 
    // TODO: Check for permissions upon content access, folder, or
    //       link dereference.
-
    public function resolvePath ($pathArray, $authority, $user, $course,
       $courseEnrollment = NULL, $cdCheckSet = NULL) 
    {      
@@ -486,6 +510,49 @@ class ContentFolder extends CourseContentSubtype {
       } else {
          return $content;
       }
+   }
+
+   /*
+    * Displays the contents of this folder.
+    *
+    * contentDiv:       The content div into which the item is to be displayed.
+    * path:             The absolute path of the content.
+    * authority:        The user's authority class.
+    * user:             The user accessing the content.
+    * course:           The course in context of which the item is viewed.
+    * enrollment:       The user's enrollment in the course.  May be NULL.
+    */
+   public function display ($contentDiv, $path, $authority, $user,
+      $course, $enrollment)
+   {
+      $folderContents = $this->getFolderContents ();
+
+      foreach ($folderContents as $content) {
+         $path = $path . '/' . $content->pathName;
+         $content->displayItem ($contentDiv, $path, $authority, $user,
+            $course, $enrollment);
+      }
+   }
+
+   /*
+    * Adds a representation of this object to the given Div
+    * a decorated Div.
+    *
+    * contentDiv:       The content div into which the item is to be displayed.
+    * path:             The absolute path of the content.
+    * authority:        The user's authority class.
+    * user:             The user accessing the content.
+    * course:           The course in context of which the item is viewed.
+    * enrollment:       The user's enrollment in the course.  May be NULL.
+    */
+   public function displayItem ($contentDiv, $path, $authority, $user,
+      $course, $enrollment)
+   {
+      $link = new Hyperlink ($contentDiv, sprintf (
+         "?action=view&path=%s", htmlentities ($path)));
+      $link->setAttribute ('class', 'content-item folder');
+
+      new Span ($link, htmlentities ($this->name), 'title');
    }
 
    /*
@@ -559,6 +626,20 @@ class ContentLink extends CourseContentSubtype {
 
       return $content;
    }
+
+   /* LRS-TODO: Implement
+    * Displays the course content in the provided Div.
+    * Subclasses must implement this method.
+    */
+   public function display ($contentDiv, $path, $authority, $user,
+      $course, $enrollment) { }
+
+   /* LRS-TODO: Implement
+    * Displays a iconified representation of the content in
+    * the provided Div.  Subclasses must implement this method.
+    */
+   public function displayItem ($contentDiv, $path, $authority, $user,
+      $course, $enrollment) { }
 
    protected function createVO ()
    {

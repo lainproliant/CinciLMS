@@ -7,10 +7,10 @@ class CourseContentDAO {
    }
    
    public function byContentID ($contentID) {
-      $stmt = $this->db->prepare ("select ContentID, ParentID, OwnerID, TypeID, Name, AccessFlags from CourseContent where ContentID = ?");
+      $stmt = $this->db->prepare ("select ContentID, ParentID, OwnerID, TypeID, Name, AccessFlags, CreationTime from CourseContent where ContentID = ?");
       $stmt->bind_param ("i", $contentID);
       $stmt->execute ();
-      $stmt->bind_result ($results ["ContentID"], $results ["ParentID"], $results ["OwnerID"], $results ["TypeID"], $results ["Name"], $results ["AccessFlags"]);
+      $stmt->bind_result ($results ["ContentID"], $results ["ParentID"], $results ["OwnerID"], $results ["TypeID"], $results ["Name"], $results ["AccessFlags"], $results ["CreationTime"]);
       $stmt->fetch ();
       $stmt->close ();
       return $results;
@@ -25,7 +25,7 @@ class CourseContentDAO {
          elseif (is_string ($val)) { $bindTypes .= 's'; }
          elseif (is_float ($val)) { $bindTypes .= 'd'; }
       }
-      $query = sprintf ("select ContentID, ParentID, OwnerID, TypeID, Name, AccessFlags from CourseContent where %s", implode (" and ", array_keys ($params)));
+      $query = sprintf ("select ContentID, ParentID, OwnerID, TypeID, Name, AccessFlags, CreationTime from CourseContent where %s", implode (" and ", array_keys ($params)));
       $query .= ' ' . $postfix;
       $bindParamArgs = array (&$bindTypes);
       foreach ($params as $key => $value) {
@@ -34,7 +34,7 @@ class CourseContentDAO {
       $stmt = $this->db->prepare ($query);
       call_user_func_array (array ($stmt, "bind_param"), $bindParamArgs);
       $stmt->execute ();
-      $stmt->bind_result ($results ["ContentID"], $results ["ParentID"], $results ["OwnerID"], $results ["TypeID"], $results ["Name"], $results ["AccessFlags"]);
+      $stmt->bind_result ($results ["ContentID"], $results ["ParentID"], $results ["OwnerID"], $results ["TypeID"], $results ["Name"], $results ["AccessFlags"], $results ["CreationTime"]);
       while ($stmt->fetch ()) {
          $resultsList [] = $results;
       }
@@ -43,8 +43,8 @@ class CourseContentDAO {
    }
    
    public function insert ($data) {
-      $stmt = $this->db->prepare ("insert into CourseContent (ParentID, OwnerID, TypeID, Name, AccessFlags) values (?, ?, ?, ?, ?)");
-      $stmt->bind_param ("iiiss", $data ["ParentID"], $data ["OwnerID"], $data ["TypeID"], $data ["Name"], $data ["AccessFlags"]);
+      $stmt = $this->db->prepare ("insert into CourseContent (ParentID, OwnerID, TypeID, Name, AccessFlags, CreationTime) values (?, ?, ?, ?, ?, ?)");
+      $stmt->bind_param ("iiisss", $data ["ParentID"], $data ["OwnerID"], $data ["TypeID"], $data ["Name"], $data ["AccessFlags"], $data ["CreationTime"]);
       $stmt->execute ();
       if ($stmt->affected_rows != 1) {
          throw new DAOException ("Couldn't insert record in the table \"CourseContent\"", $stmt->error, $stmt->affected_rows);
@@ -53,8 +53,8 @@ class CourseContentDAO {
    }
    
    public function save ($data) {
-      $stmt = $this->db->prepare ("update CourseContent set ParentID = ?, OwnerID = ?, TypeID = ?, Name = ?, AccessFlags = ? where ContentID = ?");
-      $stmt->bind_param ("iiissi", $data ["ParentID"], $data ["OwnerID"], $data ["TypeID"], $data ["Name"], $data ["AccessFlags"], $data ["ContentID"]);
+      $stmt = $this->db->prepare ("update CourseContent set ParentID = ?, OwnerID = ?, TypeID = ?, Name = ?, AccessFlags = ?, CreationTime = ? where ContentID = ?");
+      $stmt->bind_param ("iiisssi", $data ["ParentID"], $data ["OwnerID"], $data ["TypeID"], $data ["Name"], $data ["AccessFlags"], $data ["CreationTime"], $data ["ContentID"]);
       $stmt->execute ();
       if ($stmt->affected_rows != 1) {
          throw new DAOException ("Couldn't save record in table \"CourseContent\"", $stmt->error, $stmt->affected_rows);

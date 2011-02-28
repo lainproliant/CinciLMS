@@ -112,6 +112,10 @@ class UserClass extends NonUserClass {
 
    protected function actionView ($contentDiv)
    {
+      $div = new Div ($contentDiv);
+      $header = new XMLEntity ($div, 'h3');
+      $header->setAttribute ('class', 'breadcrumb');
+
       // Get the path of the item to be viewed.  The first name
       // in the path is the code of a course, and the remainder
       // of the names are a path relative to the course-root
@@ -131,35 +135,34 @@ class UserClass extends NonUserClass {
          throw new CinciException ("View Error", "No path specified.");
       }
 
+      // Build a breadcrumb trail in the title path.
+      for ($x = 0; $x < count ($pathArray); $x++) {
+         $subPathArray = array_slice ($pathArray, 0, $x + 1);
+
+
+         if ($x + 1 < count ($pathArray)) {
+            new TextLink ($header, sprintf ('?action=view&path=%s',
+               htmlentities (implode ('/', $subPathArray))), $pathArray [$x]);
+            
+            new TextEntity ($header, ' / ');
+
+         } else {
+            new TextEntity ($header, $pathArray [$x]);
+         }
+
+      }
+
       $courseCode = array_shift ($pathArray);
 
       $user = User::byUserID ($_SESSION ['userid']);
       $course = Course::byCourseCode ($courseCode);
-      $enrollment = $course->getEnrollment ($user);
-
+      
       if (empty ($course->courseID)) {
          throw new CinciAccessException ("The specified course does not exist.");
       }
-
-      // If the user is not enrolled in the course, and the user does not
-      // have '_sysopReadWrite' permissions, deny access.   
-      if (empty ($enrollment) and !$this->authorizeCheck ('_sysopReadWrite')) {
-         throw new CinciAccessException (
-            "You are not authorized to access this course.");
-      }
-
-      // If the item doesn't exist, a CinciAccessException will be thrown.
-      $entryPoint = CourseContent::byContentID ($course->entryPointID)->resolve ();
-      $content = NULL;
-
-      if (count ($pathArray) > 0) {
-         $content = $entryPoint->resolvePath ($pathArray, $this, $user, $course, $enrollment);
-      } else {
-         $content = $entryPoint;
-      }
-
-      // Ask the content to display itself as a Div in the given content div.
-      $content->display ($contentDiv);
+      
+      // Display the course's contents in the contentDiv.
+      $course->display ($div, $this, $user, $pathArray);
    }
 
    protected function submitPassword ($contentDiv)
@@ -205,13 +208,13 @@ class UserClass extends NonUserClass {
     */
    protected function showWelcome ($contentDiv)
    {
-      $div = new Div ($contentDiv, 'prompt');
+      $div = new Div ($contentDiv);
 
       $header = new XMLEntity ($div, 'h3');
       new TextEntity ($header, sprintf (
          'Welcome, %s!', htmlentities ($_SESSION ['first_name'])));
       $p = new Para ($div,
-         "Click a course in the My Courses menu above to begin.");
+         "Click on a course below to begin.");
 
       $this->showCoursesList ($div);
    }
@@ -228,8 +231,9 @@ class UserClass extends NonUserClass {
       for ($x = 0; $x < count ($courses); $x++) {
          $link = new Hyperlink ($contentDiv, sprintf (
             "?action=view&path=%s", htmlentities ($courses [$x]->courseCode)));
+         $link->setAttribute ('class', 'content-item course');
 
-         $item = new Span ($link, $courses [$x]->courseName, "content-item");
+         new Span ($link, htmlentities ($courses [$x]->courseName), 'title');
       }
    }
 
