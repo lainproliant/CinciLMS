@@ -45,7 +45,7 @@ class FolderForm extends Form {
       $div = new Div ($listDiv, 'row');
       $label = new Label ($div, NULL, 'folderPath');
       new Para ($label, 'Folder Path:');
-      new Para ($label, '(optional)', 'folderPath');
+      new Para ($label, '(optional)', 'field_note');
       new TextInput ($div, 'folderPath', 'folderPath', $folderPath);
 
       $div = new Div ($listDiv, 'row');
@@ -92,14 +92,15 @@ class ItemForm extends Form {
 
       $this->setAttribute ('onSubmit', 'return itemFormValidate (this);');
       
+      // LRS-TODO: Title is deprecated and will be removed from schema.
       $title = NULL;
+      $name = NULL;
       $text = NULL;
       $itemPath = NULL; 
       $accessFlags = COURSE_DEFAULT_PERMISSIONS;
 
       if (! empty ($item)) {
-         $name = NULL;
-         $title = $item->title;
+         $name = $item->name;
          $text = $item->text;
          $accessFlags = $item->accessFlags;
       }
@@ -110,13 +111,20 @@ class ItemForm extends Form {
       
       $div = new Div ($listDiv, 'row');
       new Label ($div, 'Item Name:', 'folderName', 'first');
-      new TextInput ($div, 'folderName', 'folderName', $folderName);
+      new TextInput ($div, 'itemName', 'itemName', $name);
       
       $div = new Div ($listDiv, 'row');
       $label = new Label ($div, NULL, 'folderPath');
       new Para ($label, 'Folder Path:');
-      new Para ($label, '(optional)', 'folderPath');
-      new TextInput ($div, 'folderPath', 'folderPath', $folderPath);
+      new Para ($label, '(optional)', 'field_note');
+      $stack = new Div ($div, 'stack');
+      new TextInput ($stack, 'itemPath', 'itemPath', $itemPath);
+      new Hr ($stack);
+
+      $listDiv = new Div ($fieldset, 'list');
+      $div = new Div ($listDiv, 'row');
+      new Label ($div, 'Text:', 'text', 'first top');
+      new TextArea ($div, 'text', 'text', $text);
 
       $div = new Div ($listDiv, 'row');
       $coursePermissions = enumerateCourseContentPermissions ();
@@ -142,10 +150,10 @@ class ItemForm extends Form {
       new ResetButton ($div, 'Reset');
       
       new HiddenField ($this, 'parent', NULL, $parentFolder->pathName); 
-      new HiddenField ($this, 'contentType', NULL, 'folder');
+      new HiddenField ($this, 'contentType', NULL, 'item');
 
-      if (! empty ($folder)) {
-         new HiddenField ($this, "folderID", NULL, $folder->contentID);
+      if (! empty ($item)) {
+         new HiddenField ($this, "itemID", NULL, $item->contentID);
       }
    }
 }

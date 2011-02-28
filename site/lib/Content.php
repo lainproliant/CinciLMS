@@ -277,9 +277,11 @@ class CourseContent extends CourseContentVO {
          
          $creationParent = sprintf ("?parent=%s", $this->pathName);
          $newFolderAction = $creationParent . '&action=newContent&contentType=folder';
+         $newItemAction = $creationParent . '&action=newContent&contentType=item';
 
          $createMenu->addItems (array (
-            'New Folder' =>      new HyperlinkAction ($newFolderAction)));
+            'New Folder' =>      new HyperlinkAction ($newFolderAction),
+            'New Content Item' => new HyperlinkAction ($newItemAction)));
       }
    }
 }
@@ -333,13 +335,13 @@ abstract class CourseContentSubtype extends CourseContent {
     * Overridden method to save a CourseContent object
     * and its appropriate subtype data.
     */
-   public function save ()
+   public function save ($saveVO = TRUE)
    {
       parent::save ();
 
       $vo = $this->createVO ();
 
-      if (! empty ($vo)) {
+      if (! empty ($vo) and $saveVO) {
          $vo->save ();
       }
    }
@@ -400,7 +402,18 @@ class ContentItem extends CourseContentSubtype {
     * the provided Div.  Subclasses must implement this method.
     */
    public function displayItem ($contentDiv, $path, $authority, $user,
-      $course, $enrollment) { }
+      $course, $enrollment)
+   {
+      $itemInfo = $this->getContentItemInfo ();
+
+      $p = new XMLEntity ($contentDiv, "p");
+      $p->setAttribute ('class', 'content-item item');
+      
+      new Span ($p, htmlentities ($this->name), 'title');
+      new Br ($p);
+      
+      new Span ($p, $itemInfo->text);
+   }
 
    protected function createVO ()
    {
@@ -448,7 +461,7 @@ class ContentFolder extends CourseContentSubtype {
       $folderEntry->insert ();
 
       $content->parentID = $this->contentID;
-      $content->save ();
+      $content->save (FALSE);
    }
 
    /*

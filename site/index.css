@@ -268,14 +268,11 @@ form div.list div.row span {
    display: table-cell;
 }
 
-/*----------------------------------------------------------------------------
- * UserForm specific CSS rules.
- */
-form.user_form label.first {
+form label.first {
    width: 8em;
 }
 
-form.user_form label.top {
+form label.top {
    vertical-align: top;
 }
 
@@ -335,3 +332,10 @@ a.course:hover {
 
 a.folder:hover {
    background-image: url('images/content-folder-open.png');
+}
+
+.item {
+   background-image: url('images/content-item.png');
+   background-repeat: no-repeat;
+   background-position: 8px 4px;
+}

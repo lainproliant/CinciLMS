@@ -210,6 +210,17 @@ class UserClass extends NonUserClass {
          new FolderForm ($div, '?action=submitContent', $this, $parent);
          break;
 
+      case 'item':
+         $div = new Div ($contentDiv, 'prompt');
+         $header = new XMLEntity ($div, 'h3');
+         new TextEntity ($header, "Create a New Content Item");
+         $p = new XMLEntity ($div, 'p');
+         new TextEntity ($p, "Enter the content item info below, then click Submit.");
+
+         new ItemForm ($div, '?action=submitContent', $this, $parent);
+         break;
+
+
       default:
          throw new CinciException ('Content Creation Error', 'Unknown content type specified.');
       }
@@ -246,8 +257,6 @@ class UserClass extends NonUserClass {
          $folderPath = $_POST ['folderPath'];
          $accessFlags = implode (',', $_POST ['accessFlags']);
 
-         var_dump ($_POST);
-
          if (empty ($folderPath)) {
             $folderPath = anumfilter ($folderName);
          }
@@ -256,14 +265,74 @@ class UserClass extends NonUserClass {
          $folder->name = $folderName;
          $folder->ownerID = $user->userID;
          $folder->accessFlags = $accessFlags;
+         
+         try {
+            $folder->insert ();
+         
+         } catch (DAOException $e) {
+            throw new CinciDatabaseException ("Content Creation Error", 
+               "There was an error creating the new folder.",
+               $e->error);
+         }
+         
+         try {
+            $parent->addContent ($folder, $folderPath);
 
-         $folder->insert ();
-         $parent->addContent ($folder, $folderPath);
+         } catch (DAOException $e) {
+            $folder->delete ();
+
+            throw new CinciDatabaseException ("Content Insertion Error", 
+               "There was an error adding the folder to its parent.",
+               $e->error);
+         
+         }
 
          $header = new XMLEntity ($div, 'h3');
          new TextEntity ($header, "Success!");
          $p = new XMLEntity ($div, 'p');
-         new TextEntity ($p, "The folder was created successfully!  Please wait...");
+         new TextEntity ($p, "The folder was created successfully!");
+         break;
+
+      case 'item':
+         $itemName = $_POST ['itemName'];
+         $itemPath = $_POST ['itemPath'];
+
+         if (empty ($itemPath)) {
+            $itemPath = anumfilter ($itemName);
+         }
+
+         $itemText = $_POST ['text'];
+         $accessFlags = implode (',', $_POST ['accessFlags']);
+
+         $item = new ContentItem ();
+         $item->name = $itemName;
+         $item->title = $itemName;
+         $item->text = $itemText;
+         $item->ownerID = $user->userID;
+         $item->accessFlags = $accessFlags;
+         
+         try {
+            $item->insert ();
+
+         } catch (DAOException $e) {
+            throw new CinciDatabaseException ("Content Creation Error", 
+               "There was an error creating the new content item.",
+               $e->error);
+         }
+
+         try {
+            $parent->addContent ($item, $itemPath);
+
+         } catch (DAOException $e) {
+            throw new CinciDatabaseException ("Content Insertion Error", 
+               "There was an error adding the content item to its parent.",
+               $e->error);
+         }
+
+         $header = new XMLEntity ($div, 'h3');
+         new TextEntity ($header, "Success!");
+         $p = new XMLEntity ($div, 'p');
+         new TextEntity ($p, "The content item was created successfully!");
          break;
 
       default:
@@ -272,7 +341,7 @@ class UserClass extends NonUserClass {
 
       $p = new XMLEntity ($div, 'p');
       new TextLink ($p, sprintf ("?action=view&path=%s", $parent->pathName),
-         sprintf ("Return to %s", htmlentities ($parent->name)));
+         sprintf ("Return to %s (%s)", htmlentities ($parent->name), htmlentities ($course->courseName)));
    }
 
    protected function submitPassword ($contentDiv)
