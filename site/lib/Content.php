@@ -276,7 +276,7 @@ class CourseContent extends CourseContentVO {
          }
          
          $creationParent = sprintf ("?parent=%s", $this->pathName);
-         $newFolderAction = $creationParent . '&action=newFolder';
+         $newFolderAction = $creationParent . '&action=newContent&contentType=folder';
 
          $createMenu->addItems (array (
             'New Folder' =>      new HyperlinkAction ($newFolderAction)));
@@ -560,8 +560,8 @@ class ContentFolder extends CourseContentSubtype {
       $folderContents = $this->getFolderContents ();
 
       foreach ($folderContents as $content) {
-         $path = $path . '/' . $content->pathName;
-         $content->displayItem ($contentDiv, $path, $authority, $user,
+         $subpath = $path . '/' . $content->pathName;
+         $content->displayItem ($contentDiv, $subpath, $authority, $user,
             $course, $enrollment);
       }
    }

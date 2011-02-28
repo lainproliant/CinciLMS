@@ -13,7 +13,7 @@ include_once "Course.php";
  */
 
 class CourseForm extends Form {
-   function __construct ($parent, $action, $userClass, $course = NULL)
+   function __construct ($parent, $action, $userClass, $user, $course = NULL)
    {
       global $SiteConfig;
 
@@ -43,8 +43,12 @@ class CourseForm extends Form {
       new TextInput ($div, 'courseName', 'courseName', $courseName);
       
       $div = new Div ($listDiv, 'row');
-      new Label ($div, 'Course Code:', 'courseCode', 'first');
+      new Label ($div, 'Course Code:', 'courseCode');
       new TextInput ($div, 'courseCode', 'courseCode', $courseCode);
+
+      $div = new Div ($listDiv, 'row');
+      new Label ($div, 'Course Owner:', 'courseOwner');
+      new TextInput ($div, 'courseOwner', 'courseOwner', $user->username);
 
       $div = new Div ($listDiv, 'row');
       $coursePermissions = enumerateCoursePermissions ();

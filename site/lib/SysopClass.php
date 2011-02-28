@@ -8,7 +8,6 @@
  * Released under the GNU General Public License, version 3.
  */
 
-
 include_once "util/XMLEntity.php";
 include_once "UserClass.php";
 include_once "Exceptions.php";
@@ -41,29 +40,38 @@ class SysopClass extends UserClass {
 
    protected function actionNewCourse ($contentDiv)
    {
+      $user = User::byUserID ($_SESSION ['userid']);
+
       $div = new Div ($contentDiv, "prompt");
       $header = new XMLEntity ($div, 'h3');
       new TextEntity ($header, "Create a New Course");
       new Para ($div, "Edit the course properties below, then click Submit.");
-      new CourseForm ($div, '?action=submitNewCourse', $this);
+      new CourseForm ($div, '?action=submitNewCourse', $this, $user);
    }
 
    protected function submitNewCourse ($contentDiv) {
       
       // Get a user instance to confirm that the user actually
       // exists when we create the course in their name.
-      $creator = User::byUserID ($_SESSION ['userid']);
+      $owner = User::byUsername ($_POST ['courseOwner']);
       $accessFlags = implode (',', $_POST ['accessFlags']);
+
+      $courseName = $_POST ['courseName'];
+      $courseCode = $_POST ['courseCode'];
+
+      if (empty ($courseCode)) {
+         $courseCode = anumfilter ($courseName);
+      }
       
       try {
          $course = Course::createNewCourse (
-            $_POST ['courseName'],
-            $_POST ['courseCode'],
+            $courseName,
+            $courseCode,
             $accessFlags,
-            $creator);
+            $owner);
 
          // Enroll the user as an instructor in the course.
-         $course->enrollUser ($creator, COURSE_ROLE_INSTRUCTOR);
+         $course->enrollUser ($owner, COURSE_ROLE_INSTRUCTOR);
 
       } catch (DAOException $e) {
          throw new CinciDatabaseException ("Course Creation Error", 
@@ -76,6 +84,8 @@ class SysopClass extends UserClass {
       new TextEntity ($header, "Success!");
       new Para ($div, sprintf (
          "The course \"%s\" was created successfully.", htmlentities ($course->courseName)));
+      $p = new XMLEntity ($div, 'p');
+      new TextLink ($p, 'index.php', 'Return Home');
    }
 }
 

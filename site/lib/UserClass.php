@@ -16,6 +16,8 @@ include_once "User.php";
 include_once "Course.php";
 include_once "Content.php";
 
+include_once "ContentForm.php";
+
 class UserClass extends NonUserClass {
    function __construct ()
    {
@@ -28,7 +30,11 @@ class UserClass extends NonUserClass {
          'changePassword'           => 'actionChangePassword',
          'logout'                   => 'actionLogout',
          'view'                     => 'actionView',
-         'submitPassword'           => 'submitPassword'));
+         'newContent'               => 'actionNewContent',
+         'editContent'              => 'actionEditContent',
+         'submitPassword'           => 'submitPassword',
+         'submitContent'            => 'submitContent',
+         'submitContentEdit'        => 'submitContentEdit'));
 
       // The user is already logged in under this class.
       // No need for login processing, remove login functions.
@@ -38,13 +44,15 @@ class UserClass extends NonUserClass {
       // Add menu items for account functions.
       $this->getMenu ()->addItem (
          "Account", new ActionMenu (array (
-            "My Courses"         => $this->generateMyCoursesMenu (),
             "Home"               => new HyperlinkAction ($_SERVER ['PHP_SELF']),
             "Change Password"    => 'changePassword',
             "sep1"               => '---',
             "Logout"             => 'logout'
          ))
       );
+
+      $this->getMenu ()->addItem (
+            "My Courses", $this->generateMyCoursesMenu ());
    }
    
    /*
@@ -113,8 +121,9 @@ class UserClass extends NonUserClass {
    protected function actionView ($contentDiv)
    {
       $div = new Div ($contentDiv);
-      $header = new XMLEntity ($div, 'h3');
-      $header->setAttribute ('class', 'breadcrumb');
+      $courseNameHeader = new XMLEntity ($div, 'h3');
+      $breadcrumbHeader = new XMLEntity ($div, 'h4');
+      $breadcrumbHeader->setAttribute ('class', 'breadcrumb');
 
       // Get the path of the item to be viewed.  The first name
       // in the path is the code of a course, and the remainder
@@ -139,30 +148,131 @@ class UserClass extends NonUserClass {
       for ($x = 0; $x < count ($pathArray); $x++) {
          $subPathArray = array_slice ($pathArray, 0, $x + 1);
 
-
          if ($x + 1 < count ($pathArray)) {
-            new TextLink ($header, sprintf ('?action=view&path=%s',
+            new TextLink ($breadcrumbHeader, sprintf ('?action=view&path=%s',
                htmlentities (implode ('/', $subPathArray))), $pathArray [$x]);
             
-            new TextEntity ($header, ' / ');
+            new TextEntity ($breadcrumbHeader, ' / ');
 
          } else {
-            new TextEntity ($header, $pathArray [$x]);
+            new TextEntity ($breadcrumbHeader, $pathArray [$x]);
          }
 
       }
 
-      $courseCode = array_shift ($pathArray);
+      $courseCode = $pathArray [0];
 
       $user = User::byUserID ($_SESSION ['userid']);
       $course = Course::byCourseCode ($courseCode);
       
+      // Show the course name in the header.
+      new TextEntity ($courseNameHeader, htmlentities ($course->courseName));
+
       if (empty ($course->courseID)) {
          throw new CinciAccessException ("The specified course does not exist.");
       }
       
       // Display the course's contents in the contentDiv.
       $course->display ($div, $this, $user, $pathArray);
+   }
+
+   protected function actionNewContent ($contentDiv)
+   {
+      $contentType = $_GET ['contentType'];
+      $parentPath = $_GET ['parent'];
+      
+      // Confirm that the parent path exists and that we have the rights
+      // to write to it.
+      $parentPathArray = explode ('/', $parentPath);
+      $parentPathArray = array_diff ($parentPathArray, array (''));
+      
+      $user = User::byUserID ($_SESSION ['userid']);
+      $parentInfo = Course::getPath ($this, $user, $parentPathArray);
+      $parent = $parentInfo [0];
+      $course = $parentInfo [1];
+      $enrollment = $parentInfo [2];
+
+      if (! $parent->checkWriteAccess ($this, $user, $course, $enrollment)) {
+         throw new CinciAccessException ("You do not have permission to create content items on this path.");
+      }
+      
+      $absolutePath = implode ('/', $parentPathArray);
+      $parent->pathName = $absolutePath;
+      
+      switch ($contentType) {
+      case 'folder':
+         $div = new Div ($contentDiv, 'prompt');
+         $header = new XMLEntity ($div, 'h3');
+         new TextEntity ($header, "Create a New Folder");
+         $p = new XMLEntity ($div, 'p');
+         new TextEntity ($p, "Enter the folder info below, then click Submit.");
+
+         new FolderForm ($div, '?action=submitContent', $this, $parent);
+         break;
+
+      default:
+         throw new CinciException ('Content Creation Error', 'Unknown content type specified.');
+      }
+   }
+
+   protected function submitContent ($contentDiv)
+   {
+      $contentType = $_POST ['contentType'];
+      $parentPath = $_POST ['parent'];
+      
+      // Confirm that the parent path exists and that we have the rights
+      // to write to it.
+      $parentPathArray = explode ('/', $parentPath);
+      $parentPathArray = array_diff ($parentPathArray, array (''));
+      
+      $user = User::byUserID ($_SESSION ['userid']);
+      $parentInfo = Course::getPath ($this, $user, $parentPathArray);
+      $parent = $parentInfo [0];
+      $course = $parentInfo [1];
+      $enrollment = $parentInfo [2];
+
+      if (! $parent->checkWriteAccess ($this, $user, $course, $enrollment)) {
+         throw new CinciAccessException ("You do not have permission to create content items on this path.");
+      }
+      
+      $absolutePath = implode ('/', $parentPathArray);
+      $parent->pathName = $absolutePath;
+
+      $div = new Div ($contentDiv, 'prompt');
+
+      switch ($contentType) {
+      case 'folder':
+         $folderName = $_POST ['folderName'];
+         $folderPath = $_POST ['folderPath'];
+         $accessFlags = implode (',', $_POST ['accessFlags']);
+
+         var_dump ($_POST);
+
+         if (empty ($folderPath)) {
+            $folderPath = anumfilter ($folderName);
+         }
+
+         $folder = new ContentFolder ();
+         $folder->name = $folderName;
+         $folder->ownerID = $user->userID;
+         $folder->accessFlags = $accessFlags;
+
+         $folder->insert ();
+         $parent->addContent ($folder, $folderPath);
+
+         $header = new XMLEntity ($div, 'h3');
+         new TextEntity ($header, "Success!");
+         $p = new XMLEntity ($div, 'p');
+         new TextEntity ($p, "The folder was created successfully!  Please wait...");
+         break;
+
+      default:
+         throw new CinciException ('Content Creation Error', 'Unknown content type specified.');
+      }
+
+      $p = new XMLEntity ($div, 'p');
+      new TextLink ($p, sprintf ("?action=view&path=%s", $parent->pathName),
+         sprintf ("Return to %s", htmlentities ($parent->name)));
    }
 
    protected function submitPassword ($contentDiv)

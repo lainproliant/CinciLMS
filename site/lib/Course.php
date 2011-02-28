@@ -201,35 +201,14 @@ class Course extends CoursesVO {
     */
    public function display ($contentDiv, $authority, $user, $pathArray)
    {
-      $enrollment = $this->getEnrollment ($user);
-      
-      if (empty ($enrollment) and ! $authority->authorizeCheck ('_sysopReadWrite')) {
-         throw new CinciAccessException (
-            "You are not authorized to access this course.");
-      }
-
-      // If the entry point doesn't exist, a CinciAccessException will be thrown.
-      $entryPoint = CourseContent::byContentID ($this->entryPointID)->resolve ();
-
-      if (empty ($entryPoint->contentID)) {
-         throw new CinciAccessException (
-            "The course's course-root is missing.  Please contact a system administrator.");
-      }
-
-      // Fully resolve the path provided.
-      $content = $entryPoint;
-
-      if (count ($pathArray) > 0) {
-         $content = $entryPoint->resolvePath ($pathArray, $authority, $user, $this, $enrollment);
-      }
+      $contentInfo = Course::getPath ($authority, $user, $pathArray);
+      $content = $contentInfo [0];
+      $course = $contentInfo [1];
+      $enrollment = $contentInfo [2];
 
       // Construct an absolute path to pass to the item.
-      $absolutePath = $this->courseCode;
+      $absolutePath = implode ('/', $pathArray);
 
-      if (! empty ($pathArray)) {
-         $absolutePath = htmlentities ($this->courseCode . '/' . implode ('/', $pathArray));
-      }
-      
       // Add the absolute path as a known pathName to the content item.
       $content->pathName = $absolutePath;
       
@@ -238,6 +217,52 @@ class Course extends CoursesVO {
 
       // Ask the path to print itself.
       $content->display ($contentDiv, $absolutePath, $authority, $user, $this, $enrollment);
+   }
+   
+   /*
+    * Get the content item, course, and enrollment associated with the given user role
+    * and path.
+    *
+    * authority:        The AuthorityClass instance for the user accessing the path.
+    * user:             The user accessing the path.
+    * patnArray:        The path to be accessed.
+    *
+    * Returns a tuple of content, course, and enrollment, in that order.
+    * Throws CinciAccessException if the content is not accessible by this user.
+    */
+   public static function getPath ($authority, $user, $pathArray)
+   {
+      $courseCode = array_shift ($pathArray);
+
+      $course = Course::byCourseCode ($courseCode);
+      
+      if (empty ($course->courseID)) {
+         throw new CinciAccessException ("The specified course does not exist.");
+      }
+      
+      $enrollment = $course->getEnrollment ($user);
+      
+      if (empty ($enrollment) and ! $authority->authorizeCheck ('_sysopReadWrite')) {
+         throw new CinciAccessException (
+            "You are not authorized to access this course.");
+      }
+
+      // If the entry point doesn't exist, a CinciAccessException will be thrown.
+      $entryPoint = CourseContent::byContentID ($course->entryPointID)->resolve ();
+
+      if (empty ($entryPoint->contentID)) {
+         throw new CinciAccessException (
+            "The course's course-root is missing.  Please contact a system administrator.");
+      }
+
+      $content = $entryPoint;
+      
+      if (count ($pathArray) > 0) {
+         $content = $entryPoint->resolvePath ($pathArray,
+            $authority, $user, $course, $enrollment);
+      }
+
+      return array ($content, $course, $enrollment);
    }
 }
 
