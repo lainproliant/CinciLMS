@@ -45,8 +45,15 @@ class AdminClass extends SysopClass {
          'submitUserEdit'           => 'submitUserEdit',
          'debug_testData'           => 'debug_testData'));
       
+       
+      $createMenu = $this->getMenu ()->getItem ('Create');
       
-      $this->getMenu ()->getItem ("System")->getItem ("Create")->addItem (
+      if (empty ($createMenu)) {
+         $createMenu = new ActionMenu ();
+         $this->getMenu ()->addItem ('Create', $createMenu);
+      }
+      
+      $createMenu->addItem (
          "New User", 'newUser');
    }
 

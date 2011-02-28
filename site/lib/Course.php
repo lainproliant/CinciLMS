@@ -187,7 +187,7 @@ class Course extends CoursesVO {
          return $enrollment;
       }
    }
-
+   
    /*
     * Displays the contents of the course and its course-root folder in 
     * the given div.
@@ -202,8 +202,8 @@ class Course extends CoursesVO {
    public function display ($contentDiv, $authority, $user, $pathArray)
    {
       $enrollment = $this->getEnrollment ($user);
-
-      if (empty ($enrollment) and ! $this->authorizeCheck ('_sysopReadWrite')) {
+      
+      if (empty ($enrollment) and ! $authority->authorizeCheck ('_sysopReadWrite')) {
          throw new CinciAccessException (
             "You are not authorized to access this course.");
       }
@@ -215,7 +215,7 @@ class Course extends CoursesVO {
          throw new CinciAccessException (
             "The course's course-root is missing.  Please contact a system administrator.");
       }
-      
+
       // Fully resolve the path provided.
       $content = $entryPoint;
 
@@ -229,6 +229,12 @@ class Course extends CoursesVO {
       if (! empty ($pathArray)) {
          $absolutePath = htmlentities ($this->courseCode . '/' . implode ('/', $pathArray));
       }
+      
+      // Add the absolute path as a known pathName to the content item.
+      $content->pathName = $absolutePath;
+      
+      // Ask the content item to add appropriate actions to the menu bar.
+      $content->addContext ($authority, $user, $this, $enrollment);
 
       // Ask the path to print itself.
       $content->display ($contentDiv, $absolutePath, $authority, $user, $this, $enrollment);

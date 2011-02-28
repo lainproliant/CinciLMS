@@ -38,7 +38,7 @@ class UserClass extends NonUserClass {
       // Add menu items for account functions.
       $this->getMenu ()->addItem (
          "Account", new ActionMenu (array (
-            "My Courses"         => $this->generateCoursesMenu (),
+            "My Courses"         => $this->generateMyCoursesMenu (),
             "Home"               => new HyperlinkAction ($_SERVER ['PHP_SELF']),
             "Change Password"    => 'changePassword',
             "sep1"               => '---',
@@ -238,9 +238,9 @@ class UserClass extends NonUserClass {
    }
 
    /*
-    * Adds a courses menu to the user's menu bar.
+    * Adds a My Courses menu to the user's menu bar.
     */
-   protected function generateCoursesMenu ()
+   protected function generateMyCoursesMenu ()
    {
       $coursesMenu = new ActionMenu (); 
       

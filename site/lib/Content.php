@@ -8,6 +8,7 @@
  */
 
 include_once "Exceptions.php";
+include_once "util/nbbc.php";
 
 include_once "VO/ContentVO.php";
 include_once "FolderJoin.php";
@@ -58,13 +59,13 @@ class CourseContent extends CourseContentVO {
     * user:             The User instance.  Can be NULL, in which case
     *                   the user is treated as a guest.
     * course:           The course in which the item is contained.
-    * courseEnrollment: The user's enrollment in the course.
+    * enrollment:       The user's enrollment in the course.
     *                   Can be NULL, in which case the user is treated
     *                   as a guest.
     *
     * Returns True if the item can be read, False otherwise.
     */
-   public function checkReadAccess ($authority, $user, $course, $courseEnrollment)
+   public function checkReadAccess ($authority, $user, $course, $enrollment)
    {
       // If the authority contains '_sysopReadWrite' permissions, grant access.
       if ($authority->authorizeCheck ('_sysopReadWrite')) {
@@ -75,15 +76,15 @@ class CourseContent extends CourseContentVO {
       // or provide defaults if a course enrollment was not specified.
       $itemPermissions =   explode (',', $this->accessFlags);
       $coursePermissions = explode (',', $course->accessFlags);
-      $userPermissions =   empty ($courseEnrollment) ?
+      $userPermissions =   empty ($enrollment) ?
          array () :
-         explode (',', $courseEnrollment->accessFlags);
+         explode (',', $enrollment->accessFlags);
    
       // Determine the user's role in the course.  If there is no course enrollment,
       // the user is assumed to be a guest.
-      $courseRole = empty ($courseEnrollment) ?
+      $courseRole = empty ($enrollment) ?
          COURSE_ROLE_GUEST :
-         $courseEnrollment->roleID;
+         $enrollment->roleID;
       
       // Determine the user ID if there is one.
       $userID = empty ($user) ?
@@ -159,16 +160,16 @@ class CourseContent extends CourseContentVO {
     * user:             The User instance.  Can be NULL, in which case
     *                   the user is treated as a guest.
     * course:           The course in which the item is contained.
-    * courseEnrollment: The user's enrollment in the course.
+    * enrollment:       The user's enrollment in the course.
     *                   Can be NULL, in which case the user is treated
     *                   as a guest.
     *
     * Returns True if the item can be written, False otherwise.
     */
-   public function checkWriteAccess ($authority, $user, $course, $courseEnrollment)
+   public function checkWriteAccess ($authority, $user, $course, $enrollment)
    {
       // If the authority contains '_sysopReadWrite' permissions, grant access.
-      // Otherwise, if no courseEnrollment was provided, deny access.
+      // Otherwise, if no enrollment was provided, deny access.
       if ($authority->authorizeCheck ('_sysopReadWrite')) {
          return TRUE;
       }
@@ -177,15 +178,15 @@ class CourseContent extends CourseContentVO {
       // or provide defaults if a course enrollment was not specified.
       $itemPermissions =   explode (',', $this->accessFlags);
       $coursePermissions = explode (',', $course->accessFlags);
-      $userPermissions =   empty ($courseEnrollment) ?
+      $userPermissions =   empty ($enrollment) ?
          array () :
-         explode (',', $courseEnrollment->accessFlags);
+         explode (',', $enrollment->accessFlags);
 
       // Determine the user's role in the course.  If there is no course enrollment,
       // the user is assumed to be a guest.
-      $courseRole = empty ($courseEnrollment) ?
+      $courseRole = empty ($enrollment) ?
          COURSE_ROLE_GUEST :
-         $courseEnrollment->roleID;
+         $enrollment->roleID;
 
       // Determine the user ID if there is one.
       $userID = empty ($user) ?
@@ -248,6 +249,37 @@ class CourseContent extends CourseContentVO {
       } else {
          // Course write permissions are disabled for the user.  Access denied.
          return FALSE;
+      }
+   }
+
+   /*
+    * Adds appropriate context menus to the given AuthorityClass instance.
+    * 
+    * authority:        The user's current AuthorityClass instance.
+    * user:             The User instance.  Can be NULL, in which case
+    *                   the user is treated as a guest.
+    * course:           The course in which the item is contained.
+    * enrollment:       The user's enrollment in the course.
+    *                   Can be NULL, in which case the user is treated
+    *                   as a guest.
+    */
+   public function addContext ($authority, $user, $course, $enrollment)
+   {
+      if ($this->checkWriteAccess ($authority, $user, $course, $enrollment)) {
+         $createMenu = $authority->getMenu ()->getItem ('Create');
+         
+         if (empty ($createMenu)) {
+            $createMenu = new ActionMenu ();
+            $authority->getMenu ()->addItem ('Create', $createMenu);
+         } else {
+            $createMenu->insertSeparator ();
+         }
+         
+         $creationParent = sprintf ("?parent=%s", $this->pathName);
+         $newFolderAction = $creationParent . '&action=newFolder';
+
+         $createMenu->addItems (array (
+            'New Folder' =>      new HyperlinkAction ($newFolderAction)));
       }
    }
 }
@@ -444,7 +476,7 @@ class ContentFolder extends CourseContentSubtype {
     * authority:        The user's current AuthorityClass instance.
     * user:             The user for which permissions will be determined.
     * course:           The course containing the content.
-    * courseEnrollment: The enrollment record for the user in this course.
+    * enrollment: The enrollment record for the user in this course.
     *
     * Returns a CourseContentSubtype for the content retrieved.
     * Throws a CinciAccessException if the path doesn't exist or the
@@ -454,7 +486,7 @@ class ContentFolder extends CourseContentSubtype {
    // TODO: Check for permissions upon content access, folder, or
    //       link dereference.
    public function resolvePath ($pathArray, $authority, $user, $course,
-      $courseEnrollment = NULL, $cdCheckSet = NULL) 
+      $enrollment = NULL, $cdCheckSet = NULL) 
    {      
       // A set for circular dependency checking.
       if (empty ($cdCheckSet)) {
@@ -484,7 +516,7 @@ class ContentFolder extends CourseContentSubtype {
       $content = CourseContent::byContentID (
          $folderContents->contentID)->resolve ();
       
-      if (! $content->checkReadAccess ($authority, $user, $course, $courseEnrollment)) {
+      if (! $content->checkReadAccess ($authority, $user, $course, $enrollment)) {
          // Access to the resource was denied.  Throw an exception.
          throw new CinciAccessException (
             "You are not authorized to access the requested content.");   
@@ -492,7 +524,7 @@ class ContentFolder extends CourseContentSubtype {
       
       if ($content->typeID == CONTENT_TYPE_LINK) {
          $content = $content->dereference (
-            $authority, $user, $course, $courseEnrollment, $cdCheckSet);
+            $authority, $user, $course, $enrollment, $cdCheckSet);
       }
 
       if (! empty ($pathArray)) {
@@ -505,7 +537,7 @@ class ContentFolder extends CourseContentSubtype {
 
          // Recurse into the next directory.
          return $content->resolvePath ($pathArray, $authority, $user,
-            $course, $courseEnrollment, $cdCheckSet);
+            $course, $enrollment, $cdCheckSet);
 
       } else {
          return $content;
@@ -592,7 +624,7 @@ class ContentLink extends CourseContentSubtype {
     *                   and dereferencing links.
     */
    public function dereference ($authority, $user, $course,
-      $courseEnrollment = NULL, $cdCheckSet = NULL)
+      $enrollment = NULL, $cdCheckSet = NULL)
    {
       // A set for circular dependency checking.
       if (empty ($cdCheckSet)) {
@@ -619,7 +651,7 @@ class ContentLink extends CourseContentSubtype {
             "The course content link is broken and cannot be dereferenced.");
       }
 
-      if (! $content->checkReadAccess ($authority, $user, $course, $courseEnrollment)) {
+      if (! $content->checkReadAccess ($authority, $user, $course, $enrollment)) {
          // Access to the destination content was denied.
          throw new CinciAccessException ("You are not authorized to access the content linked to by this item.");
       }

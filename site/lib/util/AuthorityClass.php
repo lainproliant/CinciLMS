@@ -185,6 +185,14 @@ class ActionMenu {
    {
       return count ($this->children);
    }
+
+   /*
+    * Inserts a separator into the menu.
+    */
+   public function insertSeparator ()
+   {
+      $this->children [] = '---';
+   }
 }
 
 class HyperlinkAction {

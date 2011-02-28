@@ -28,13 +28,15 @@ class SysopClass extends UserClass {
          'submitNewCourse'    => 'submitNewCourse',
          'submitCourseEdit'   => 'submitCourseEdit'));
       
-      if (! $this->getMenu ()->hasItem ("System")) {
-         $this->getMenu ()->addItem ("System", new ActionMenu (array (
-            "Create" => new ActionMenu ())));
+      $createMenu = $this->getMenu ()->getItem ('Create');
+      
+      if (empty ($createMenu)) {
+         $createMenu = new ActionMenu ();
+         $this->getMenu ()->addItem ('Create', $createMenu);
       }
 
-      $this->getMenu ()->getItem ("System")->getItem ("Create")->addItem (
-            "New Course", 'newCourse');
+      $createMenu->addItem (
+         "New Course", 'newCourse');
    }
 
    protected function actionNewCourse ($contentDiv)
