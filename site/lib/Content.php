@@ -396,8 +396,8 @@ class ContentItem extends CourseContentSubtype {
     */
    public function display ($contentDiv, $path, $authority, $user,
       $course, $enrollment) { }
-
-   /* LRS-TODO: Implement
+   
+   /*
     * Displays a iconified representation of the content in
     * the provided Div.  Subclasses must implement this method.
     */

@@ -161,13 +161,22 @@ class AdminClass extends SysopClass {
    {
       global $SiteConfig;
 
-      $usernames = array ('bob', 'alice', 'eve');
-      $users = array ();
+      // Create three test users.
+      $userInfo = array (
+         'bob'    => array ("Bob", 'I', "Teacher"),
+         'alice'  => array ("Alice",'C', "Learner"),
+         'eve'    => array ("Eve", 'S', "Dropper"));
 
-      foreach ($usernames as $username) {
+      $users = array ();
+      $courses = array ();
+      
+      // Give each of them a user account and their own course.
+      foreach ($userInfo as $username => $name) {
          $user = new User ();
          $user->username = $username;
-         $user->firstName = $username;
+         $user->firstName = $name [0];
+         $user->middleInitial = $name [1];
+         $user->lastName = $name [2];
          
          $salted_password = hash ('sha256',
             $SiteConfig ['db']['static_salt'] . $username);
@@ -182,37 +191,28 @@ class AdminClass extends SysopClass {
          $users [] = $user;
 
          $course = Course::createNewCourse (
-            sprintf ("%s's course", $username),
-            sprintf ("lrs_debug_test_%s", $username),
+            sprintf ("%s's course", $user->firstName),
+            sprintf ("lrs_debug_test_%s", $user->username),
             COURSE_DEFAULT_PERMISSIONS,
             $user);
 
          $course->enrollUser ($user, COURSE_ROLE_INSTRUCTOR);
+         $courses [] = $course;
       }
       
-      for ($x = 0; $x < 9; $x++) {
-         $course = Course::createNewCourse (
-            sprintf ("Test Course %03s", $x),
-            sprintf ("lrs_debug_test_%03s", $x),
-            COURSE_DEFAULT_PERMISSIONS,
-            $users [$x % 3]
-         );
-
-         $course->enrollUser ($users [$x % 3], COURSE_ROLE_INSTRUCTOR);
-         $course->enrollUser ($users [($x + 1) % 3], COURSE_ROLE_STUDENT);
-         
-         $folder = CourseContent::byContentID (
-            $course->entryPointID)->resolve ();
-
-         for ($y = 0; $y < 2; $y++) {
-            $subfolder = new ContentFolder ();
-            $subfolder->name = sprintf ("Level %d", $y);
-            $subfolder->ownerID = $users [$x % 3]->userID;
-
-            $subfolder->insert ();
-            $folder->addContent ($subfolder);
-
-            $folder = $subfolder;
+      // Create a test course with a large level of nested folders.
+      $nestCourse = Course::createNewCourse (
+         "Nested Course",
+         "lrs_debug_test_nest",
+         COURSE_DEFAULT_PERMISSIONS,
+         $this->getUser ());
+      
+      // Enroll each user as a student in each other course.
+      foreach ($courses as $course) {
+         foreach ($users as $user) {
+            if (is_null ($course->getEnrollment ($user))) {
+               $course->enrollUser ($user, COURSE_ROLE_STUDENT);
+            }
          }
       }
    }

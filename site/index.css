@@ -289,7 +289,7 @@ form label.top {
 }
 
 .content-item {
-   background-color: #F0D0C0;
+   background-color: #F0F0F0;
    display: block;
    margin: 1em;
    padding-left: 4em;
@@ -303,7 +303,7 @@ form label.top {
 }
 
 a.content-item:hover {
-   background-color: #D0C0A0;
+   background-color: #F0D0C0;
 }
 
 .content-item span.title {
