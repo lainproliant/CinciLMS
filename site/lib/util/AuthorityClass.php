@@ -193,6 +193,25 @@ class ActionMenu {
    {
       $this->children [] = '---';
    }
+
+   /*
+    * Appends a submenu to the given menu.  Returns the new menu.
+    * If a menu item of the same name already exists, a separator is
+    * added before returning the menu.
+    */
+   public function appendSubmenu ($submenuName)
+   {
+      $submenu = $this->getItem ($submenuName);
+
+      if (empty ($submenu)) {
+         $submenu = new ActionMenu ();
+         $this->addItem ($submenuName, $submenu);
+      } else {
+         $submenu->insertSeparator ();
+      }
+
+      return $submenu;
+   }
 }
 
 class HyperlinkAction {

@@ -21,11 +21,12 @@ class SysopClass extends UserClass {
       parent::__construct ();
 
       $this->addActions (array (
-         '_sysopReadWrite'    => NULL,
-         'newCourse'          => 'actionNewCourse',
-         'editCourse'         => 'actionEditCourse',
-         'submitNewCourse'    => 'submitNewCourse',
-         'submitCourseEdit'   => 'submitCourseEdit'));
+         '_sysopReadWrite'       => NULL,
+         '_sysopEnrollAbility'   => NULL,
+         'newCourse'             => 'actionNewCourse',
+         'editCourse'            => 'actionEditCourse',
+         'submitNewCourse'       => 'submitNewCourse',
+         'submitCourseEdit'      => 'submitCourseEdit'));
       
       $createMenu = $this->getMenu ()->getItem ('Create');
       
@@ -40,17 +41,15 @@ class SysopClass extends UserClass {
 
    protected function actionNewCourse ($contentDiv)
    {
-      $user = User::byUserID ($_SESSION ['userid']);
-
       $div = new Div ($contentDiv, "prompt");
       $header = new XMLEntity ($div, 'h3');
       new TextEntity ($header, "Create a New Course");
       new Para ($div, "Edit the course properties below, then click Submit.");
-      new CourseForm ($div, '?action=submitNewCourse', $this, $user);
+      new CourseForm ($div, '?action=submitNewCourse', $this, $this->getUser ());
    }
 
-   protected function submitNewCourse ($contentDiv) {
-      
+   protected function submitNewCourse ($contentDiv) 
+   {   
       // Get a user instance to confirm that the user actually
       // exists when we create the course in their name.
       $owner = User::byUsername ($_POST ['courseOwner']);

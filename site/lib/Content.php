@@ -266,16 +266,10 @@ class CourseContent extends CourseContentVO {
    public function addContext ($authority, $user, $course, $enrollment)
    {
       if ($this->checkWriteAccess ($authority, $user, $course, $enrollment)) {
-         $createMenu = $authority->getMenu ()->getItem ('Create');
-         
-         if (empty ($createMenu)) {
-            $createMenu = new ActionMenu ();
-            $authority->getMenu ()->addItem ('Create', $createMenu);
-         } else {
-            $createMenu->insertSeparator ();
-         }
-         
-         $creationParent = sprintf ("?parent=%s", $this->pathName);
+         $createMenu = $authority->getMenu ()->appendSubmenu ('Create');
+
+         // Add course content creation items. 
+         $creationParent = sprintf ("?parent=%s", htmlentities ($this->pathName));
          $newFolderAction = $creationParent . '&action=newContent&contentType=folder';
          $newItemAction = $creationParent . '&action=newContent&contentType=item';
 

@@ -231,6 +231,33 @@ class UserClass extends NonUserClass {
       }
    }
 
+   protected function actionEnrollUser ($contentDiv)
+   {
+      $course = NULL;
+
+      if (! empty ($_GET ['courseCode'])) {
+         $courseCode = $_GET ['courseCode'];
+
+         $course = Course::byCourseCode ($courseCode);
+
+         if (empty ($course->courseID)) {
+            throw new CinciAccessException ("The specified course does not exist.");
+         }
+         
+         $user = $this->getUser ();
+         $enrollment = $course->getEnrollment ($user);
+
+         if (! $course->checkEnrollAbility ($this, $user, $enrollment)) {
+            throw new CinciAccessException ("You do not have permission to enroll users in this course.");
+         }
+      }
+
+      $div = new Div ($contentDiv, "prompt"); 
+      $header = new XMLEntity ($div, 'h3');
+      new TextEntity ($header, "Enroll a User");
+      new Para ($div, "Enter the username and course role below, then click Submit.");
+   }
+
    protected function submitContent ($contentDiv)
    {
       $contentType = $_POST ['contentType'];

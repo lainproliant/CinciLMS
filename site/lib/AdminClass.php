@@ -8,7 +8,6 @@
  * Released under the GNU General Public License, version 3.
  */
 
-
 include_once "util/XMLEntity.php";
 include_once "SysopClass.php";
 include_once "Exceptions.php";
@@ -39,6 +38,7 @@ class AdminClass extends SysopClass {
       parent::__construct ();
 
       $this->addActions (array (
+         '_adminUnenrollAbility'    => NULL,
          'newUser'                  => 'actionNewUser',
          'editUser'                 => 'actionEditUser',
          'submitNewUser'            => 'submitNewUser',

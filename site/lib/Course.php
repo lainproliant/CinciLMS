@@ -215,6 +215,9 @@ class Course extends CoursesVO {
       // Ask the content item to add appropriate actions to the menu bar.
       $content->addContext ($authority, $user, $this, $enrollment);
 
+      // Ask this course to add appropriate actions to the menu bar.
+      $this->addContext ($authority, $user, $enrollment);
+
       // Ask the path to print itself.
       $content->display ($contentDiv, $absolutePath, $authority, $user, $this, $enrollment);
    }
@@ -263,6 +266,92 @@ class Course extends CoursesVO {
       }
 
       return array ($content, $course, $enrollment);
+   }
+
+   /*
+    * Checks whether the specified user has the rights to enroll users
+    * in the specified course, based on the given course enrollment.
+    *
+    * authority:     The user's current AuthorityClass instance.  Can be NULL,
+    *                in which case special AuthorityClass permissions are not
+    *                determined.
+    * user:          The User instance.
+    * enrollment:    The user's enrollment in the course.  May be NULL, in which
+    *                case the user is treated as a guest.
+    *
+    * Returns True if the user has the right to enroll users, False otherwise.
+    */
+   public function checkEnrollAbility ($authority, $user, $enrollment)
+   {
+      // If the authority contains '_sysopEnrollAbility' permissions, grant ability.
+      if (! empty ($authority) and $authority->authorizeCheck ('_sysopEnrollAbility')) {
+         return TRUE;
+      }
+
+      // If the user is not enrolled in the course, do not allow them to enroll anyone.
+      // Only allow them to enroll if they have EnW rights.
+
+      $userPermissions = empty ($enrollment) ?
+         array () :
+         explode (',', $enrollment->accessFlags);
+
+      var_dump ($userPermissions);
+
+      if (in_array ('EnW', $userPermissions)) {
+         // The user is enrolled and has EnW permissions, grant ability.
+         return TRUE;
+      } else {
+         // The user is not enrolled or does not have EnW permissions.  Deny ability.
+         return FALSE;
+      }
+   }
+
+   /*
+    * Checks whether the specified user has the rights to unenroll users
+    * from the specified course, based on the given course enrollment.
+    *
+    * authority:     The user's current AuthorityClass instance.  Can be NULL,
+    *                in which case special AuthorityClass permissions are not
+    *                determined.
+    * user:          The User instance.  Can be NULL, in which case the user is
+    *                treated as a guest (and definitely won't have unenroll ability).
+    *
+    * Returns True if the user has the right to unenroll users, False otherwise.
+    */
+   public function checkUnenrollAbility ($authority, $user)
+   {
+      // If the authority contains '_adminUnenrollAbility' permissions, grant ability.
+      if (! empty ($authority) and $authority->authorizeCheck ('_adminUnenrollAbility')) {
+         return TRUE;
+      }
+
+      // If the user is not enrolled in the course, do not allow them to unenroll anyone.
+      // Only allow them to unenroll if they have EnW rights.
+      $enrollment = $this->getEnrollment ($user);
+
+      $userPermissions = empty ($enrollment) ?
+         array () :
+         explode (',', $enrollment->accessFlags);
+
+      if (in_array ('EnW', $userPermissions)) {
+         // The user is enrolled and has EnW permissions, grant ability.
+         return TRUE;
+      } else {
+         // The user is not enrolled or does not have EnW permissions.  Deny ability.
+         return FALSE;
+      }
+   }
+
+   public function addContext ($authority, $user, $enrollment)
+   {
+      if ($this->checkEnrollAbility ($authority, $user, $enrollment)) {
+         $modifyMenu = $authority->getMenu ()->appendSubmenu ('Modify');
+         
+         $enrollUserAction = sprintf ('&action=enrollUser&courseID=%d', $this->courseID);
+
+         // Add course enrollment item.
+         $modifyMenu->addItem ('Enroll User', new HyperlinkAction ($enrollUserAction));
+      }
    }
 }
 
