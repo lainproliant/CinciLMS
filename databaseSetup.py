@@ -241,7 +241,7 @@ create table `FactCourseEnrollment` (
    `UserID` int not null,
    `CourseID` int not null,
    `RoleID` int not null,
-   `AccessFlags` set ('CR','CW','GrR','GrW')  not null,
+   `AccessFlags` set ('CR','CW','GrR','GrW','EnR','EnW')  not null,
    constraint `FK_EnrollmentUserID` foreign key (`UserID`) references `Users` (`UserID`) on delete cascade,
    constraint `FK_EnrollmentCourseID` foreign key (`CourseID`) references `Courses` (`CourseID`) on delete cascade,
    constraint `FK_EnrollmentRoleID` foreign key (`RoleID`) references `CourseRoles` (`RoleID`),
