@@ -76,20 +76,8 @@ class UserForm extends Form {
       new TextInput ($div, 'emailAddress', 'emailAddress', $emailAddress);
       
       $div = new Div ($listDiv, 'row');
-      $systemRoles = enumerateSystemRoles ();
-      new Label ($div, 'System Role:');
-      $stack = new Div ($div, 'stack');
-      new Hr ($stack);
-      foreach ($systemRoles as $roleID => $desc) {
-         $radio = new RadioButton ($stack, 'systemRole', NULL, $roleID);
-         if ($systemRole == $roleID) {
-            $radio->setAttribute ('checked', '1');
-         }
-
-         new TextEntity ($stack, $desc);
-         new Br ($stack);
-      }
-      new Hr ($stack);
+      new Label ($div, 'System Role:', 'systemRole');
+      new Select ($div, 'systemRole', enumerateSystemRoles (), SYSTEM_ROLE_USER);
 
       $div = new Div ($listDiv, 'row');
       new Label ($div, 'User is Active?');
@@ -109,6 +97,58 @@ class UserForm extends Form {
       new TextArea ($div, 'notes', 'notes', $notes);
 
       $div = new Div ($listDiv, 'row');
+      new Label ($div, '&nbsp;');
+      new SubmitButton ($div, 'Submit');
+      new ResetButton ($div, 'Reset');
+      
+      if (! empty ($user)) {
+         new HiddenField ($this, "userID", NULL, $user->userID);
+      }
+   }
+}
+
+class UserEnrollmentForm extends Form {
+   function __construct ($parent, $action, $course = NULL, $enrollment = NULL)
+   {
+      global $SiteConfig;
+
+      parent::__construct ($parent, $action, 'POST', 'user_form');
+
+      # Include the user validation script.
+      new Script ($this, 'lib/user.js');
+
+      $this->setAttribute ('onSubmit', 'return userEnrollmentFormValidate (this);');
+      
+      $username = NULL;
+      $courseCode = NULL;
+      $courseRole = NULL;
+      $accessFlags = NULL;
+
+      if (! empty ($course)) {
+         $courseCode = $course->courseCode;
+      }
+
+      $fieldset = new FieldSet ($this);
+
+      $listDiv = new Div ($fieldset, 'list');
+      
+      $div = new Div ($listDiv, 'row');
+      new Label ($div, 'Username:', 'username', 'first');
+      new TextInput ($div, 'username', 'username', $username);
+      
+      if (! empty ($courseCode)) {
+         new HiddenField ($this, 'courseCode', NULL, $courseCode);
+      } else {
+         $div = new Div ($listDiv, 'row');
+         new Label ($div, 'Course Code:', 'courseCode');
+         new TextInput ($div, 'courseCode', 'courseCode', $courseCode);
+      }
+      
+      $div = new Div ($listDiv, 'row');
+      new Label ($div, 'Course Role:', 'courseRole');
+      new Select ($div, 'courseRole', enumerateCourseRoles (), COURSE_ROLE_STUDENT);
+      
+      $div = new Div ($listDiv, 'row submit_row');
       new Label ($div, '&nbsp;');
       new SubmitButton ($div, 'Submit');
       new ResetButton ($div, 'Reset');

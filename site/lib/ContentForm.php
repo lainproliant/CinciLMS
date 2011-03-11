@@ -66,7 +66,7 @@ class FolderForm extends Form {
 
       $listDiv = new Div ($fieldset, 'list');
 
-      $div = new Div ($listDiv, 'row');
+      $div = new Div ($listDiv, 'row submit_row');
       new Label ($div, '&nbsp;');
       new SubmitButton ($div, 'Submit');
       new ResetButton ($div, 'Reset');
@@ -144,7 +144,7 @@ class ItemForm extends Form {
 
       $listDiv = new Div ($fieldset, 'list');
 
-      $div = new Div ($listDiv, 'row');
+      $div = new Div ($listDiv, 'row submit_row');
       new Label ($div, '&nbsp;');
       new SubmitButton ($div, 'Submit');
       new ResetButton ($div, 'Reset');

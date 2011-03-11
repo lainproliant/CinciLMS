@@ -34,9 +34,9 @@ class UserClass extends NonUserClass {
          'editContent'              => 'actionEditContent',
          'enrollUser'               => 'actionEnrollUser',
          'editEnrollment'           => 'actionEditEnrollment',
-         'submitPassword'           => 'submitPassword',
          'submitContent'            => 'submitContent',
-         'submitContentEdit'        => 'submitContentEdit'));
+         'submitEnrollment'         => 'submitEnrollment',
+         'submitPassword'           => 'submitPassword'));
 
       // The user is already logged in under this class.
       // No need for login processing, remove login functions.
@@ -243,19 +243,31 @@ class UserClass extends NonUserClass {
          if (empty ($course->courseID)) {
             throw new CinciAccessException ("The specified course does not exist.");
          }
+
          
          $user = $this->getUser ();
          $enrollment = $course->getEnrollment ($user);
+         
+         // Allow the course to add its context menu.
+         $course->addContext ($this, $user, $enrollment);
 
          if (! $course->checkEnrollAbility ($this, $user, $enrollment)) {
-            throw new CinciAccessException ("You do not have permission to enroll users in this course.");
+            throw new CinciAccessException ("You are not authorized to enroll users in this course.");
          }
       }
 
       $div = new Div ($contentDiv, "prompt"); 
       $header = new XMLEntity ($div, 'h3');
-      new TextEntity ($header, "Enroll a User");
+      $headerText = "Enroll a User";
+
+      if (! empty ($course)) {
+         $headerText .= sprintf (" in %s", htmlentities ($course->courseName));
+      }
+
+      new TextEntity ($header, $headerText);
       new Para ($div, "Enter the username and course role below, then click Submit.");
+
+      new UserEnrollmentForm ($div, '?action=submitEnrollment', $course);
    }
 
    protected function submitContent ($contentDiv)
@@ -372,8 +384,62 @@ class UserClass extends NonUserClass {
       }
 
       $p = new XMLEntity ($div, 'p');
-      new TextLink ($p, sprintf ("?action=view&path=%s", $parent->pathName),
+      new TextLink ($p, sprintf ("?action=view&path=%s", htmlentities ($parent->pathName)),
          sprintf ("Return to %s (%s)", htmlentities ($parent->name), htmlentities ($course->courseName)));
+   }
+
+   protected function submitEnrollment ($contentDiv)
+   {
+      if (empty ($_POST)) {
+         throw new CinciException ("Enrollment Error", "No enrollment information provided.");
+      }
+      
+      $course = Course::byCourseCode ($_POST ['courseCode']);
+
+      if (empty ($course->courseID)) {
+         throw new CinciException ("Enrollment Error", "The specified course does not exist.");
+      }
+
+      $user = User::byUsername ($_POST ['username']);
+
+      if (empty ($user->userID)) {
+         throw new CinciException ("Enrollment Error", "The specified user does not exist.");
+      }
+      
+      if ($course->getEnrollment ($user) != NULL) {
+         throw new CinciException ("Enrollment Error", htmlentities (
+            sprintf ("The user \"%s\" is already enrolled in %s.",
+            $user->username, $course->courseName)));
+      }
+
+      $actingUser = $this->getUser ();
+      $actingUserEnrollment = $course->getEnrollment ($actingUser);
+
+      if (! $course->checkEnrollAbility ($this, $actingUser, $actingUserEnrollment)) {
+         throw new CinciAccessException ("You are not authorized to enroll users in this course.");
+      }
+
+      $courseRoleID = $_POST ['courseRole'];
+
+      // Try to the course enrollment.
+      try {
+         $course->enrollUser ($user, $courseRoleID);
+
+      } catch (DAOException $e) {
+         throw new CinciDatabaseException ("Enrollment Error",
+            htmlentities (sprintf ("There was an error enrolling \"%s\" in \"%s\".",
+               $user->username, $course->courseCode)),
+            $e->error);
+      }
+
+      $div = new Div ($contentDiv, "prompt");
+      $header = new XMLEntity ($div, 'h3');
+      new TextEntity ($header, "Success!");
+      new Para ($div, htmlentities (sprintf ("The user \"%s\" was enrolled in %s successfully.",
+            $user->username, $course->courseName)));
+      $p = new XMLEntity ($div, 'p');
+      new TextLink ($p, sprintf ("?action=view&path=%s", htmlentities ($course->courseCode)),
+         sprintf ("Return to %s", htmlentities ($course->courseName)));
    }
 
    protected function submitPassword ($contentDiv)

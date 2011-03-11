@@ -256,6 +256,10 @@ form div.list div.row {
    display: table-row;
 }
 
+form div.list div.submit_row * {
+   margin-top: 16px;
+}
+
 form p {
    margin-top: 0;
    margin-bottom: 0;

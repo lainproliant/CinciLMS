@@ -33,7 +33,7 @@ class LoginForm extends Form {
       new Label ($div, "Password:", "password");
       new PasswordInput ($div, 'password', 'password');
    
-      $div = new Div ($listDiv, 'row');
+      $div = new Div ($listDiv, 'row submit_row');
       new Label ($div, "&nbsp;");
       new SubmitButton ($div, "Login");
       new ResetButton ($div, "Reset");
@@ -70,7 +70,7 @@ class ChangePasswordForm extends Form {
       new Label ($div, "Confirm New:", "new_password_B");
       new PasswordInput ($div, 'new_password_B', 'new_password_B');
 
-      $div = new Div ($listDiv, 'row');
+      $div = new Div ($listDiv, 'row submit_row');
 
       new Label ($div, "&nbsp;");
       new SubmitButton ($div, "Change Password");

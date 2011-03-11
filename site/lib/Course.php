@@ -124,6 +124,11 @@ class Course extends CoursesVO {
     *
     * Returns a new FactCourseEnrollmentVO object on success,
     * throws a DAOException upon failure.
+    *
+    * NOTE that this method does not check for an existing
+    * enrollment, as the composite key of UserID/CourseID
+    * in FactCourseEnrollment is forced to be unique.  If
+    * such an enrollment exists, a DAOException will be thrown.
     */
    public function enrollUser ($user, $roleID)
    {
@@ -295,8 +300,6 @@ class Course extends CoursesVO {
          array () :
          explode (',', $enrollment->accessFlags);
 
-      var_dump ($userPermissions);
-
       if (in_array ('EnW', $userPermissions)) {
          // The user is enrolled and has EnW permissions, grant ability.
          return TRUE;
@@ -347,7 +350,8 @@ class Course extends CoursesVO {
       if ($this->checkEnrollAbility ($authority, $user, $enrollment)) {
          $modifyMenu = $authority->getMenu ()->appendSubmenu ('Modify');
          
-         $enrollUserAction = sprintf ('&action=enrollUser&courseID=%d', $this->courseID);
+         $enrollUserAction = sprintf ('?action=enrollUser&courseCode=%s', 
+            htmlentities ($this->courseCode));
 
          // Add course enrollment item.
          $modifyMenu->addItem ('Enroll User', new HyperlinkAction ($enrollUserAction));

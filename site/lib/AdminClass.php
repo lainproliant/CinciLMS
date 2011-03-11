@@ -128,8 +128,7 @@ class AdminClass extends SysopClass {
          throw new CinciException ("Edit User Error", "No user information provided.");
       }
 
-      $user = new User ();
-      $user->byUserID ($_POST ['userID']);
+      $user = User::byUserID ($_POST ['userID']);
 
       $user->username = $_POST ['username'];
       $user->externalID = $_POST ['externalID'];

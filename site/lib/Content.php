@@ -406,7 +406,7 @@ class ContentItem extends CourseContentSubtype {
       new Span ($p, htmlentities ($this->name), 'title');
       new Br ($p);
       
-      new Span ($p, $itemInfo->text);
+      new Span ($p, htmlentities ($itemInfo->text));
    }
 
    protected function createVO ()
