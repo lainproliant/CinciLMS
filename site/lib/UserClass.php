@@ -32,6 +32,8 @@ class UserClass extends NonUserClass {
          'view'                     => 'actionView',
          'newContent'               => 'actionNewContent',
          'editContent'              => 'actionEditContent',
+         'enrollUser'               => 'actionEnrollUser',
+         'editEnrollment'           => 'actionEditEnrollment',
          'submitPassword'           => 'submitPassword',
          'submitContent'            => 'submitContent',
          'submitContentEdit'        => 'submitContentEdit'));
@@ -149,17 +151,20 @@ class UserClass extends NonUserClass {
          $subPathArray = array_slice ($pathArray, 0, $x + 1);
 
          if ($x + 1 < count ($pathArray)) {
-            new TextLink ($breadcrumbHeader, sprintf ('?action=view&path=%s',
-               htmlentities (implode ('/', $subPathArray))), $pathArray [$x]);
+            $subPath = implode ('/', $subPathArray);
+            $subPathHref = htmlentities (
+               sprintf ('?action=view&path=%s', $subPath), ENT_QUOTES);
+            $pathName = htmlentities ($pathArray [$x], ENT_QUOTES);
             
+            new TextLink ($breadcrumbHeader, $subPathHref, $pathName);
             new TextEntity ($breadcrumbHeader, ' / ');
 
          } else {
-            new TextEntity ($breadcrumbHeader, $pathArray [$x]);
+            new TextEntity ($breadcrumbHeader, htmlentities ($pathArray [$x]), ENT_QUOTES);
          }
 
       }
-
+      
       $courseCode = $pathArray [0];
 
       $user = User::byUserID ($_SESSION ['userid']);
