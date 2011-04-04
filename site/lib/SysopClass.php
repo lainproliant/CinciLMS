@@ -25,6 +25,7 @@ class SysopClass extends UserClass {
          '_sysopEnrollAbility'   => NULL,
          'newCourse'             => 'actionNewCourse',
          'editCourse'            => 'actionEditCourse',
+         'searchUsers'           => 'actionSearchUsers',
          'submitNewCourse'       => 'submitNewCourse',
          'submitCourseEdit'      => 'submitCourseEdit'));
       
@@ -46,6 +47,15 @@ class SysopClass extends UserClass {
       new TextEntity ($header, "Create a New Course");
       new Para ($div, "Edit the course properties below, then click Submit.");
       new CourseForm ($div, '?action=submitNewCourse', $this, $this->getUser ());
+   }
+
+   protected function actionSearchUsers ($contentDiv)
+   {
+      $div = new Div ($contentDiv, "prompt");
+      $header = new XMLEntity ($div, 'h3');
+      new TextEntity ($header, "Search Users in System");
+      new Para ($div, "Enter the search criterion below, then click Search.");
+      new UserSearchForm ($div, '?action=submitUserSearch');
    }
 
    protected function submitNewCourse ($contentDiv) 

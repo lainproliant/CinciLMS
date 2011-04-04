@@ -159,4 +159,67 @@ class UserEnrollmentForm extends Form {
    }
 }
 
+
+class UserSearchForm extends Form {
+   function __construct ($parent, $action)
+   {
+      global $SiteConfig;
+
+      parent::__construct ($parent, $action, 'POST', 'user_form');
+
+      # Include the user validation script.
+      new Script ($this, 'lib/user.js');
+
+      $this->setAttribute ('onSubmit', 'return userSearchValidate (this);');
+
+      $criterionArray = array (
+         "Username",
+         "Full Name (Last, First)",
+         "First Name"
+      );
+      
+      $criterion = NULL;
+      $search = NULL;
+
+      if (! empty ($course)) {
+         $courseCode = $course->courseCode;
+      }
+
+      $fieldset = new FieldSet ($this);
+
+      $listDiv = new Div ($fieldset, 'list');
+      
+      $div = new Div ($listDiv, 'row');
+      new Label ($div, 'Search by:', 'criterion', 'first');
+      new Select ($div, 'criterion', $criterionArray, 0);
+      
+      $div = new Div ($listDiv, 'row');
+      new Label ($div, 'Search with:', 'search');
+      new TextInput ($div, 'search', 'search');
+      
+      $div = new Div ($listDiv, 'row submit_row');
+      new Label ($div, '&nbsp;');
+      new SubmitButton ($div, 'Search');
+      new ResetButton ($div, 'Reset');
+   }
+}
+
+class UserSearchResults extends Div {
+   function __construct ($parent, $users)
+   {
+      parent::__construct ($parent, 'search_results');
+      
+      $table = new Table ($this, 'results');
+
+      for ($user in $users) {
+
+      }
+
+
+
+   }
+}
+
+
+
 ?>
