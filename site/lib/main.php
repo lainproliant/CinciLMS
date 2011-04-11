@@ -224,10 +224,11 @@ function main ()
    // Populate the navigation div with a functions menu.
    populateMenu ($menuList, $class, $class->getMenu (), TRUE);
    populateMenu ($contextMenuList, $class, $class->getContextMenu ());
-
-   $containerDiv->pretty = $SiteConfig ['site']['pretty'];
-   $containerDiv->initial_il = $SiteConfig ['site']['initial_il'];
    
+   $containerDiv->setPrettyPrint (
+      $SiteConfig ['site']['pretty'],
+      $SiteConfig ['site']['initial_il']);
+
    $containerDiv->printString ();
 }
 

@@ -45,8 +45,8 @@ class XMLEntity implements IStringRep {
    private $children;
    protected $no_empty_tags;
 
-   public $pretty;
-   public $initial_il;
+   private $pretty;
+   private $initial_il;
 
    // Constructs an XMLEntity.
    function __construct ($parent, $tag, $attributes = NULL)
@@ -152,6 +152,19 @@ class XMLEntity implements IStringRep {
       }
 
       return $html;
+   }
+
+   /*
+    * Sets pretty print options.
+    *
+    * pretty:     Whether the output should be indented pretty-like.
+    * initial_il: The initial indent level of the text.
+    *             By default, this is 0.
+    */
+   public function setPrettyPrint ($pretty, $initial_il = 0)
+   {
+      $this->pretty = $pretty;
+      $this->initial_il = $initial_il;
    }
 
    /*
