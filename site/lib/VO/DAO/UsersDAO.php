@@ -45,9 +45,10 @@ class UsersDAO {
       $stmt = $this->db->prepare ($query);
       call_user_func_array (array ($stmt, "bind_param"), $bindParamArgs);
       $stmt->execute ();
+      $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["UserID"], $results ["ExternalID"], $results ["Username"], $results ["FirstName"], $results ["MiddleInitial"], $results ["LastName"], $results ["EmailAddress"], $results ["PasswordSalt"], $results ["PasswordHash"], $results ["Notes"], $results ["LastLogin"], $results ["IsActive"], $results ["SystemRole"]);
       while ($stmt->fetch ()) {
-         $resultsList [] = $results;
+         $resultsList [] = array_map ($lambda, $results);
       }
       $stmt->close ();
       return $resultsList;

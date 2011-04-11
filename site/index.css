@@ -343,3 +343,31 @@ a.folder:hover {
    background-repeat: no-repeat;
    background-position: 8px 4px;
 }
+
+/*----------------------------------------------------------------------------
+ * CSS Rules for Search Results.
+ */
+div.search_results th {
+   background-color: #F0D0C0;
+}
+
+div.search_results table,
+div.search_results th,
+div.search_results tr,
+div.search_results td {
+   border: 0px;
+}
+
+div.search_results th,
+div.search_results td {
+   min-width: 6em;
+   max-width: 30em;
+}
+
+div.search_results th {
+   text-align: center;
+}
+
+div.search_results td {
+   padding-right: 8px;
+}

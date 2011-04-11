@@ -174,8 +174,8 @@ class UserSearchForm extends Form {
 
       $criterionArray = array (
          "Username",
-         "Full Name (Last, First)",
-         "First Name"
+         "Last Name",
+         "Last, First"
       );
       
       $criterion = NULL;
@@ -205,21 +205,61 @@ class UserSearchForm extends Form {
 }
 
 class UserSearchResults extends Div {
-   function __construct ($parent, $users)
+   function __construct ($parent, $authority, $users, $columnsBefore = array (),
+      $columnsAfter = array ())
    {
       parent::__construct ($parent, 'search_results');
-      
+
+      $columns = array ('Username' => NULL, 'Name' => NULL);
+      $columns = array_merge ($columnsBefore, $columns);
+      $columns = array_merge ($columns, $columnsAfter);
+
       $table = new Table ($this, 'results');
 
-      for ($user in $users) {
-
+      foreach (array_keys ($columns) as $column) {
+         new TableHeader ($table, $column);
       }
 
+      foreach ($users as $user) {
+         $row = new TableRow ($table);
 
+         foreach ($columns as $column => $param) {
+            $this->createUserCell ($authority, $row, $column, $param, $user);
+         }
+      }
+   }
 
+   private function createUserCell ($authority, $row, $columnName, $param, $user)
+   {
+      switch ($columnName) {
+      case "Username":
+         $col = new TableColumn ($row);
+
+         if ($authority->authorizeCheck ('viewProfile')) {
+            new TextLink ($col, sprintf (
+               "?action=viewProfile&username=%s", htmlentities ($user->username)),
+            htmlentities ($user->username));
+         } else {
+            new TextEntity ($col, htmlentities ($user->username));
+         }
+         
+         break;
+
+      case "Name":
+         $nameString = sprintf ("%s, %s", $user->lastName, $user->firstName);
+
+         if (! empty ($user->middleInitial)) {
+            $nameString = sprintf ("%s %s", $nameString, $user->middleInitial);
+         }
+
+         new TableColumn ($row, htmlentities ($nameString));
+         break;
+
+      case "Default":
+         throw new CinciException ("Search Results Error",
+            sprintf ("\"%s\" is an unknown search results column.", $columnName));
+      }
    }
 }
-
-
 
 ?>

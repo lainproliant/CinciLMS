@@ -45,9 +45,10 @@ class CoursesDAO {
       $stmt = $this->db->prepare ($query);
       call_user_func_array (array ($stmt, "bind_param"), $bindParamArgs);
       $stmt->execute ();
+      $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["CourseID"], $results ["CourseCode"], $results ["CourseName"], $results ["EntryPointID"], $results ["AccessFlags"]);
       while ($stmt->fetch ()) {
-         $resultsList [] = $results;
+         $resultsList [] = array_map ($lambda, $results);
       }
       $stmt->close ();
       return $resultsList;
@@ -115,9 +116,10 @@ class CourseRolesDAO {
       $stmt = $this->db->prepare ($query);
       call_user_func_array (array ($stmt, "bind_param"), $bindParamArgs);
       $stmt->execute ();
+      $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["RoleID"], $results ["RoleName"], $results ["DefaultAccess"]);
       while ($stmt->fetch ()) {
-         $resultsList [] = $results;
+         $resultsList [] = array_map ($lambda, $results);
       }
       $stmt->close ();
       return $resultsList;
@@ -185,9 +187,10 @@ class FactCourseEnrollmentDAO {
       $stmt = $this->db->prepare ($query);
       call_user_func_array (array ($stmt, "bind_param"), $bindParamArgs);
       $stmt->execute ();
+      $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["UserID"], $results ["CourseID"], $results ["RoleID"], $results ["AccessFlags"]);
       while ($stmt->fetch ()) {
-         $resultsList [] = $results;
+         $resultsList [] = array_map ($lambda, $results);
       }
       $stmt->close ();
       return $resultsList;

@@ -56,5 +56,81 @@ class User extends UsersVO {
       return CourseJoin::joinUserID_CourseEnrollment (
          $this->userID);
    }
+
+   /*
+    * Search for users with usernames that match or begin with the
+    * given characters.
+    */
+   public static function searchByUsername ($username)
+   {
+      $dao = new UsersDAO ();
+      $users = array ();
+
+      $lambda = create_function ('$a', 'return $a;');
+
+      $results = $dao->search (array ("Username like ?" =>
+         sprintf ("%s%%", $username)));
+
+      foreach ($results as $result) {
+         $users [] = $lambda (self::fromResult ($result));
+      }
+
+      return $users;
+   }
+
+
+   /*
+    * Search for users with last names that match or begin with the
+    * given characters.
+    */
+   public static function searchByLastName ($lastName)
+   {
+      $dao = new UsersDAO ();
+      $users = array ();
+
+      $lambda = create_function ('$a', 'return $a;');
+
+      $results = $dao->search (array ("LastName like ?" =>
+         sprintf ("%s%%", $lastName)));
+
+      foreach ($results as $result) {
+         $users [] = $lambda (self::fromResult ($result));
+      }
+
+      return $users;
+   }
+
+
+   /*
+    * Search for users with last and first names that match or begin
+    * with the given characters.  The last name must match if
+    * searching with a first name.
+    *
+    * fullName: The full name to search with.  It should be in the form
+    *           of "Last, First".
+    */
+   public static function searchByFullName ($fullName)
+   {
+      $dao = new UsersDAO ();
+      $users = array ();
+
+      list ($lastName, $firstName) = split (", ", $fullName);
+      
+      $lastName = trim ($lastName);
+      $firstName = trim ($firstName);
+
+      $lambda = create_function ('$a', 'return $a;');
+
+      $results = $dao->search (array (
+         "LastName like ?" => sprintf ("%s%%", $lastName),
+         "FirstName like ?" => sprintf ("%s%%", $firstName)));
+
+      foreach ($results as $result) {
+         $users [] = $lambda (self::fromResult ($result));
+      }
+
+      return $users;
+   }
+ 
 }
 
