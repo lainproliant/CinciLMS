@@ -27,17 +27,27 @@ class SysopClass extends UserClass {
          'editCourse'            => 'actionEditCourse',
          'searchUsers'           => 'actionSearchUsers',
          'submitNewCourse'       => 'submitNewCourse',
-         'submitCourseEdit'      => 'submitCourseEdit'));
+         'submitCourseEdit'      => 'submitCourseEdit',
+         'submitUserSearch'      => 'submitUserSearch'));
       
       $createMenu = $this->getMenu ()->getItem ('Create');
+      $searchMenu = $this->getMenu ()->getItem ('Search');
       
       if (empty ($createMenu)) {
          $createMenu = new ActionMenu ();
          $this->getMenu ()->addItem ('Create', $createMenu);
       }
 
+      if (empty ($searchMenu)) {
+         $searchMenu = new ActionMenu ();
+         $this->getMenu ()->addItem ('Search', $searchMenu);
+      }
+
       $createMenu->addItem (
          "New Course", 'newCourse');
+
+      $searchMenu->addItem (
+         "Users", 'searchUsers');
    }
 
    protected function actionNewCourse ($contentDiv)
@@ -95,6 +105,37 @@ class SysopClass extends UserClass {
          "The course \"%s\" was created successfully.", htmlentities ($course->courseName)));
       $p = new XMLEntity ($div, 'p');
       new TextLink ($p, 'index.php', 'Return Home');
+   }
+
+   protected function submitUserSearch ($contentDiv)
+   {
+      $criterion = $_POST ['criterion'];
+      $search = $_POST ['search'];
+
+      $users = NULL;
+      
+      switch ($criterion) {
+      case 0:
+         $users = User::searchByUsername ($search);
+         break;
+
+      case 1:
+         $users = User::searchByLastname ($search);
+         break;
+
+      case 2:
+         $users = User::searchByFullName ($search);
+         break;
+
+      default:
+         throw new CinciException ("User Search Error",
+            "Unknown search criterion.");
+      }
+
+      $div = new Div ($contentDiv, "prompt");
+      $header = new XMLEntity ($div, 'h3');
+      new TextEntity ($header, "User Search Results");
+      new UserSearchResults ($div, $this, $users); 
    }
 }
 

@@ -11,6 +11,8 @@ mkdir -p DAO;
 
 echo "Generating VO Source Files..."
 
+cd site/lib/VO
+
 ppdao --database CinciLMS --tables Courses,CourseRoles,FactCourseEnrollment --vo --include DAO/CoursesDAO.php --username ${USERNAME} --password ${PASSWORD} > CoursesVO.php;
 ppdao --database CinciLMS --tables Users --vo --include DAO/UsersDAO.php --username ${USERNAME} --password ${PASSWORD} > UsersVO.php;
 ppdao --database CinciLMS --tables CourseContent,ContentItems,ContentLinks,ContentItemAttachments,FactFolderContents --keys ContentLinks=DestinationID:ContentItemAttachments=ContentID --indexes FactFolderContents=IDX_PathIndex --vo --include DAO/ContentDAO.php --username ${USERNAME} --password ${PASSWORD} > ContentVO.php;

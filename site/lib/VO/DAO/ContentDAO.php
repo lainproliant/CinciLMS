@@ -34,9 +34,10 @@ class CourseContentDAO {
       $stmt = $this->db->prepare ($query);
       call_user_func_array (array ($stmt, "bind_param"), $bindParamArgs);
       $stmt->execute ();
+      $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["ContentID"], $results ["ParentID"], $results ["OwnerID"], $results ["TypeID"], $results ["Name"], $results ["AccessFlags"], $results ["CreationTime"]);
       while ($stmt->fetch ()) {
-         $resultsList [] = $results;
+         $resultsList [] = array_map ($lambda, $results);
       }
       $stmt->close ();
       return $resultsList;
@@ -104,9 +105,10 @@ class ContentItemsDAO {
       $stmt = $this->db->prepare ($query);
       call_user_func_array (array ($stmt, "bind_param"), $bindParamArgs);
       $stmt->execute ();
+      $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["ItemID"], $results ["Title"], $results ["Text"]);
       while ($stmt->fetch ()) {
-         $resultsList [] = $results;
+         $resultsList [] = array_map ($lambda, $results);
       }
       $stmt->close ();
       return $resultsList;
@@ -189,9 +191,10 @@ class ContentLinksDAO {
       $stmt = $this->db->prepare ($query);
       call_user_func_array (array ($stmt, "bind_param"), $bindParamArgs);
       $stmt->execute ();
+      $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["LinkID"], $results ["DestinationID"]);
       while ($stmt->fetch ()) {
-         $resultsList [] = $results;
+         $resultsList [] = array_map ($lambda, $results);
       }
       $stmt->close ();
       return $resultsList;
@@ -274,9 +277,10 @@ class ContentItemAttachmentsDAO {
       $stmt = $this->db->prepare ($query);
       call_user_func_array (array ($stmt, "bind_param"), $bindParamArgs);
       $stmt->execute ();
+      $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["ContentID"], $results ["FileID"]);
       while ($stmt->fetch ()) {
-         $resultsList [] = $results;
+         $resultsList [] = array_map ($lambda, $results);
       }
       $stmt->close ();
       return $resultsList;
@@ -354,9 +358,10 @@ class FactFolderContentsDAO {
       $stmt = $this->db->prepare ($query);
       call_user_func_array (array ($stmt, "bind_param"), $bindParamArgs);
       $stmt->execute ();
+      $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["FolderID"], $results ["ContentID"], $results ["Path"]);
       while ($stmt->fetch ()) {
-         $resultsList [] = $results;
+         $resultsList [] = array_map ($lambda, $results);
       }
       $stmt->close ();
       return $resultsList;
