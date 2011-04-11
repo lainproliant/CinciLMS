@@ -11,10 +11,14 @@ class XMLEntityException extends Exception { }
 
 define ("XMLENTITY_INDENT_WIDTH", 3);
 
+interface IStringRep {
+   public function getString ();
+}
+
 /*
  * TextEntity: A generic printable text entity.
  */
-class TextEntity {
+class TextEntity implements IStringRep {
    private $text;
 
    function __construct ($parent, $text)
@@ -35,11 +39,14 @@ class TextEntity {
 /*
  * XMLEntity: A generic XML document entity.
  */
-class XMLEntity {
+class XMLEntity implements IStringRep {
    private $tag;
    private $attributes;
    private $children;
    protected $no_empty_tags;
+
+   public $pretty;
+   public $initial_il;
 
    // Constructs an XMLEntity.
    function __construct ($parent, $tag, $attributes = NULL)
@@ -80,8 +87,17 @@ class XMLEntity {
    }
 
    // Gets a list of child nodes.
-   public function getChildren () {
+   public function getChildren ()
+   {
       return $this->children;
+   }
+
+   /*
+    * Gets a string representation of the entity.
+    */
+   public function getString ()
+   {
+      return $this->generateString ($this->pretty, $this->initial_il);
    }
 
    /*
@@ -94,7 +110,7 @@ class XMLEntity {
     *             the pretty printing code.
     *             Default is 0.
     */
-   public function getString ($pretty = FALSE, $il = 0)
+   public function generateString ($pretty = FALSE, $il = 0)
    {
       $html = '';
       
@@ -115,10 +131,10 @@ class XMLEntity {
          foreach ($this->children as $child) {
             if (get_class ($child) != "TextEntity") {
                if ($pretty) {
-                  $html .= "\n" . $child->getString ($pretty, $il + 1);
+                  $html .= "\n" . $child->generateString ($pretty, $il + 1);
                   $do_newline = TRUE;
                } else {
-                  $html .= $child->getString ($pretty, $il);
+                  $html .= $child->generateString ($pretty, $il);
                }
 
             } else {
@@ -141,13 +157,10 @@ class XMLEntity {
    /*
     * Prints a representation of the entire entity with 
     * child nodes as a string
-    *
-    * pretty:        Determine whether output should be pretty and indented.
-    * initial_il:    The initial indent level.  Default is 0.
     */
-   public function printString ($pretty = FALSE, $initial_il = 0)
+   public function printString ()
    {
-      print $this->getString ($pretty, $initial_il);
+      print $this->getString ();
       print "\n";
    }
 }
