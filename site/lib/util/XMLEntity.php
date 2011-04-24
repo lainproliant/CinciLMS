@@ -359,7 +359,7 @@ class Checkbox extends Input {
  * ActionButton: A convenience class for a button link to execute script.  Requires JavaScript.
  */
 class ActionButton extends Input {
-   function __construct ($parent, $label, $action, $class)
+   function __construct ($parent, $label, $action, $class = NULL)
    {
       parent::__construct ($parent, 'button', NULL);
 
@@ -519,6 +519,36 @@ class UnorderedList extends XMLEntity {
    function __construct ($parent, $class = NULL, $children = NULL)
    {
       parent::__construct ($parent, 'ul');
+
+      if (! empty ($class)) {
+         $this->setAttribute ('class', $class);
+      }
+
+      if (! empty ($children)) {
+         foreach ($children as $child) {
+            $this->addListItem ($child);
+         }
+      }
+   }
+
+   function addListItem ($child) 
+   {
+      $li = new ListItem ($this); 
+      $li->addChild ($child);
+      return $li;
+   }
+}
+
+/*
+ * OrderedList: An unordered list of elements.
+ * To use this list, create HTMLEntities with NULL parents,
+ * then construct an OrderedList and add the items in order,
+ * either via the constructor or with the addChild method.
+ */
+class OrderedList extends XMLEntity {
+   function __construct ($parent, $class = NULL, $children = NULL)
+   {
+      parent::__construct ($parent, 'ol');
 
       if (! empty ($class)) {
          $this->setAttribute ('class', $class);
