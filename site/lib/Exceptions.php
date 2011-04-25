@@ -1,5 +1,7 @@
 <?php
 
+
+
 /*
  * Exceptions: Types of exceptions in the 
  * Cincinnatus Learning Management System.

@@ -30,6 +30,8 @@ include_once "SiteConfig.php";
  */
 function accessDenied ($contentDiv)
 {
+   global $SiteLog;
+
    $div = new Div ($contentDiv, 'warning prompt');
    $h3 = new XMLEntity ($div, 'h3');
    new TextEntity ($h3, "Unauthorized Action");

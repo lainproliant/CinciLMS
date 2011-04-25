@@ -12,6 +12,7 @@ include_once "NonUserClass.php";
 include_once "UserClass.php";
 include_once "SysopClass.php";
 include_once "AdminClass.php";
+include_once "Logger.php";
 
 define ("SYSTEM_ROLE_USER",   0);
 define ("SYSTEM_ROLE_SYSOP",  1);
@@ -19,6 +20,9 @@ define ("SYSTEM_ROLE_ADMIN",  2);
 
 // Define a global configuration array.
 $SiteConfig = array ();
+
+// Define a global logger.
+$SiteLog = NULL;
 
 // Define an exception for session expiry events.
 class ExpiredSessionException extends Exception { }
@@ -36,6 +40,22 @@ function globalSiteConfig ()
 
    // Set the default timezone for time functions.
    date_default_timezone_set ($SiteConfig ['site']['default_timezone']);
+
+   // Initialize the global log file.
+   $SiteLog = new Logger ($SiteConfig ['site']['log_file'], $SiteConfig ['site']['log_level']);
+}
+
+
+/*
+ * Gets the current username.
+ */
+function getCurrentUsername ()
+{
+   if (! isset ($_SESSION ["username"])) {
+      return '<guest>';
+   } else {
+      return $_SESSION ["username"];
+   }
 }
 
 /*
