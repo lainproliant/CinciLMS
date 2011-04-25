@@ -17,6 +17,7 @@ include_once "Course.php";
 include_once "Content.php";
 
 include_once "ContentForm.php";
+include_once "GradeForm.php";
 
 class UserClass extends NonUserClass {
    function __construct ()
@@ -34,6 +35,7 @@ class UserClass extends NonUserClass {
          'editContent'              => 'actionEditContent',
          'enrollUser'               => 'actionEnrollUser',
          'editEnrollment'           => 'actionEditEnrollment',
+         'gradeCourse'              => 'actionGradeCourse',
          'submitContent'            => 'submitContent',
          'submitEnrollment'         => 'submitEnrollment',
          'submitPassword'           => 'submitPassword'));
@@ -254,20 +256,52 @@ class UserClass extends NonUserClass {
          if (! $course->checkEnrollAbility ($this, $user, $enrollment)) {
             throw new CinciAccessException ("You are not authorized to enroll users in this course.");
          }
+      } else {
+         // A course code was not provided.
+         throw new CinciException ("Enroll User Error", "No course code was provided.");
       }
 
       $div = new Div ($contentDiv, "prompt"); 
       $header = new XMLEntity ($div, 'h3');
-      $headerText = "Enroll a User";
-
-      if (! empty ($course)) {
-         $headerText .= sprintf (" in %s", htmlentities ($course->courseName));
-      }
+      $headerText = sprintf ("Enroll a user in %s", htmlentities ($course->courseName));
 
       new TextEntity ($header, $headerText);
       new Para ($div, "Enter the username and course role below, then click Submit.");
 
       new UserEnrollmentForm ($div, '?action=submitEnrollment', $course);
+   }
+
+   protected function actionGradeCourse ($contentDiv)
+   {
+      $course = NULL;
+
+      if (! empty ($_GET ['courseCode'])) {
+         $courseCode = $_GET ['courseCode'];
+
+         $course = Course::byCourseCode ($courseCode);
+         $user = $this->getUser ();
+         $enrollment = $course->getEnrollment ($user);
+
+         if (empty ($course->courseID)) {
+            throw new CinciAccessException ("The specified course does not exist.");
+         }
+
+         if (! $course->checkReadGradesAbility ($this, $user, $enrollment)) {
+            throw new CinciAccessException ("You are not authorized to read the grade record for this course.");
+         }
+
+      } else {
+         // A course code was not provided.
+         throw new CinciException ("Grade Course Error", "No course code was provided.");
+      }
+
+      $div = new Div ($contentDiv, "prompt");
+      $header = new XMLEntity ($div, 'h3');
+      $headerText = sprintf ("Grade Record: %s", htmlentities ($course->courseName));
+
+      new TextEntity ($header, $headerText);
+
+      new GradeRecordForm ($contentDiv, $course);
    }
 
    protected function submitContent ($contentDiv)

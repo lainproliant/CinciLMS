@@ -206,6 +206,7 @@ create table `AssignmentFileSubmissions` (
    `AssignmentID` int not null,
    `StudentID` int not null,
    `CourseID` int not null,
+   INDEX IDX_StudentAssignmentSubmissions (`AssignmentID`, `StudentID`, `CourseID`),
    `SubmissionDate` date not null,
    `FileID` int not null,
    constraint `FK_SubmissionAssignmentID` foreign key (`AssignmentID`) references `Assignments` (`AssignmentID`) on delete cascade,

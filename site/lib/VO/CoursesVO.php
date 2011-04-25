@@ -107,6 +107,15 @@ class FactCourseEnrollmentVO {
       return $obj;
    }
    
+   public static function listByCourseID ($courseID) {
+      $dao = new FactCourseEnrollmentDAO ();
+      $objs = array ();
+      foreach ($dao->listByCourseID ($courseID) as $result) {
+         $objs [] = self::fromResult ($result);
+      }
+      return $objs;
+   }
+   
    protected function toData () {
       $data = array ();
       $data ["UserID"] = $this->userID;

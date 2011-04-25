@@ -1,0 +1,14 @@
+# Hide all *.php files from users.
+<Files ~ "^.*\.php">
+   Order allow,deny
+   Deny from all
+   Satisfy All
+</Files>
+
+# Allow the outside world to see the Ajax portal.
+<Files ~ "^ajax.php">
+   Order allow,deny
+   Allow from all
+   Satisfy All
+</Files>
+

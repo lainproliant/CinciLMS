@@ -17,6 +17,7 @@ include_once "User.php";
 # LRS-DEBUG: Remove after debug_testData is removed.
 include_once "Course.php";
 include_once "Content.php";
+include_once "Grades.php";
 
 function randomPassword ($length = 6)
 {
@@ -198,13 +199,23 @@ class AdminClass extends SysopClass {
          $course->enrollUser ($user, COURSE_ROLE_INSTRUCTOR);
          $courses [] = $course;
       }
-      
-      // Create a test course with a large level of nested folders.
-      $nestCourse = Course::createNewCourse (
-         "Nested Course",
-         "lrs_debug_test_nest",
-         COURSE_DEFAULT_PERMISSIONS,
-         $this->getUser ());
+
+      // Create some test grade columns!
+      foreach ($courses as $course) {
+         $gradeColumns = array ();
+
+         for ($X = 0; $X < 7; $X++) {
+            $gradeColumn = new GradeColumn ();
+
+            $gradeColumn->courseID = $course->courseID;
+            $gradeColumn->name = sprintf ("Column %d", $X);
+            $gradeColumn->pointsPossible = 100;
+
+            $gradeColumn->insert ();
+
+            $gradeColumns [] = $gradeColumn;
+         }
+      }
       
       // Enroll each user as a student in each other course.
       foreach ($courses as $course) {

@@ -7,6 +7,8 @@
       <script type='text/javascript' src='lib/main.js'></script>
       <script type='text/javascript' src='lib/util/js/sprintf-0.6.js'></script>
       <script type='text/javascript' src='lib/util/js/jssha256.js'></script>
+      <script type='text/javascript' src='lib/util/js/sorttable.js'></script>
+
 
       <title>University of Cincinnati</title>
 

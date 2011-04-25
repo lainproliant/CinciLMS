@@ -318,10 +318,12 @@ class Course extends CoursesVO {
     *                determined.
     * user:          The User instance.  Can be NULL, in which case the user is
     *                treated as a guest (and definitely won't have unenroll ability).
+    * enrollment:    The user's enrollment in the course.  May be NULL, in which
+    *                case the user is treated as a guest.
     *
     * Returns True if the user has the right to unenroll users, False otherwise.
     */
-   public function checkUnenrollAbility ($authority, $user)
+   public function checkUnenrollAbility ($authority, $user, $enrollment)
    {
       // If the authority contains '_adminUnenrollAbility' permissions, grant ability.
       if (! empty ($authority) and $authority->authorizeCheck ('_adminUnenrollAbility')) {
@@ -330,7 +332,6 @@ class Course extends CoursesVO {
 
       // If the user is not enrolled in the course, do not allow them to unenroll anyone.
       // Only allow them to unenroll if they have EnW rights.
-      $enrollment = $this->getEnrollment ($user);
 
       $userPermissions = empty ($enrollment) ?
          array () :
@@ -345,6 +346,41 @@ class Course extends CoursesVO {
       }
    }
 
+   /*
+    * Checks whether the specified user has rights to read the grade record
+    * for the specified course, based on the given course enrollment.
+    *
+    * authority:     The user's current AuthorityClass instance.  Can be NULL,
+    *                in which case special AuthorityClass permissions are not
+    *                determined.
+    * user:          The User instance.  Can be NULL, in which case the user is
+    *                treated as a guest (and definitely won't have unenroll ability).
+    * enrollment:    The user's enrollment in the course.  May be NULL, in which
+    *                case the user is treated as a guest.
+    */
+   public function checkReadGradesAbility ($authority, $user, $enrollment)
+   {
+      // If the authority contains '_sysopReadGradesAbility', grant ability.
+      if (! empty ($authority) and $authority->authorizeCheck ('_sysopReadGradesAbility')) {
+         return TRUE;
+      }
+
+      $userPermissions = empty ($enrollment) ?
+         array () :
+         explode (',', $enrollment->accessFlags);
+
+      if (in_array ('GrR', $userPermissions)) {
+         // The user is enrolled and has GrR permissions, grant ability.
+         return TRUE;
+      } else {
+         // The user is not enrolled or does not have GrR permissions.  Deny ability.
+         return FALSE;
+      }
+   }
+   
+   /*
+    * Adds course-specific context items to the action menu.
+    */
    public function addContext ($authority, $user, $enrollment)
    {
       if ($this->checkEnrollAbility ($authority, $user, $enrollment)) {
@@ -355,6 +391,13 @@ class Course extends CoursesVO {
 
          // Add course enrollment item.
          $modifyMenu->addItem ('Enroll User', new HyperlinkAction ($enrollUserAction));
+      }
+
+      if ($this->checkReadGradesAbility ($authority, $user, $enrollment)) {
+         $gradeCourseAction = sprintf ("?action=gradeCourse&courseCode=%s",
+            htmlentities ($this->courseCode));
+
+         $authority->getMenu ()->addItem ("Grade", new HyperlinkAction ($gradeCourseAction));
       }
    }
 }

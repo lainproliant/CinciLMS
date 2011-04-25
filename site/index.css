@@ -371,3 +371,39 @@ div.search_results th {
 div.search_results td {
    padding-right: 8px;
 }
+
+
+/*----------------------------------------------------------------------------
+ * CSS Rules for the Grade Record.
+ */
+div.grades {
+   overflow-x: scroll;
+}
+
+div.grades table,
+div.grades th,
+div.grades tr,
+div.grades td {
+   border: 0px;
+}
+
+div.grades th,
+div.grades td {
+   min-width: 10em;
+   max-width: 25em;
+}
+
+div.grades th {
+   background-color: #A0A0F0;
+}
+
+div.grades tr {
+   background-color: #A0F0A0;
+}
+
+div.grades td.static {
+   background-color: #70C070;
+}
+
+
+

@@ -169,6 +169,21 @@ class FactCourseEnrollmentDAO {
       return $results;
    }
    
+   public function listByCourseID ($courseID) {
+      $resultsList = array ();
+      $results = array ();
+      $stmt = $this->db->prepare ("select UserID, CourseID, RoleID, AccessFlags from FactCourseEnrollment where CourseID = ?");
+      $stmt->bind_param ("i", $courseID);
+      $stmt->execute ();
+      $lambda = create_function ('$a', 'return $a;');
+      $stmt->bind_result ($results ["UserID"], $results ["CourseID"], $results ["RoleID"], $results ["AccessFlags"]);
+      while ($stmt->fetch ()) {
+         $resultsList [] = array_map ($lambda, $results);
+      }
+      $stmt->close ();
+      return $resultsList;
+   }
+   
    public function search ($params, $postfix = "") {
       $resultsList = array ();
       $results = array ();
