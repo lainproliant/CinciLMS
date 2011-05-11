@@ -89,6 +89,10 @@ class ItemForm extends Form {
 
       # Include the content validation script.
       new Script ($this, 'lib/content.js');
+      
+      # Include the tinymce and initializer scripts.
+      new Script ($this, 'lib/util/tiny_mce/tiny_mce.js');
+      new Script ($this, 'lib/itemform.js');
 
       $this->setAttribute ('onSubmit', 'return itemFormValidate (this);');
       
@@ -119,18 +123,17 @@ class ItemForm extends Form {
       new Para ($label, '(optional)', 'field_note');
       $stack = new Div ($div, 'stack');
       new TextInput ($stack, 'itemPath', 'itemPath', $itemPath);
-      new Hr ($stack);
 
       $listDiv = new Div ($fieldset, 'list');
       $div = new Div ($listDiv, 'row');
-      new Label ($div, 'Text:', 'text', 'first top');
-      new TextArea ($div, 'text', 'text', $text);
+      $stack = new Div ($div, 'stack');
+      new TextArea ($stack, 'text', 'text', $text);
 
+      $listDiv = new Div ($fieldset, 'list');
       $div = new Div ($listDiv, 'row');
       $coursePermissions = enumerateCourseContentPermissions ();
-      new Label ($div, 'Folder Permissions:');
+      new Label ($div, 'Item Permissions:');
       $stack = new Div ($div, 'stack');
-      new Hr ($stack);
       foreach ($coursePermissions as $flag => $desc) {
          $check = new Checkbox ($stack, 'accessFlags[]', NULL, $flag);
          if (strpos ($accessFlags, $flag) !== false) {
@@ -140,7 +143,6 @@ class ItemForm extends Form {
          new TextEntity ($stack, $desc);
          new Br ($stack);
       }
-      new Hr ($stack);
 
       $listDiv = new Div ($fieldset, 'list');
 

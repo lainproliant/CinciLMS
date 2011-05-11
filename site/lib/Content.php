@@ -8,7 +8,6 @@
  */
 
 include_once "Exceptions.php";
-include_once "util/nbbc.php";
 
 include_once "VO/ContentVO.php";
 include_once "FolderJoin.php";
@@ -399,14 +398,13 @@ class ContentItem extends CourseContentSubtype {
       $course, $enrollment)
    {
       $itemInfo = $this->getContentItemInfo ();
-
-      $p = new XMLEntity ($contentDiv, "p");
-      $p->setAttribute ('class', 'content-item item');
+   
+      $div = new Div ($contentDiv, 'content-item item');
       
-      new Span ($p, htmlentities ($this->name), 'title');
-      new Br ($p);
+      $header = new XMLEntity ($div, 'h4');
+      new TextEntity ($header, $itemInfo->title);
       
-      new Span ($p, nl2br (htmlentities ($itemInfo->text)));
+      new TextEntity ($div, $itemInfo->text); 
    }
 
    protected function createVO ()

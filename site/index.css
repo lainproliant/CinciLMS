@@ -194,7 +194,7 @@ form fieldset {
    padding: 0;
 }
 
-form label {
+form label, form p {
    font-size: small;
 }
 
@@ -298,6 +298,7 @@ form label.top {
    margin: 1em;
    padding-left: 4em;
    padding-right: 4em;
+   padding-top: 2px;
 
    min-height: 50px;
 
@@ -310,7 +311,7 @@ a.content-item:hover {
    background-color: #F0D0C0;
 }
 
-.content-item span.title {
+.content-item .title {
    font-weight: bold;
    line-height: 50px;
    font-size: large;
