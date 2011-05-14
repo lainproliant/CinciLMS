@@ -311,6 +311,10 @@ class UserClass extends NonUserClass {
 
    protected function submitContent ($contentDiv)
    {
+      if (empty ($_POST ['contentType']) or empty ($_POST ['parent'])) {
+         throw new CinciException ("Content Submission Error", "Content type or parent not specified.");
+      }
+
       $contentType = $_POST ['contentType'];
       $parentPath = $_POST ['parent'];
       
