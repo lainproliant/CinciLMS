@@ -18,12 +18,12 @@ class GradeRecordForm extends Div {
 
       $table = new Table ($this, "sortable");
 
-      new TableHeader ($table, "First Name");
-      new TableHeader ($table, "Last Name");
-      new TableHeader ($table, "Username");
+      new TableHeader ($table->getHead (), "First Name");
+      new TableHeader ($table->getHead (), "Last Name");
+      new TableHeader ($table->getHead (), "Username");
 
       foreach ($gradeRecord->getColumns () as $column) {
-         new TableHeader ($table, $column->name);
+         new TableHeader ($table->getHead (), $column->name);
       }
 
       /*
@@ -34,7 +34,7 @@ class GradeRecordForm extends Div {
          $userPermissions = explode (',', $enrollment->accessFlags);
 
          if (in_array ('CW', $userPermissions)) {
-            $row = new TableRow ($table);
+            $row = new TableRow ($table->getBody ());
 
             $user = User::byUserID ($enrollment->userID);
 

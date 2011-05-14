@@ -583,9 +583,19 @@ class ListItem extends XMLEntity {
  * Table: A convenience class for a table.
  */
 class Table extends XMLEntity {
-   function __construct ($parent, $class = NULL)
+   private $tableHead, $tableBody;
+
+   function __construct ($parent, $class = NULL, $useHeadBody = TRUE)
    {
       parent::__construct ($parent, 'table');
+      
+      if ($useHeadBody == TRUE) {
+         $this->tableHead = new XMLEntity ($this, 'thead');
+         $this->tableBody = new XMLEntity ($this, 'tbody');
+      } else {
+         $this->tableHead = NULL;
+         $this->tableBody = NULL;
+      }
 
       if (! empty ($class)) {
          $this->setAttribute ('class', $class);
@@ -599,12 +609,22 @@ class Table extends XMLEntity {
    {
       $classID = 0;
 
-      foreach ($this->getChildren () as $childNode) {
+      foreach ($this->tableBody->getChildren () as $childNode) {
          if (get_class ($childNode) == "TableRow") {
             $childNode->setAttribute ('class', $classes[$classID]);
             $classID = ($classID + 1) % sizeof ($classes);
          }
       }
+   }
+
+   public function getHead ()
+   {
+      return $this->tableHead;
+   }
+
+   public function getBody ()
+   {
+      return $this->tableBody;
    }
 }
 

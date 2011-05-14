@@ -217,11 +217,11 @@ class UserSearchResults extends Div {
       $table = new Table ($this, 'results');
 
       foreach (array_keys ($columns) as $column) {
-         new TableHeader ($table, $column);
+         new TableHeader ($table->getHead (), $column);
       }
 
       foreach ($users as $user) {
-         $row = new TableRow ($table);
+         $row = new TableRow ($table->getBody ());
 
          foreach ($columns as $column => $param) {
             $this->createUserCell ($authority, $row, $column, $param, $user);
