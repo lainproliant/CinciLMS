@@ -29,14 +29,14 @@ include_once "User.php";
 /*
  * accessDenied: Prints an access denied message.
  */
-function accessDenied ($contentDiv)
+function accessDenied ($contentDiv, $e)
 {
    $div = new Div ($contentDiv, 'warning prompt');
    $h3 = new XMLEntity ($div, 'h3');
-   new TextEntity ($h3, "Unauthorized Action");
+   new TextEntity ($h3, "Access Denied");
 
    $p = new XMLEntity ($div, 'p');
-   new TextEntity ($p, "You are not authorized to perform the specified action.");
+   new TextEntity ($p, $e->getMessage ());
 }
 
 /*
@@ -195,14 +195,17 @@ function main ()
             $class = $newClass;
          }
       } catch (NotAuthorizedException $e) {
-         $e->logException ($SiteLog);
-         accessDenied ($contentDiv);
+         throw new CinciAccessException ("You are not authorized to perform the specified action.");
       }
-
+   
    } catch (ExpiredSessionException $e) {
       // The session has expired, notify the user.
       $e->logException ($SiteLog);
       sessionExpired ($contentDiv);
+
+   } catch (CinciAccessException $e) {
+      $e->logException ($SiteLog);
+      accessDenied ($contentDiv, $e);
 
    } catch (CinciLoginException $e) {
       // The login was unsuccessful, notify the user.
