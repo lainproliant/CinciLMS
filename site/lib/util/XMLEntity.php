@@ -751,8 +751,7 @@ function xml_header ($version = "1.0", $encoding = "UTF-8")
 /*
  * Replace all instances of any non-alphanumeric or 
  * underscore character with an underscore.
- * Useful for limiting the characters in course
- * content path names.
+ * Useful for limiting the characters in URI path names.
  *
  * $string:    The string to filter.
  *
