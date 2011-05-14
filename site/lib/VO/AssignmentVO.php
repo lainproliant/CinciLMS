@@ -10,6 +10,9 @@ class AssignmentsVO {
    }
    
    public static function fromResult ($result) {
+      if (empty ($result)) {
+         return NULL;
+      }
       $obj = new static ();
       $obj->assignmentID = $result ["AssignmentID"];
       $obj->typeID = $result ["TypeID"];
@@ -52,6 +55,9 @@ class AssignmentFileSubmissionsVO {
    }
    
    public static function fromResult ($result) {
+      if (empty ($result)) {
+         return NULL;
+      }
       $obj = new static ();
       $obj->submissionID = $result ["SubmissionID"];
       $obj->assignmentID = $result ["AssignmentID"];
@@ -98,6 +104,9 @@ class AssignmentTypesVO {
    }
    
    public static function fromResult ($result) {
+      if (empty ($result)) {
+         return NULL;
+      }
       $obj = new static ();
       $obj->assignmentTypeID = $result ["AssignmentTypeID"];
       $obj->typeName = $result ["TypeName"];

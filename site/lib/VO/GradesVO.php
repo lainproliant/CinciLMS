@@ -10,6 +10,9 @@ class GradeColumnsVO {
    }
    
    public static function fromResult ($result) {
+      if (empty ($result)) {
+         return NULL;
+      }
       $obj = new static ();
       $obj->columnID = $result ["ColumnID"];
       $obj->courseID = $result ["CourseID"];
@@ -65,6 +68,9 @@ class GradesVO {
    }
    
    public static function fromResult ($result) {
+      if (empty ($result)) {
+         return NULL;
+      }
       $obj = new static ();
       $obj->columnID = $result ["ColumnID"];
       $obj->studentID = $result ["StudentID"];

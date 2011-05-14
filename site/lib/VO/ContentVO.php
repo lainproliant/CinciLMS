@@ -10,6 +10,9 @@ class CourseContentVO {
    }
    
    public static function fromResult ($result) {
+      if (empty ($result)) {
+         return NULL;
+      }
       $obj = new static ();
       $obj->contentID = $result ["ContentID"];
       $obj->parentID = $result ["ParentID"];
@@ -58,6 +61,9 @@ class ContentItemsVO {
    }
    
    public static function fromResult ($result) {
+      if (empty ($result)) {
+         return NULL;
+      }
       $obj = new static ();
       $obj->itemID = $result ["ItemID"];
       $obj->title = $result ["Title"];
@@ -98,6 +104,9 @@ class ContentLinksVO {
    }
    
    public static function fromResult ($result) {
+      if (empty ($result)) {
+         return NULL;
+      }
       $obj = new static ();
       $obj->linkID = $result ["LinkID"];
       $obj->destinationID = $result ["DestinationID"];
@@ -145,6 +154,9 @@ class ContentItemAttachmentsVO {
    }
    
    public static function fromResult ($result) {
+      if (empty ($result)) {
+         return NULL;
+      }
       $obj = new static ();
       $obj->contentID = $result ["ContentID"];
       $obj->fileID = $result ["FileID"];
@@ -197,6 +209,9 @@ class FactFolderContentsVO {
    }
    
    public static function fromResult ($result) {
+      if (empty ($result)) {
+         return NULL;
+      }
       $obj = new static ();
       $obj->folderID = $result ["FolderID"];
       $obj->contentID = $result ["ContentID"];

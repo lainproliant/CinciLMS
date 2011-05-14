@@ -15,6 +15,9 @@ class UsersVO {
    }
    
    public static function fromResult ($result) {
+      if (empty ($result)) {
+         return NULL;
+      }
       $obj = new static ();
       $obj->userID = $result ["UserID"];
       $obj->externalID = $result ["ExternalID"];

@@ -15,6 +15,9 @@ class CoursesVO {
    }
    
    public static function fromResult ($result) {
+      if (empty ($result)) {
+         return NULL;
+      }
       $obj = new static ();
       $obj->courseID = $result ["CourseID"];
       $obj->courseCode = $result ["CourseCode"];
@@ -59,6 +62,9 @@ class CourseRolesVO {
    }
    
    public static function fromResult ($result) {
+      if (empty ($result)) {
+         return NULL;
+      }
       $obj = new static ();
       $obj->roleID = $result ["RoleID"];
       $obj->roleName = $result ["RoleName"];
@@ -99,6 +105,9 @@ class FactCourseEnrollmentVO {
    }
    
    public static function fromResult ($result) {
+      if (empty ($result)) {
+         return NULL;
+      }
       $obj = new static ();
       $obj->userID = $result ["UserID"];
       $obj->courseID = $result ["CourseID"];
