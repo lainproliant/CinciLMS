@@ -12,6 +12,7 @@ include_once "NonUserClass.php";
 include_once "UserClass.php";
 include_once "SysopClass.php";
 include_once "AdminClass.php";
+include_once "Exceptions.php";
 include_once "Logger.php";
 
 define ("SYSTEM_ROLE_USER",   0);
@@ -24,9 +25,6 @@ $SiteConfig = array ();
 // Define a global logger.
 $SiteLog = NULL;
 
-// Define an exception for session expiry events.
-class ExpiredSessionException extends Exception { }
-
 /*
  * Initialize the global SiteConfig and initialize other
  * globally important settings.
@@ -34,6 +32,7 @@ class ExpiredSessionException extends Exception { }
 function globalSiteConfig ()
 {
    global $SiteConfig;
+   global $SiteLog;
 
    // Load configuration from "config.ini".
    $SiteConfig = parse_ini_file ("config.ini", TRUE);

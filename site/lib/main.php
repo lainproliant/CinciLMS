@@ -24,14 +24,13 @@ include_once "util/XMLEntity.php";
 include_once "Exceptions.php";
 include_once "LoginForm.php";
 include_once "SiteConfig.php";
+include_once "User.php";
 
 /*
  * accessDenied: Prints an access denied message.
  */
 function accessDenied ($contentDiv)
 {
-   global $SiteLog;
-
    $div = new Div ($contentDiv, 'warning prompt');
    $h3 = new XMLEntity ($div, 'h3');
    new TextEntity ($h3, "Unauthorized Action");
@@ -54,7 +53,6 @@ function databaseError ($contentDiv, $e)
    
    $p = new Para ($div, sprintf ('<code>%s</code>',
       $e->getDBError ()));
-   
 }
 
 /*
@@ -163,6 +161,7 @@ function populateMenu ($menuList, $class, $userMenu, $level = 1)
 function main ()
 {
    global $SiteConfig;
+   global $SiteLog;
 
    // Start a new session or resume the current session.
    session_start ();
@@ -196,24 +195,29 @@ function main ()
             $class = $newClass;
          }
       } catch (NotAuthorizedException $e) {
+         $e->logException ($SiteLog);
          accessDenied ($contentDiv);
       }
 
    } catch (ExpiredSessionException $e) {
       // The session has expired, notify the user.
+      $e->logException ($SiteLog);
       sessionExpired ($contentDiv);
 
    } catch (CinciLoginException $e) {
       // The login was unsuccessful, notify the user.
+      $e->logException ($SiteLog);
       loginFailed ($contentDiv, $e);
       $class->showLogin ($contentDiv);
 
    } catch (CinciDatabaseException $e) {
       // There was a database error, notify the user.
+      $e->logException ($SiteLog);
       databaseError ($contentDiv, $e);
 
    } catch (CinciException $e) {
       // There was another kind of error.
+      $e->logException ($SiteLog);
       genericError ($contentDiv, $e);
    }
    

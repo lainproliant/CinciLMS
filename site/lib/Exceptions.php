@@ -1,6 +1,6 @@
 <?php
 
-
+include_once "User.php";
 
 /*
  * Exceptions: Types of exceptions in the 
@@ -20,9 +20,17 @@ class CinciException extends Exception {
       $this->header = $header;
    }
 
-   function getHeader ()
+   public function getHeader ()
    {
       return $this->header;
+   }
+
+   public function logException ($logger)
+   {
+      $logger->logError (sprintf ("[%s] %s: %s",
+         User::getCurrentUsername (),
+         $this->getHeader (),
+         $this->getMessage ()));
    }
 }
 
@@ -40,13 +48,29 @@ class CinciDatabaseException extends CinciException {
    {
       return $this->dberror;
    }
+
 }
 
 // An exception for login errors.
 class CinciLoginException extends CinciException { 
-   function __construct ($message)
+   private $username;
+
+   function __construct ($username, $message)
    {
       parent::__construct ("Login Error", $message);
+      $this->username = $username;
+   }
+
+   public function getUsername ()
+   {
+      return $this->username;
+   }
+
+   public function logException ($logger)
+   {
+      $logger->logInfo (sprintf ("[%s]->[%s] Login failed.",
+         User::getCurrentUsername (),
+         $this->getUsername ()));
    }
 }
 
@@ -55,6 +79,21 @@ class CinciAccessException extends CinciException {
    function __construct ($message)
    {
       parent::__construct ("Access Denied", $message);
+   }
+}
+
+
+// An exception for expired sessions.
+class ExpiredSessionException extends CinciException {
+   function __construct ()
+   {
+      parent::__construct ("Session Expired", "");
+   }
+   
+   public function logException ($logger)
+   {
+      $logger->logInfo (sprintf ("[%s] Session expired.",
+         User::getCurrentUsername ()));
    }
 }
 

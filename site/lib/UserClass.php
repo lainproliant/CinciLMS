@@ -101,6 +101,11 @@ class UserClass extends NonUserClass {
 
    protected function actionLogout ($contentDiv)
    {
+      global $SiteLog;
+
+      $SiteLog->logInfo (sprintf ("[%s] Logged out.",
+         User::getCurrentUsername ()));
+
       session_destroy ();
 
       $div = new Div ($contentDiv, 'prompt');

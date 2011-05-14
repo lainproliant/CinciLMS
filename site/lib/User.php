@@ -131,7 +131,38 @@ class User extends UsersVO {
 
       return $users;
    }
- 
+
+   /*
+    * Search for the currently logged in user's user object.
+    * If there is no user currently logged in, return NULL.
+    */
+   public static function getCurrentUser ()
+   {
+      $user = NULL;
+
+      if (! empty ($_SESSION ['userid'])) {
+         $user = User::byUserID ($_SESSION ['userid']);
+      }
+
+      return $user;
+   }
+
+   /*
+    * A convenience method to get the current username
+    * of the currently logged in user.
+    *
+    * Returns "guest" if there is no user logged in.
+    */
+   public static function getCurrentUsername ()
+   {
+      $user = static::getCurrentUser ();
+
+      if (empty ($user)) {
+         return "guest";
+      } else {
+         return $user->username;
+      }
+   }
 }
 
 ?>

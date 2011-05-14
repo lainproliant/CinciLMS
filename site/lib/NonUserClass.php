@@ -44,6 +44,7 @@ class NonUserClass extends AuthorityClass {
    protected function submitLogin ($contentDiv)
    {
       global $SiteConfig;
+      global $SiteLog;
 
       // Sleep for a few seconds to help mitigate brute force attacks.
       sleep ($SiteConfig ['site']['login_delay']);
@@ -64,18 +65,21 @@ class NonUserClass extends AuthorityClass {
          $user = User::byUsername ($username);
 
       } catch (UsernameException $e) {
-         throw new CinciLoginException ("The username and password you provided were incorrect.");
+         throw new CinciLoginException ($username,
+            "The username and password you provided were incorrect.");
       }
 
       // Do the passwords match?
       if (! $user->checkPassword ($password)) {
          // The password was incorrect.
-         throw new CinciLoginException ("The username and password you provided were incorrect.");
+         throw new CinciLoginException ($username,
+            "The username and password you provided were incorrect.");
       }
 
       // We must confirm that the user is still active, otherwise login should fail.
       if (! $user->isActive) {
-         throw new CinciLoginException ("This account has been disabled because the user is not active.  Please contact a system administrator.");
+         throw new CinciLoginException ($username, 
+            "This account has been disabled because the user is not active.  Please contact a system administrator.");
       }
 
       // Login was successful!  Create a new session. 
@@ -87,6 +91,10 @@ class NonUserClass extends AuthorityClass {
       $_SESSION['system_role'] = $user->systemRole;
       $_SESSION['first_name'] = $user->firstName;
       $_SESSION['last_name'] = $user->lastName;
+
+      // Write the login even to the log file.
+      $SiteLog->logInfo (sprintf ("[%s] Logged in.",
+         User::getCurrentUsername ()));
 
       // LRS-TODO: This needs to be replaced with a delay page that occurs before login.
       // Trigger an HTTP refresh after 2 seconds.
