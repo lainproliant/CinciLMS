@@ -390,20 +390,51 @@ div.grades td {
 
 div.grades th,
 div.grades td {
-   min-width: 10em;
+   min-width: 7em;
    max-width: 25em;
+   padding-left: 0.25em;
+   padding-right: 0.25em;
 }
 
 div.grades th {
-   background-color: #A0A0F0;
+   background-color: #FF6140;
+   text-align: left;
+}
+
+div.grades th.header {
+   background-image: url('images/table-unsorted.gif');
+   background-repeat: no-repeat;
+   background-position: center right;
+}
+
+div.grades th.header img {
+   cursor: pointer;
+}
+
+div.grades th.headerSortUp {
+   background-image: url('images/table-up.gif');
+   background-color: #FFA180;
+}
+
+div.grades th.headerSortDown {
+   background-image: url('images/table-down.gif');
+   background-color: #FFA180;
 }
 
 div.grades tr {
-   background-color: #A0F0A0;
+   background-color: #B4FD4D;
+}
+
+div.grades tr.odd {
+   background-color: #DAF48E;
 }
 
 div.grades td.static {
-   background-color: #70C070;
+   background-color: #99EEFF;
+}
+
+div.grades tr.odd td.static {
+   background-color: #B2F1FF;
 }
 
 

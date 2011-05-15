@@ -13,6 +13,12 @@ class GradeRecordForm extends Div {
    function __construct ($parent, $course) {
       parent::__construct ($parent, "grades");
 
+      // Include the jquery.tablesorter javascript plugin.
+      new Script ($this, 'lib/util/js/jquery.tablesorter.js');
+
+      // Include the grade record init script.
+      new Script ($this, 'lib/grade-record.js');
+
       $gradeRecord = new GradeRecord ($course);
       $enrollments = $course->getUserEnrollments ();
 
@@ -23,7 +29,8 @@ class GradeRecordForm extends Div {
       new TableHeader ($table->getHead (), "Username");
 
       foreach ($gradeRecord->getColumns () as $column) {
-         new TableHeader ($table->getHead (), $column->name);
+         $header = new TableHeader ($table->getHead (), $column->name);
+         new Image ($header, 'images/menu-context.png', 'context');
       }
 
       /*

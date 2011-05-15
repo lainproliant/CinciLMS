@@ -210,6 +210,12 @@ class UserSearchResults extends Div {
    {
       parent::__construct ($parent, 'search_results');
 
+      // Include the jquery.tablesorter javascript plugin.
+      new Script ($this, 'lib/util/js/jquery.tablesorter.js');
+
+      // Include the user search results init script.
+      new Script ($this, 'lib/user-search-results.js');
+
       $columns = array ('Username' => NULL, 'Name' => NULL);
       $columns = array_merge ($columnsBefore, $columns);
       $columns = array_merge ($columns, $columnsAfter);
