@@ -117,7 +117,7 @@ div.menu ul {
    top: 0%;
    left: 100%;
    width: 100%;
-   z-index: 3;
+   z-index: 2;
 }
 
 div.menu ul.L0 {
@@ -139,7 +139,7 @@ div.menu ul li {
    position: relative;
    width: 9em;
    float: left;
-   z-index: 2;
+   /*z-index: 2;*/
 }
 
 div.menu li.separator {
