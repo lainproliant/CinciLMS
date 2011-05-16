@@ -632,15 +632,17 @@ class Table extends XMLEntity {
  * TableHeader: A convenience class for a table header.
  */
 class TableHeader extends XMLEntity {
-   function __construct ($parent, $text, $class = NULL)
+   function __construct ($parent, $text = NULL, $class = NULL)
    {
       parent::__construct ($parent, 'th');
+
+      if (! empty ($text)) {
+         new TextEntity ($this, $text);
+      }
 
       if (! empty ($class)) {
          $this->setAttribute ('class', $class);
       }
-
-      new TextEntity ($this, $text);
    }
 }
 
