@@ -29,8 +29,9 @@ class GradeRecordForm extends Div {
       new TableHeader ($table->getHead (), "Username");
 
       foreach ($gradeRecord->getColumns () as $column) {
-         $header = new TableHeader ($table->getHead (), $column->name);
+         $header = new TableHeader ($table->getHead ());
          new Image ($header, 'images/menu-context.png', 'context');
+         new Span ($header, $column->name);
       }
 
       /*
@@ -74,7 +75,7 @@ class GradeRecordForm extends Div {
       $col = new TableColumn ($row);
       
       $col->setAttribute ("class", "editable");
-      $col->setAttribute ("metadata", sprintf ("%d:%d:%d",
+      $col->setAttribute ("data-cell", sprintf ("%d:%d:%d",
          $course->courseID,
          $user->userID,
          $column->columnID));

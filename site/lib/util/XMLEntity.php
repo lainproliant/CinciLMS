@@ -71,11 +71,11 @@ class XMLEntity implements IStringRep {
    public function setAttribute ($attribute, $value)
    {
       // Validate the attribute name.
-      if (ctype_alpha ($attribute[0]) and ctype_alnum ($attribute)) {
+      if (isValidAttributeName ($attribute)) {
          $this->attributes[$attribute] = $value;
       } else {
          throw new XMLEntityException (
-            "Invalid attribute name: \'$attribute\'.  Must be alphanumeric and begin with an alpha character."
+            "Invalid attribute name: \'$attribute\'."
          );
       }
    }
@@ -762,6 +762,16 @@ function xml_header ($version = "1.0", $encoding = "UTF-8")
 function anumfilter ($string)
 {
    return preg_replace ('/[^A-Za-z0-9_-]/', '_', $string);
+}
+
+
+/*
+ * Checks to confirm that the given attribute name is a
+ * valid XML attribute name.
+ */
+function isValidAttributeName ($attributeName)
+{
+   return preg_match ('/^[A-Za-z_:][A-Za-z0-9_\-.:]+$/', $attributeName);
 }
 
 
