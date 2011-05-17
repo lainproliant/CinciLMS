@@ -11,6 +11,9 @@ class XMLEntityException extends Exception { }
 
 define ("XMLENTITY_INDENT_WIDTH", 3);
 
+/*
+ * IStringRep: An interface for a stringable object.
+ */
 interface IStringRep {
    public function getString ();
 }
