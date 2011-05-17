@@ -120,6 +120,11 @@ div.menu ul {
    z-index: 2;
 }
 
+/* Special class for the initial context menu. */
+div.menu ul {
+   width: 9em;
+}
+
 div.menu ul.L0 {
    position: relative;
    top: 0%;
@@ -127,20 +132,33 @@ div.menu ul.L0 {
    width: 100%;
 }
 
+div.menu ul.context {
+   position: absolute;
+   display: block;
+   top: 100%;
+   left: 0%;
+   z-index: 3;
+}
+
+
 div.menu ul.L1 {
    position: absolute;
    top: 100%;
    left: 0%;
-   width: 100%;
    z-index: 3;
 }
 
 div.menu ul li {
    position: relative;
-   width: 9em;
    float: left;
+   width: 100%;
    /*z-index: 2;*/
 }
+
+div.menu ul.L0 li {
+   width: 9em;
+}
+
 
 div.menu li.separator {
    height: 4px;
@@ -183,6 +201,15 @@ a:active {
 
 a img {
    border: none;
+}
+
+div#column-context-menu {
+   display: none;
+   position: absolute;
+   background: white;
+   width: 6em;
+   top: 0px;
+   left: 0px;
 }
 
 /*----------------------------------------------------------------------------
@@ -436,6 +463,4 @@ div.grades td.static {
 div.grades tr.odd td.static {
    background-color: #B2F1FF;
 }
-
-
 

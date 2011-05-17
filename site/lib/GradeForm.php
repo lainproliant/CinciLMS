@@ -19,6 +19,9 @@ class GradeRecordForm extends Div {
       // Include the grade record init script.
       new Script ($this, 'lib/grade-record.js');
 
+      // Create the context menu for columns.
+      $this->createColumnContextMenu ();
+
       $gradeRecord = new GradeRecord ($course);
       $enrollments = $course->getUserEnrollments ();
 
@@ -30,6 +33,10 @@ class GradeRecordForm extends Div {
 
       foreach ($gradeRecord->getColumns () as $column) {
          $header = new TableHeader ($table->getHead ());
+
+         $header->setAttribute ('data-column', sprintf ("%d",
+            $column->columnID));
+
          new Image ($header, 'images/menu-context.png', 'context');
          new Span ($header, $column->name);
       }
@@ -81,6 +88,14 @@ class GradeRecordForm extends Div {
          $column->columnID));
 
       new TextEntity ($row, htmlentities ($grade->grade));
+   }
+
+   private function createColumnContextMenu ()
+   {
+      $contextMenu = new Div ($this);
+      $contextMenu->setAttribute ('id', 'column-context-menu');
+      $contextMenu->setAttribute ('class', 'menu');
+      new Para ($contextMenu, 'This is a context menu.');
    }
 }
 

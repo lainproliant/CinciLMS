@@ -7,6 +7,7 @@
       <script type='text/javascript' src='lib/util/js/jquery.js'></script>
       <script type='text/javascript' src='lib/util/js/sprintf-0.6.js'></script>
       <script type='text/javascript' src='lib/util/js/jssha256.js'></script>
+      <script type='text/javascript' src='lib/util/js/XMLEntity.js'></script>
 
       <script type='text/javascript' src='lib/main.js'></script>
 
