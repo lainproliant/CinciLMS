@@ -38,13 +38,16 @@ class UserClass extends NonUserClass {
          'gradeCourse'              => 'actionGradeCourse',
          'submitContent'            => 'submitContent',
          'submitEnrollment'         => 'submitEnrollment',
-         'submitPassword'           => 'submitPassword'));
+         'submitPassword'           => 'submitPassword',
+
+         'AJAX_saveGrade'           => 'AJAX_saveGrade'
+      ));
 
       // The user is already logged in under this class.
       // No need for login processing, remove login functions.
       $this->removeActions (array (
          'login', 'submitLogin'));
-         
+
       // Add menu items for account functions.
       $this->getMenu ()->addItem (
          "Account", new ActionMenu (array (
@@ -56,9 +59,9 @@ class UserClass extends NonUserClass {
       );
 
       $this->getMenu ()->addItem (
-            "My Courses", $this->generateMyCoursesMenu ());
+         "My Courses", $this->generateMyCoursesMenu ());
    }
-   
+
    /*
     * Fetches the user info and enrollments for the user.
     */ 
@@ -162,7 +165,7 @@ class UserClass extends NonUserClass {
             $subPathHref = htmlentities (
                sprintf ('?action=view&path=%s', $subPath), ENT_QUOTES);
             $pathName = htmlentities ($pathArray [$x], ENT_QUOTES);
-            
+
             new TextLink ($breadcrumbHeader, $subPathHref, $pathName);
             new TextEntity ($breadcrumbHeader, ' / ');
 
@@ -171,19 +174,19 @@ class UserClass extends NonUserClass {
          }
 
       }
-      
+
       $courseCode = $pathArray [0];
 
       $user = User::byUserID ($_SESSION ['userid']);
       $course = Course::byCourseCode ($courseCode);
-      
+
       // Show the course name in the header.
       new TextEntity ($courseNameHeader, htmlentities ($course->courseName));
 
       if (empty ($course->courseID)) {
          throw new CinciAccessException ("The specified course does not exist.");
       }
-      
+
       // Display the course's contents in the contentDiv.
       $course->display ($div, $this, $user, $pathArray);
    }
@@ -192,12 +195,12 @@ class UserClass extends NonUserClass {
    {
       $contentType = $_GET ['contentType'];
       $parentPath = $_GET ['parent'];
-      
+
       // Confirm that the parent path exists and that we have the rights
       // to write to it.
       $parentPathArray = explode ('/', $parentPath);
       $parentPathArray = array_diff ($parentPathArray, array (''));
-      
+
       $user = User::byUserID ($_SESSION ['userid']);
       $parentInfo = Course::getPath ($this, $user, $parentPathArray);
       $parent = $parentInfo [0];
@@ -207,10 +210,10 @@ class UserClass extends NonUserClass {
       if (! $parent->checkWriteAccess ($this, $user, $course, $enrollment)) {
          throw new CinciAccessException ("You do not have permission to create content items on this path.");
       }
-      
+
       $absolutePath = implode ('/', $parentPathArray);
       $parent->pathName = $absolutePath;
-      
+
       switch ($contentType) {
       case 'folder':
          $div = new Div ($contentDiv, 'prompt');
@@ -251,10 +254,10 @@ class UserClass extends NonUserClass {
             throw new CinciAccessException ("The specified course does not exist.");
          }
 
-         
+
          $user = $this->getUser ();
          $enrollment = $course->getEnrollment ($user);
-         
+
          // Allow the course to add its context menu.
          $course->addContext ($this, $user, $enrollment);
 
@@ -317,12 +320,12 @@ class UserClass extends NonUserClass {
 
       $contentType = $_POST ['contentType'];
       $parentPath = $_POST ['parent'];
-      
+
       // Confirm that the parent path exists and that we have the rights
       // to write to it.
       $parentPathArray = explode ('/', $parentPath);
       $parentPathArray = array_diff ($parentPathArray, array (''));
-      
+
       $user = User::byUserID ($_SESSION ['userid']);
       $parentInfo = Course::getPath ($this, $user, $parentPathArray);
       $parent = $parentInfo [0];
@@ -332,7 +335,7 @@ class UserClass extends NonUserClass {
       if (! $parent->checkWriteAccess ($this, $user, $course, $enrollment)) {
          throw new CinciAccessException ("You do not have permission to create content items on this path.");
       }
-      
+
       $absolutePath = implode ('/', $parentPathArray);
       $parent->pathName = $absolutePath;
 
@@ -352,16 +355,16 @@ class UserClass extends NonUserClass {
          $folder->name = $folderName;
          $folder->ownerID = $user->userID;
          $folder->accessFlags = $accessFlags;
-         
+
          try {
             $folder->insert ();
-         
+
          } catch (DAOException $e) {
             throw new CinciDatabaseException ("Content Creation Error", 
                "There was an error creating the new folder.",
                $e->error);
          }
-         
+
          try {
             $parent->addContent ($folder, $folderPath);
 
@@ -371,7 +374,7 @@ class UserClass extends NonUserClass {
             throw new CinciDatabaseException ("Content Insertion Error", 
                "There was an error adding the folder to its parent.",
                $e->error);
-         
+
          }
 
          $header = new XMLEntity ($div, 'h3');
@@ -397,7 +400,7 @@ class UserClass extends NonUserClass {
          $item->text = $itemText;
          $item->ownerID = $user->userID;
          $item->accessFlags = $accessFlags;
-         
+
          try {
             $item->insert ();
 
@@ -436,7 +439,7 @@ class UserClass extends NonUserClass {
       if (empty ($_POST)) {
          throw new CinciException ("Enrollment Error", "No enrollment information provided.");
       }
-      
+
       $course = Course::byCourseCode ($_POST ['courseCode']);
 
       if (empty ($course->courseID)) {
@@ -448,7 +451,7 @@ class UserClass extends NonUserClass {
       if (empty ($user->userID)) {
          throw new CinciException ("Enrollment Error", "The specified user does not exist.");
       }
-      
+
       if ($course->getEnrollment ($user) != NULL) {
          throw new CinciException ("Enrollment Error", htmlentities (
             sprintf ("The user \"%s\" is already enrolled in %s.",
@@ -471,7 +474,7 @@ class UserClass extends NonUserClass {
       } catch (DAOException $e) {
          throw new CinciDatabaseException ("Enrollment Error",
             htmlentities (sprintf ("There was an error enrolling \"%s\" in \"%s\".",
-               $user->username, $course->courseCode)),
+            $user->username, $course->courseCode)),
             $e->error);
       }
 
@@ -479,7 +482,7 @@ class UserClass extends NonUserClass {
       $header = new XMLEntity ($div, 'h3');
       new TextEntity ($header, "Success!");
       new Para ($div, htmlentities (sprintf ("The user \"%s\" was enrolled in %s successfully.",
-            $user->username, $course->courseName)));
+         $user->username, $course->courseName)));
       $p = new XMLEntity ($div, 'p');
       new TextLink ($p, sprintf ("?action=view&path=%s", htmlentities ($course->courseCode)),
          sprintf ("Return to %s", htmlentities ($course->courseName)));
@@ -538,7 +541,7 @@ class UserClass extends NonUserClass {
 
       $this->showCoursesList ($div);
    }
-   
+
    /*
     * Prints a list of Div links to the user's enrolled courses.
     */
@@ -563,19 +566,28 @@ class UserClass extends NonUserClass {
    protected function generateMyCoursesMenu ()
    {
       $coursesMenu = new ActionMenu (); 
-      
+
       if (count ($this->getCourses () > 0)) { 
          foreach ($this->getCourses () as $course) {
             $coursesMenu->addItem (
                htmlentities ($course->courseName),
-               new HyperlinkAction (sprintf ("?action=view&path=%s", htmlentities ($course->courseCode)))
+               new HyperlinkAction (sprintf ("?action=view&path=%s",
+               htmlentities ($course->courseCode)))
             );
          }
       }
 
       return $coursesMenu;
-   } 
+   }
+
+   /*
+    * Save the given grade to the database via an AJAX request.
+    */
+   protected function AJAX_saveGrade ($ajaxReply) {
+      global $SiteLog;
+
+
+   }
 }
 
 ?>
-

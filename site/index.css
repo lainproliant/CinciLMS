@@ -424,6 +424,14 @@ div.grades td {
 }
 
 div.grades th {
+   padding-right: 2em;
+}
+
+div.grades td {
+   padding-right: 2px;
+}
+
+div.grades th {
    background-color: #FF6140;
    text-align: left;
 }
