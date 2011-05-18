@@ -748,9 +748,10 @@ class Script extends XMLEntity {
 /*
  * xml_header: A utility function to print an XML header.
  */
-function xml_header ($version = "1.0", $encoding = "UTF-8")
+function xml_header ($version = "1.0", $encoding = "UTF-8", $standalone = "no")
 {
-   print sprintf ("<?xml version=\"%s\" encoding=\"%s\" ?>\n", $version, $encoding);
+   print sprintf ("<?xml version=\"%s\" encoding=\"%s\" standalone=\"%s\" ?>\n",
+      $version, $encoding, $standalone);
 }
 
 /*
