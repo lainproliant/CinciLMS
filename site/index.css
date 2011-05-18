@@ -116,13 +116,8 @@ div.menu ul {
    display: none;
    top: 0%;
    left: 100%;
-   width: 100%;
-   z-index: 2;
-}
-
-/* Special class for the initial context menu. */
-div.menu ul {
    width: 9em;
+   z-index: 2;
 }
 
 div.menu ul.L0 {
@@ -139,7 +134,6 @@ div.menu ul.context {
    left: 0%;
    z-index: 3;
 }
-
 
 div.menu ul.L1 {
    position: absolute;
