@@ -8,17 +8,22 @@
  * Requires jquery.js, jquery.tablesorter.js, and XMLEntity.js.
  */
 
+var KEYCODE_ENTER = 13;
+var KEYCODE_ESC   = 27;
+
 $(document).ready (function () {
+   /*
+    * Applies the tablesorter to the grade record table
+    * and enables dynamic zebra striping.
+    */
    $("table.sortable").tablesorter ({
       widgets: ['zebra']
    });
 
-   $("#column-context-menu").hide ();
-
-   $("#column-context-menu").mouseleave (function (event) {
-      $(this).fadeOut ();
-   });
-
+   /*
+    * Shows the context menu for a column when its
+    * menu icon is clicked.
+    */
    $("table.sortable th img").click (function (event) {
       var columnContextMenu = $("#column-context-menu");
       var x = event.pageX - 8, y = event.pageY - 8;
@@ -52,10 +57,81 @@ $(document).ready (function () {
 
       event.stopPropagation ();
    });
-
-   $("table.sortable td.editable").dblclick (function (event) {
-      
+   
+   /*
+    * Hides the context menu when the mouse leaves it.
+    */
+   $("#column-context-menu").mouseleave (function (event) {
+      $(this).fadeOut ();
    });
+   
+   /*
+    * Hides the context menu initially.
+    */
+   $("#column-context-menu").hide ();
 
+   /*
+    * Begins editing of an editable cell when it is double clicked.
+    */
+   $("table.sortable td.editable").dblclick (function (event) {
+      // Create the text input for editing.
+      var tableCell = $(this);
+      var textInput = $(X$ ('input').attr ('type', 'text').toString ());
+
+      var savedGrade = $.trim ($(this).text ());
+      var newGrade = savedGrade;
+
+      $(this).empty ();
+
+      textInput.val (savedGrade);
+      textInput.width ($(this).width ());
+      textInput.height ($(this).height ());
+      
+      /*
+       * Hide the text input when it loses focus.
+       */
+      textInput.blur (function (event) {
+         // If the grade has changed, try to save it to the server.
+         if (newGrade != savedGrade) {
+            metadata = tableCell.attr ('data-cell');
+            saveGrade (metadata, newGrade);
+         }
+         
+         tableCell.text (newGrade);
+         $(this).remove ();
+      });
+
+      /*
+       * Save the text input when it is submitted (via Return key).
+       */
+      textInput.keyup (function (event) {
+         switch (event.keyCode) {
+         case KEYCODE_ENTER:
+            newGrade = $(this).val ();
+            $(this).blur ();
+            break;
+         case KEYCODE_ESC:
+            $(this).blur ();
+            break;
+         }
+      });
+     
+
+      $(this).append (textInput); 
+      
+      textInput.focus ();
+      textInput.select ();
+   });
 });
+
+
+/*
+ * Attempts to save the given grade to the server.
+ */
+function saveGrade (gradeCellIdentity, grade)
+{
+   alert (sprintf ("Attempting to save \"%s\" with grade \"%s\".",
+            gradeCellIdentity,
+            grade));
+}
 

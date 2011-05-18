@@ -86,7 +86,8 @@ class GradeRecordForm extends Div {
          $course->courseID,
          $user->userID,
          $column->columnID));
-
+      $col->setAttribute ("data-display", "numeric");
+   
       new TextEntity ($row, htmlentities ($grade->grade));
    }
 

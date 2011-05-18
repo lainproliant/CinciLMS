@@ -419,8 +419,8 @@ div.grades th,
 div.grades td {
    min-width: 7em;
    max-width: 25em;
-   padding-left: 0.25em;
-   padding-right: 0.25em;
+   padding-left: 2px;
+   padding-right: 2px;
 }
 
 div.grades th {
@@ -462,5 +462,14 @@ div.grades td.static {
 
 div.grades tr.odd td.static {
    background-color: #B2F1FF;
+}
+
+div.grades td.editable input {
+   font-family: inherit;
+   font-size: 100%;
+   border: 0px;
+   outline: none;
+   padding: 0px;
+   margin: 0px;
 }
 
