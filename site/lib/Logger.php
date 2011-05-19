@@ -12,6 +12,11 @@ class LoggerException extends Exception {
  * Released under the GNU General Public License.
  */
 class Logger {
+   constant LEVEL_CRITICAL = 99;
+   constant LEVEL_INFO = 3;
+   constant LEVEL_DIAG = 2;
+   constant LEVEL_DEBUG = 1;
+
    private $logLevel;
    private $logFileName;
 
@@ -25,7 +30,7 @@ class Logger {
       }
    }
 
-   public function log ($message, $level = 0)
+   public function log ($message, $level = LEVEL_INFO)
    {
       if ($level <= $this->logLevel) {
          $logFile = fopen ($this->logFileName, "a");
@@ -39,22 +44,28 @@ class Logger {
          fclose ($logFile);
       }
    }
-
-   public function logInfo ($message, $level = 0)
+   
+   public function logDebug ($message, $level = LEVEL_DEBUG)
    {
-      $this->log (sprintf ("(III) [%s] <%s> %s\n",
+      $this->log (sprintf ("(DBG) [%s] <%s> %s\n",
          date ("c"), $_SERVER ['QUERY_STRING'], $message, $level));
    }
 
-   public function logError ($message, $level = 0)
+   public function logInfo ($message, $level = LEVEL_INFO)
    {
-      $this->log (sprintf ("(EEE) [%s] <%s> %s\n",
+      $this->log (sprintf ("(IFO) [%s] <%s> %s\n",
          date ("c"), $_SERVER ['QUERY_STRING'], $message, $level));
    }
 
-   public function logFatal ($message, $level = 0)
+   public function logError ($message, $level = LEVEL_CRITICAL)
    {
-      $this->log (sprintf ("(XXX) [%s] <%s> %s\n",
+      $this->log (sprintf ("(ERR) [%s] <%s> %s\n",
+         date ("c"), $_SERVER ['QUERY_STRING'], $message, $level));
+   }
+
+   public function logFatal ($message, $level = LEVEL_CRITICAL)
+   {
+      $this->log (sprintf ("(DIE) [%s] <%s> %s\n",
          date ("c"), $_SERVER ['QUERY_STRING'], $message, $level));
    }
 }
