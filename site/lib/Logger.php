@@ -12,10 +12,10 @@ class LoggerException extends Exception {
  * Released under the GNU General Public License.
  */
 class Logger {
-   constant LEVEL_CRITICAL = 99;
-   constant LEVEL_INFO = 3;
-   constant LEVEL_DIAG = 2;
-   constant LEVEL_DEBUG = 1;
+   const LEVEL_CRITICAL = 99;
+   const LEVEL_INFO = 3;
+   const LEVEL_DIAG = 2;
+   const LEVEL_DEBUG = 1;
 
    private $logLevel;
    private $logFileName;
