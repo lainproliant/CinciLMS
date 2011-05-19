@@ -18,6 +18,10 @@ class GradeRecordForm extends Div {
 
       // Include the grade record init script.
       new Script ($this, 'lib/grade-record.js');
+      
+      // Create a div for the status message.
+      $status = new Div ($this, 'status');
+      new Span ($status, "Ready.");
 
       // Create the context menu for columns.
       $this->createColumnContextMenu ();

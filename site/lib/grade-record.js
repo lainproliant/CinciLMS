@@ -133,5 +133,37 @@ function saveGrade (gradeCellIdentity, grade)
    alert (sprintf ("Attempting to save \"%s\" with grade \"%s\".",
             gradeCellIdentity,
             grade));
+
+   $.ajax ({
+      type: "GET",
+      url: sprintf ("ajax.php?action=AJAX_saveGrade&cellIdentity=%s&grade=%s",
+         gradeCellIdentity, grade),
+      dataType: "xml",
+      success: onSaveGradeReply,
+      error: onSaveGradeError
+   });
+}
+
+/*
+ * Called when the AJAX_saveGrade request completes successfully.
+ */
+function onSaveGradeReply (xml)
+{
+   // Get the request status.
+   var status = $(xml).find ('status').text ();
+
+   if (status == 'exception') {
+      
+   }
+
+   alert ("AJAX_saveGrade reply: " + $(xml).find ('status').text ());
+}
+
+/*
+ * Called when the AJAX_saveGrade request could not be completed.
+ */
+function onSaveGradeError (xmlHttpRequest, errorType, e)
+{
+   alert ("AJAX_saveGrade failed: " + errorType);
 }
 

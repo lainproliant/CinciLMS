@@ -203,13 +203,11 @@ a img {
    border: none;
 }
 
-div#column-context-menu {
-   display: none;
-   position: absolute;
-   background: white;
-   width: 6em;
-   top: 0px;
-   left: 0px;
+div.status {
+   background: #FFEEAA;
+   border: 1px dashed #CCAA00;
+
+   margin-bottom: 8px;
 }
 
 /*----------------------------------------------------------------------------
@@ -480,4 +478,15 @@ div.grades td.editable input {
    padding: 0px;
    margin: 0px;
 }
+
+div#column-context-menu {
+   display: none;
+   position: absolute;
+   background: white;
+   width: 6em;
+   top: 0px;
+   left: 0px;
+}
+
+
 
