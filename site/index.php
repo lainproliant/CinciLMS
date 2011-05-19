@@ -30,7 +30,7 @@
          </div>
          
          <!-- Begin PHP generated markup -->
-         <?php include "lib/main.php"?>
+<?php include "lib/main.php"?>
          <!-- End PHP generated markup -->
 
          </div>
