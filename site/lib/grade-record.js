@@ -36,9 +36,13 @@ $(document).ready (function () {
       menuListXML = new X$ ('ul').class ('L1 context');
 
       for (var n = 0; n < 5; n++) {
-         item = new Xc$ (menuListXML, 'li').add (
-            new X$ ('p').add (
-               new T$ (sprintf ("Item %d", n))));
+         item = new Xc$ (menuListXML, 'li');
+         header = new Xc$ (item, 'p').add (
+               new T$ (sprintf ("Item %d", n)));
+
+         new Xc$ (header, 'img').attr (
+            'src', 'images/menu-right.png').attr (
+               'alt', 'submenu');
 
          subMenu = new Xc$ (item, 'ul').class ('L2');
 
@@ -49,8 +53,6 @@ $(document).ready (function () {
          }
       }
       
-      alert (menuListXML);
-
       columnContextMenu.empty ();
       columnContextMenu.append ($(menuListXML.toString ()));
       columnContextMenu.show ();
