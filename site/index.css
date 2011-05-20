@@ -210,6 +210,12 @@ div.status.errorStatus {
    color: #FFFFFF;
 }
 
+div.status.successStatus {
+   background: #AAFFAA;
+   border 1px dashed #000000;
+   color: #000000;
+}
+
 /*----------------------------------------------------------------------------
  * Form specific CSS rules.
  */
@@ -402,7 +408,8 @@ div.search_results td {
 /*----------------------------------------------------------------------------
  * CSS Rules for the Grade Record.
  */
-div.grades {
+div.grades table {
+   display: block;
    overflow-x: scroll;
 }
 

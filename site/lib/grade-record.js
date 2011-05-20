@@ -90,7 +90,7 @@ $(document).ready (function () {
       var textInput = $(X$ ('input').attr ('type', 'text').toString ());
 
       var savedGrade = $.trim ($(this).text ());
-      var newGrade = savedGrade;
+      var gradeSaved = false;
 
       $(this).empty ();
 
@@ -103,12 +103,15 @@ $(document).ready (function () {
        */
       textInput.blur (function (event) {
          // If the grade has changed, try to save it to the server.
+         var newGrade = $(this).val ();
+         
+         $(this).remove ();
+
          if (newGrade != savedGrade) {
             saveGrade (tableCell, savedGrade, newGrade);
          }
          
          $('table.sortable').trigger ('update');
-         $(this).remove ();
       });
 
       /*
@@ -117,7 +120,6 @@ $(document).ready (function () {
       textInput.keyup (function (event) {
          switch (event.keyCode) {
          case KEYCODE_ENTER:
-            newGrade = $(this).val ();
             $(this).blur ();
             break;
          case KEYCODE_ESC:
@@ -139,11 +141,8 @@ $(document).ready (function () {
  */
 function saveGrade (tableCell, oldGrade, newGrade)
 {
-   alert (sprintf ("Attempting to save \"%s\" with grade \"%s\".",
-            gradeCellIdentity,
-            grade));
+   var gradeCellIdentity = tableCell.attr ('data-cell');
 
-   
    if (newGrade > MAX_GRADE_VAL || newGrade < MIN_GRADE_VAL) {
       statusError ("The grade value was out of bounds", 5);
       tableCell.text (oldGrade);
@@ -155,8 +154,8 @@ function saveGrade (tableCell, oldGrade, newGrade)
    $.ajax ({
       type: "GET",
       url: sprintf ("ajax.php?action=saveGrade&cellIdentity=%s&grade=%s",
-         gradeCellIdentity, grade),
-      dataType: "text",
+         gradeCellIdentity, newGrade),
+      dataType: "xml",
       success: onSaveGradeReply,
       error: onSaveGradeError
    });
@@ -167,8 +166,16 @@ function saveGrade (tableCell, oldGrade, newGrade)
  */
 function onSaveGradeReply (xml)
 {
-   // Get the request status.
-   alert (xml);
+   status = $(xml).find ('status').text ();
+   message = $(xml).find ('message').text ();
+
+   if (status == "success") {
+      statusSuccess (message, 2);
+
+   } else if (status == "exception") {
+      statusError (message, 5);
+
+   }
 }
 
 /*
@@ -185,11 +192,26 @@ function onSaveGradeError (xmlHttpRequest, errorType, e)
  */
 function statusError (message, secs)
 {
-   $('#gradeRecordStatus').text ("The grade value was out of bounds.");
+   $('#gradeRecordStatus').text (message);
    $('#gradeRecordStatus').addClass ('errorStatus');
 
    $('#gradeRecordStatus').oneTime (secs * 1000, function () {
       $(this).text (STATUS_READY);
       $(this).removeClass ('errorStatus');
+   });
+}
+
+/*
+ * Updates the status div with an error message and resets after
+ * a few seconds.
+ */
+function statusSuccess (message, secs)
+{
+   $('#gradeRecordStatus').text (message);
+   $('#gradeRecordStatus').addClass ('successStatus');
+
+   $('#gradeRecordStatus').oneTime (secs * 1000, function () {
+      $(this).text (STATUS_READY);
+      $(this).removeClass ('successStatus');
    });
 }
