@@ -20,6 +20,35 @@ class GradeColumn extends GradeColumnsVO {
    public function fetchUserGrade ($user) {
       return Grade::byColumnID_StudentID ($this->columnID, $user->userID);
    }
+
+   /*
+    * Sets the grade for a user in this column.  If no grade exists,
+    * a grade is created and given the specified value.
+    */
+   public function setUserGrade ($user, $grade)
+   {
+      global $SiteLog;
+
+      $gradeCell = $this->fetchUserGrade ($user);
+
+      $SiteLog->logDebug (sprintf ("setUserGrade: grade = %s",
+         var_export ($gradeCell, true)));
+
+      if (empty ($gradeCell)) {
+         $gradeCell = new Grade ();
+
+         $gradeCell->columnID = $this->columnID;
+         $gradeCell->studentID = $user->userID;
+         $gradeCell->grade = $grade;
+
+         $gradeCell->insert ();
+      } else {
+
+         $gradeCell->grade = $grade;
+
+         $gradeCell->save ();
+      }
+   }
 }
 
 /*

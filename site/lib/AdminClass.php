@@ -40,6 +40,7 @@ class AdminClass extends SysopClass {
 
       $this->addActions (array (
          '_adminUnenrollAbility'    => NULL,
+         '_adminWriteGradesAbility' => NULL,
          'newUser'                  => 'actionNewUser',
          'editUser'                 => 'actionEditUser',
          'submitNewUser'            => 'submitNewUser',

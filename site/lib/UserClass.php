@@ -69,10 +69,15 @@ class UserClass extends NonUserClass {
    {
       // Fetch the user and enrollments for this user. 
       $this->user = User::byUserID ($_SESSION ['userid']);
-
-      $enrollments_courses = $this->user->getCourseEnrollments ();
-      $this->enrollments = $enrollments_courses [0];
-      $this->courses = $enrollments_courses [1];
+      
+      if (! empty ($this->user)) {
+         $enrollments_courses = $this->user->getCourseEnrollments ();
+         $this->enrollments = $enrollments_courses [0];
+         $this->courses = $enrollments_courses [1];
+      } else {
+         $this->enrollments = array ();
+         $this->courses = array ();
+      }
    }
 
    /*
@@ -287,12 +292,13 @@ class UserClass extends NonUserClass {
          $courseCode = $_GET ['courseCode'];
 
          $course = Course::byCourseCode ($courseCode);
-         $user = $this->getUser ();
-         $enrollment = $course->getEnrollment ($user);
 
-         if (empty ($course->courseID)) {
+         if (empty ($course)) {
             throw new CinciAccessException ("The specified course does not exist.");
          }
+
+         $user = $this->getUser ();
+         $enrollment = $course->getEnrollment ($user);
 
          if (! $course->checkReadGradesAbility ($this, $user, $enrollment)) {
             throw new CinciAccessException ("You are not authorized to read the grade record for this course.");
@@ -586,7 +592,78 @@ class UserClass extends NonUserClass {
    protected function AJAX_saveGrade ($ajaxReply) {
       global $SiteLog;
 
+      $SiteLog->logDebug ("AJAX_saveGrade method called.");
 
+      if (empty ($_GET ['cellIdentity']) or empty ($_GET ['grade'])) {
+         throw new CinciException ("Grade Submit Error",
+            "Invalid grade submission request.");
+      }
+
+      // Retrieve the cell's identity, a tuple of courseID, columnID, and userID
+      // for the grade cell.
+      $cellIdentity = $_GET ['cellIdentity'];
+      $grade = $_GET ['grade'];
+
+      list ($courseID, $columnID, $userID) = explode (':', $cellIdentity);
+
+      // Retrieve the course and determine if we have rights to edit grades.
+      $course = Course::byCourseID ($courseID);
+
+      if (empty ($course)) {
+         throw new CinciException ("Grade Submit Error",
+            "The specified course does not exist.");
+      }
+
+      // Get the user's enrollment in the course.  It's okay if this is NULL,
+      // as this represents that the user is not enrolled in the course.
+      // Admins are not enrolled in courses typically, but still have permission
+      // to write grades granted by the '_adminWriteGradesAbility' action.
+      $enrollment = $course->getEnrollment ($this->getUser ());
+
+      // Determine if we can write the grade record in the course.
+      if ($course->checkWriteGradesAbility ($this, $this->getUser (), $enrollment)) {
+         // Get the user for which the grade will be set.
+         $SiteLog->logDebug (sprintf ("Grade write ability granted."));
+         
+         $column = GradeColumn::byColumnID ($columnID);
+         
+         // Get the user for which the grade will be set.
+         $SiteLog->logDebug (sprintf ("Saving user grade."));
+         
+         if (empty ($column)) {
+            throw new CinciException ("Grade Submit Error",
+               "The specified grade column does not exist.");
+         }
+
+         $user = User::byUserID ($userID);
+
+         if (empty ($user)) {
+            throw new CinciException ("Grade Submit Error",
+               "The specified user does not exist.");
+         }
+
+         // Confirm that the user is enrolled in the course.
+         $enrollment = $course->getEnrollment ($user);
+         if (empty ($enrollment)) {
+            throw new CinciException ("Grade Submit Error",
+               "The specified user is not enrolled in the course.");
+         }
+         
+         // Sets the user's grade for the column.
+         // If no grade exists, the grade is created.
+         $column->setUserGrade ($user, $grade);
+
+      } else {
+         throw new CinciException ("Grade Submit Error",
+            "You do not have permission to write to the grade record of this course.");
+
+      }
+
+      // The user's grade was saved successfully.
+      // Construct a successful AJAXReply.
+      new AJAXStatus ($ajaxReply, 'success');
+      new AJAXHeader ($ajaxReply, 'Success');
+      new AJAXMessage ($ajaxReply, 'Grade submission successful');
    }
 }
 

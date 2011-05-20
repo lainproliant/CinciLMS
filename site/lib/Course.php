@@ -379,6 +379,38 @@ class Course extends CoursesVO {
    }
    
    /*
+    * Checks whether the specified user has rights to edit the grade record
+    * for the specified course, based on the given course enrollment.
+    *
+    * authority:     The user's current AuthorityClass instance.  Can be NULL,
+    *                in which case special AuthorityClass permissions are not
+    *                determined.
+    * user:          The User instance.  Can be NULL, in which case the user is
+    *                treated as a guest (and definitely won't have unenroll ability).
+    * enrollment:    The user's enrollment in the course.  May be NULL, in which
+    *                case the user is treated as a guest.
+    */
+   public function checkWriteGradesAbility ($authority, $user, $enrollment)
+   {
+      // If the authority contains '_sysopReadGradesAbility', grant ability.
+      if (! empty ($authority) and $authority->authorizeCheck ('_adminWriteGradesAbility')) {
+         return TRUE;
+      }
+
+      $userPermissions = empty ($enrollment) ?
+         array () :
+         explode (',', $enrollment->accessFlags);
+
+      if (in_array ('GrW', $userPermissions)) {
+         // The user is enrolled and has GrW permissions, grant ability.
+         return TRUE;
+      } else {
+         // The user is not enrolled or does not have GrW permissions.  Deny ability.
+         return FALSE;
+      }
+   }
+
+   /*
     * Adds course-specific context items to the action menu.
     */
    public function addContext ($authority, $user, $enrollment)

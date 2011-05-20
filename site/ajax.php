@@ -61,6 +61,10 @@ function main ()
       generateExceptionReply ($ajaxReply, $e->getHeader (),
          $e->getMessage ());
 
+   } catch (DAOException $e) {
+      generateExceptionReply ($ajaxReply, $e->getMessage (),
+         $e->error);
+
    } catch (Exception $e) {
       generateExceptionReply ($ajaxReply, 'Unknown Exception',
         $e->getMessage ());

@@ -89,11 +89,12 @@ class GradeRecordForm extends Div {
       $col->setAttribute ("class", "editable");
       $col->setAttribute ("data-cell", sprintf ("%d:%d:%d",
          $course->courseID,
-         $user->userID,
-         $column->columnID));
-      $col->setAttribute ("data-display", "numeric");
-   
-      new TextEntity ($row, htmlentities ($grade->grade));
+         $column->columnID,
+         $user->userID));
+      
+      if (! empty ($grade)) {
+         new TextEntity ($row, htmlentities ($grade->grade));
+      }
    }
 
    private function createColumnContextMenu ()
