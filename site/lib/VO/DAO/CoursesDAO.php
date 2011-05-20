@@ -10,9 +10,10 @@ class CoursesDAO {
       $stmt = $this->db->prepare ("select CourseID, CourseCode, CourseName, EntryPointID, AccessFlags from Courses where CourseID = ?");
       $stmt->bind_param ("i", $courseID);
       $stmt->execute ();
+      $stmt->store_result ();
       $stmt->bind_result ($results ["CourseID"], $results ["CourseCode"], $results ["CourseName"], $results ["EntryPointID"], $results ["AccessFlags"]);
       $stmt->fetch ();
-      if ($stmt->num_rows < 0) {
+      if ($stmt->num_rows < 1) {
          $results = NULL;
       }
       
@@ -25,9 +26,10 @@ class CoursesDAO {
       $stmt = $this->db->prepare ("select CourseID, CourseCode, CourseName, EntryPointID, AccessFlags from Courses where CourseCode = ?");
       $stmt->bind_param ("s", $courseCode);
       $stmt->execute ();
+      $stmt->store_result ();
       $stmt->bind_result ($results ["CourseID"], $results ["CourseCode"], $results ["CourseName"], $results ["EntryPointID"], $results ["AccessFlags"]);
       $stmt->fetch ();
-      if ($stmt->num_rows < 0) {
+      if ($stmt->num_rows < 1) {
          $results = NULL;
       }
       $stmt->close ();
@@ -40,6 +42,7 @@ class CoursesDAO {
       $query = "select CourseID, CourseCode, CourseName, EntryPointID, AccessFlags from Courses";
       $stmt = $this->db->prepare ($query);
       $stmt->execute ();
+      $stmt->store_result ();
       $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["CourseID"], $results ["CourseCode"], $results ["CourseName"], $results ["EntryPointID"], $results ["AccessFlags"]);
       while ($stmt->fetch ()) {
@@ -67,6 +70,7 @@ class CoursesDAO {
       $stmt = $this->db->prepare ($query);
       call_user_func_array (array ($stmt, "bind_param"), $bindParamArgs);
       $stmt->execute ();
+      $stmt->store_result ();
       $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["CourseID"], $results ["CourseCode"], $results ["CourseName"], $results ["EntryPointID"], $results ["AccessFlags"]);
       while ($stmt->fetch ()) {
@@ -114,9 +118,10 @@ class CourseRolesDAO {
       $stmt = $this->db->prepare ("select RoleID, RoleName, DefaultAccess from CourseRoles where RoleID = ?");
       $stmt->bind_param ("i", $roleID);
       $stmt->execute ();
+      $stmt->store_result ();
       $stmt->bind_result ($results ["RoleID"], $results ["RoleName"], $results ["DefaultAccess"]);
       $stmt->fetch ();
-      if ($stmt->num_rows < 0) {
+      if ($stmt->num_rows < 1) {
          $results = NULL;
       }
       
@@ -130,6 +135,7 @@ class CourseRolesDAO {
       $query = "select RoleID, RoleName, DefaultAccess from CourseRoles";
       $stmt = $this->db->prepare ($query);
       $stmt->execute ();
+      $stmt->store_result ();
       $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["RoleID"], $results ["RoleName"], $results ["DefaultAccess"]);
       while ($stmt->fetch ()) {
@@ -157,6 +163,7 @@ class CourseRolesDAO {
       $stmt = $this->db->prepare ($query);
       call_user_func_array (array ($stmt, "bind_param"), $bindParamArgs);
       $stmt->execute ();
+      $stmt->store_result ();
       $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["RoleID"], $results ["RoleName"], $results ["DefaultAccess"]);
       while ($stmt->fetch ()) {
@@ -204,9 +211,10 @@ class FactCourseEnrollmentDAO {
       $stmt = $this->db->prepare ("select UserID, CourseID, RoleID, AccessFlags from FactCourseEnrollment where UserID = ? and CourseID = ?");
       $stmt->bind_param ("ii", $userID, $courseID);
       $stmt->execute ();
+      $stmt->store_result ();
       $stmt->bind_result ($results ["UserID"], $results ["CourseID"], $results ["RoleID"], $results ["AccessFlags"]);
       $stmt->fetch ();
-      if ($stmt->num_rows < 0) {
+      if ($stmt->num_rows < 1) {
          $results = NULL;
       }
       
@@ -220,6 +228,7 @@ class FactCourseEnrollmentDAO {
       $stmt = $this->db->prepare ("select UserID, CourseID, RoleID, AccessFlags from FactCourseEnrollment where CourseID = ?");
       $stmt->bind_param ("i", $courseID);
       $stmt->execute ();
+      $stmt->store_result ();
       $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["UserID"], $results ["CourseID"], $results ["RoleID"], $results ["AccessFlags"]);
       while ($stmt->fetch ()) {
@@ -235,6 +244,7 @@ class FactCourseEnrollmentDAO {
       $query = "select UserID, CourseID, RoleID, AccessFlags from FactCourseEnrollment";
       $stmt = $this->db->prepare ($query);
       $stmt->execute ();
+      $stmt->store_result ();
       $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["UserID"], $results ["CourseID"], $results ["RoleID"], $results ["AccessFlags"]);
       while ($stmt->fetch ()) {
@@ -262,6 +272,7 @@ class FactCourseEnrollmentDAO {
       $stmt = $this->db->prepare ($query);
       call_user_func_array (array ($stmt, "bind_param"), $bindParamArgs);
       $stmt->execute ();
+      $stmt->store_result ();
       $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["UserID"], $results ["CourseID"], $results ["RoleID"], $results ["AccessFlags"]);
       while ($stmt->fetch ()) {

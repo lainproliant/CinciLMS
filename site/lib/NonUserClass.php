@@ -61,10 +61,11 @@ class NonUserClass extends AuthorityClass {
       $password = $_POST['password'];
       
       // Attempt to retrieve the user salt for the specified user.
-      try {
-         $user = User::byUsername ($username);
-
-      } catch (UsernameException $e) {
+      $user = User::byUsername ($username);
+      
+      if (empty ($user)) {
+         print 'LRS-DEBUG: $user is NULL!';
+         print sprintf ("(%s)", $username);
          throw new CinciLoginException ($username,
             "The username and password you provided were incorrect.");
       }

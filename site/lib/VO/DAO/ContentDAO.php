@@ -10,9 +10,10 @@ class CourseContentDAO {
       $stmt = $this->db->prepare ("select ContentID, ParentID, OwnerID, TypeID, Name, AccessFlags, CreationTime from CourseContent where ContentID = ?");
       $stmt->bind_param ("i", $contentID);
       $stmt->execute ();
+      $stmt->store_result ();
       $stmt->bind_result ($results ["ContentID"], $results ["ParentID"], $results ["OwnerID"], $results ["TypeID"], $results ["Name"], $results ["AccessFlags"], $results ["CreationTime"]);
       $stmt->fetch ();
-      if ($stmt->num_rows < 0) {
+      if ($stmt->num_rows < 1) {
          $results = NULL;
       }
       
@@ -26,6 +27,7 @@ class CourseContentDAO {
       $query = "select ContentID, ParentID, OwnerID, TypeID, Name, AccessFlags, CreationTime from CourseContent";
       $stmt = $this->db->prepare ($query);
       $stmt->execute ();
+      $stmt->store_result ();
       $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["ContentID"], $results ["ParentID"], $results ["OwnerID"], $results ["TypeID"], $results ["Name"], $results ["AccessFlags"], $results ["CreationTime"]);
       while ($stmt->fetch ()) {
@@ -53,6 +55,7 @@ class CourseContentDAO {
       $stmt = $this->db->prepare ($query);
       call_user_func_array (array ($stmt, "bind_param"), $bindParamArgs);
       $stmt->execute ();
+      $stmt->store_result ();
       $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["ContentID"], $results ["ParentID"], $results ["OwnerID"], $results ["TypeID"], $results ["Name"], $results ["AccessFlags"], $results ["CreationTime"]);
       while ($stmt->fetch ()) {
@@ -100,9 +103,10 @@ class ContentItemsDAO {
       $stmt = $this->db->prepare ("select ItemID, Title, Text from ContentItems where ItemID = ?");
       $stmt->bind_param ("i", $itemID);
       $stmt->execute ();
+      $stmt->store_result ();
       $stmt->bind_result ($results ["ItemID"], $results ["Title"], $results ["Text"]);
       $stmt->fetch ();
-      if ($stmt->num_rows < 0) {
+      if ($stmt->num_rows < 1) {
          $results = NULL;
       }
       
@@ -116,6 +120,7 @@ class ContentItemsDAO {
       $query = "select ItemID, Title, Text from ContentItems";
       $stmt = $this->db->prepare ($query);
       $stmt->execute ();
+      $stmt->store_result ();
       $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["ItemID"], $results ["Title"], $results ["Text"]);
       while ($stmt->fetch ()) {
@@ -143,6 +148,7 @@ class ContentItemsDAO {
       $stmt = $this->db->prepare ($query);
       call_user_func_array (array ($stmt, "bind_param"), $bindParamArgs);
       $stmt->execute ();
+      $stmt->store_result ();
       $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["ItemID"], $results ["Title"], $results ["Text"]);
       while ($stmt->fetch ()) {
@@ -190,9 +196,10 @@ class ContentLinksDAO {
       $stmt = $this->db->prepare ("select LinkID, DestinationID from ContentLinks where LinkID = ?");
       $stmt->bind_param ("i", $linkID);
       $stmt->execute ();
+      $stmt->store_result ();
       $stmt->bind_result ($results ["LinkID"], $results ["DestinationID"]);
       $stmt->fetch ();
-      if ($stmt->num_rows < 0) {
+      if ($stmt->num_rows < 1) {
          $results = NULL;
       }
       
@@ -206,6 +213,7 @@ class ContentLinksDAO {
       $stmt = $this->db->prepare ("select LinkID, DestinationID from ContentLinks where DestinationID = ?");
       $stmt->bind_param ("i", $destinationID);
       $stmt->execute ();
+      $stmt->store_result ();
       $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["LinkID"], $results ["DestinationID"]);
       while ($stmt->fetch ()) {
@@ -221,6 +229,7 @@ class ContentLinksDAO {
       $query = "select LinkID, DestinationID from ContentLinks";
       $stmt = $this->db->prepare ($query);
       $stmt->execute ();
+      $stmt->store_result ();
       $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["LinkID"], $results ["DestinationID"]);
       while ($stmt->fetch ()) {
@@ -248,6 +257,7 @@ class ContentLinksDAO {
       $stmt = $this->db->prepare ($query);
       call_user_func_array (array ($stmt, "bind_param"), $bindParamArgs);
       $stmt->execute ();
+      $stmt->store_result ();
       $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["LinkID"], $results ["DestinationID"]);
       while ($stmt->fetch ()) {
@@ -295,9 +305,10 @@ class ContentItemAttachmentsDAO {
       $stmt = $this->db->prepare ("select ContentID, FileID from ContentItemAttachments where ContentID = ? and FileID = ?");
       $stmt->bind_param ("ii", $contentID, $fileID);
       $stmt->execute ();
+      $stmt->store_result ();
       $stmt->bind_result ($results ["ContentID"], $results ["FileID"]);
       $stmt->fetch ();
-      if ($stmt->num_rows < 0) {
+      if ($stmt->num_rows < 1) {
          $results = NULL;
       }
       
@@ -311,6 +322,7 @@ class ContentItemAttachmentsDAO {
       $stmt = $this->db->prepare ("select ContentID, FileID from ContentItemAttachments where ContentID = ?");
       $stmt->bind_param ("i", $contentID);
       $stmt->execute ();
+      $stmt->store_result ();
       $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["ContentID"], $results ["FileID"]);
       while ($stmt->fetch ()) {
@@ -326,6 +338,7 @@ class ContentItemAttachmentsDAO {
       $query = "select ContentID, FileID from ContentItemAttachments";
       $stmt = $this->db->prepare ($query);
       $stmt->execute ();
+      $stmt->store_result ();
       $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["ContentID"], $results ["FileID"]);
       while ($stmt->fetch ()) {
@@ -353,6 +366,7 @@ class ContentItemAttachmentsDAO {
       $stmt = $this->db->prepare ($query);
       call_user_func_array (array ($stmt, "bind_param"), $bindParamArgs);
       $stmt->execute ();
+      $stmt->store_result ();
       $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["ContentID"], $results ["FileID"]);
       while ($stmt->fetch ()) {
@@ -400,9 +414,10 @@ class FactFolderContentsDAO {
       $stmt = $this->db->prepare ("select FolderID, ContentID, Path from FactFolderContents where FolderID = ? and ContentID = ?");
       $stmt->bind_param ("ii", $folderID, $contentID);
       $stmt->execute ();
+      $stmt->store_result ();
       $stmt->bind_result ($results ["FolderID"], $results ["ContentID"], $results ["Path"]);
       $stmt->fetch ();
-      if ($stmt->num_rows < 0) {
+      if ($stmt->num_rows < 1) {
          $results = NULL;
       }
       
@@ -414,9 +429,10 @@ class FactFolderContentsDAO {
       $stmt = $this->db->prepare ("select FolderID, ContentID, Path from FactFolderContents where FolderID = ? and Path = ?");
       $stmt->bind_param ("is", $folderID, $path);
       $stmt->execute ();
+      $stmt->store_result ();
       $stmt->bind_result ($results ["FolderID"], $results ["ContentID"], $results ["Path"]);
       $stmt->fetch ();
-      if ($stmt->num_rows < 0) {
+      if ($stmt->num_rows < 1) {
          $results = NULL;
       }
       $stmt->close ();
@@ -429,6 +445,7 @@ class FactFolderContentsDAO {
       $query = "select FolderID, ContentID, Path from FactFolderContents";
       $stmt = $this->db->prepare ($query);
       $stmt->execute ();
+      $stmt->store_result ();
       $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["FolderID"], $results ["ContentID"], $results ["Path"]);
       while ($stmt->fetch ()) {
@@ -456,6 +473,7 @@ class FactFolderContentsDAO {
       $stmt = $this->db->prepare ($query);
       call_user_func_array (array ($stmt, "bind_param"), $bindParamArgs);
       $stmt->execute ();
+      $stmt->store_result ();
       $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["FolderID"], $results ["ContentID"], $results ["Path"]);
       while ($stmt->fetch ()) {
