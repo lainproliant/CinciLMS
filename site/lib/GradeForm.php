@@ -21,7 +21,8 @@ class GradeRecordForm extends Div {
       
       // Create a div for the status message.
       $status = new Div ($this, 'status');
-      new Span ($status, "Ready.");
+      $status->setAttribute ('id', 'gradeRecordStatus');
+      new TextEntity ($status, "Ready.");
 
       // Create the context menu for columns.
       $this->createColumnContextMenu ();

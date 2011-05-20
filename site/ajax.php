@@ -44,10 +44,13 @@ function main ()
             "No action was specified during the request.");
       }
 
-      $actionToAuthorize = 'AJAX_' + $_GET ['action'];
+      $actionToAuthorize = 'AJAX_' . $_GET ['action'];
 
       // Pass the AJAX request on to the authority class to be processed.
       try {
+         $SiteLog->logInfo (sprintf (
+            "AJAX request: %s", $actionToAuthorize));
+
          $class->authorize ($actionToAuthorize, $ajaxReply);
 
       } catch (NotAuthorizedException $e) {

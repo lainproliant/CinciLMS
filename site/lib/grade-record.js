@@ -136,9 +136,11 @@ function saveGrade (gradeCellIdentity, grade)
             gradeCellIdentity,
             grade));
 
+   
+
    $.ajax ({
       type: "GET",
-      url: sprintf ("ajax.php?action=AJAX_saveGrade&cellIdentity=%s&grade=%s",
+      url: sprintf ("ajax.php?action=saveGrade&cellIdentity=%s&grade=%s",
          gradeCellIdentity, grade),
       dataType: "xml",
       success: onSaveGradeReply,
@@ -155,6 +157,7 @@ function onSaveGradeReply (xml)
    var status = $(xml).find ('status').text ();
 
    if (status == 'exception') {
+
       
    }
 
