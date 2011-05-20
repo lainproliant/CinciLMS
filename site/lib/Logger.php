@@ -30,7 +30,7 @@ class Logger {
       }
    }
 
-   public function log ($message, $level = LEVEL_INFO)
+   public function log ($message, $level = Logger::LEVEL_INFO)
    {
       if ($level <= $this->logLevel) {
          $logFile = fopen ($this->logFileName, "a");
@@ -45,25 +45,25 @@ class Logger {
       }
    }
    
-   public function logDebug ($message, $level = LEVEL_DEBUG)
+   public function logDebug ($message, $level = Logger::LEVEL_DEBUG)
    {
       $this->log (sprintf ("(DBG) [%s] <%s> %s\n",
          date ("c"), $_SERVER ['QUERY_STRING'], $message, $level));
    }
 
-   public function logInfo ($message, $level = LEVEL_INFO)
+   public function logInfo ($message, $level = Logger::LEVEL_INFO)
    {
       $this->log (sprintf ("(IFO) [%s] <%s> %s\n",
          date ("c"), $_SERVER ['QUERY_STRING'], $message, $level));
    }
 
-   public function logError ($message, $level = LEVEL_CRITICAL)
+   public function logError ($message, $level = Logger::LEVEL_CRITICAL)
    {
       $this->log (sprintf ("(ERR) [%s] <%s> %s\n",
          date ("c"), $_SERVER ['QUERY_STRING'], $message, $level));
    }
 
-   public function logFatal ($message, $level = LEVEL_CRITICAL)
+   public function logFatal ($message, $level = Logger::LEVEL_CRITICAL)
    {
       $this->log (sprintf ("(DIE) [%s] <%s> %s\n",
          date ("c"), $_SERVER ['QUERY_STRING'], $message, $level));
