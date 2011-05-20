@@ -204,6 +204,12 @@ div.status {
    margin-bottom: 8px;
 }
 
+div.status.errorStatus {
+   background: #FF0000;
+   border 1px dashed #FFFFFF;
+   color: #FFFFFF;
+}
+
 /*----------------------------------------------------------------------------
  * Form specific CSS rules.
  */

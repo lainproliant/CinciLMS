@@ -5,11 +5,20 @@
  * (c) 2011 Lee Supe (lain_proliant)
  * Released under the GNU General Public License, version 3
  *
- * Requires jquery.js, jquery.tablesorter.js, and XMLEntity.js.
+ * Requires 
+ *    jquery.js, 
+ *    jquery.tablesorter.js, 
+ *    jquery.timers.js,
+ *    XMLEntity.js.
  */
 
 var KEYCODE_ENTER = 13;
 var KEYCODE_ESC   = 27;
+
+var MAX_GRADE_VAL = 9999999.99;
+var MIN_GRADE_VAL = -9999999.99;
+
+var STATUS_READY = "Ready.";
 
 $(document).ready (function () {
    /*
@@ -95,11 +104,10 @@ $(document).ready (function () {
       textInput.blur (function (event) {
          // If the grade has changed, try to save it to the server.
          if (newGrade != savedGrade) {
-            metadata = tableCell.attr ('data-cell');
-            saveGrade (metadata, newGrade);
+            saveGrade (tableCell, savedGrade, newGrade);
          }
          
-         tableCell.text (newGrade);
+         $('table.sortable').trigger ('update');
          $(this).remove ();
       });
 
@@ -118,7 +126,6 @@ $(document).ready (function () {
          }
       });
      
-
       $(this).append (textInput); 
       
       textInput.focus ();
@@ -130,12 +137,21 @@ $(document).ready (function () {
 /*
  * Attempts to save the given grade to the server.
  */
-function saveGrade (gradeCellIdentity, grade)
+function saveGrade (tableCell, oldGrade, newGrade)
 {
    alert (sprintf ("Attempting to save \"%s\" with grade \"%s\".",
             gradeCellIdentity,
             grade));
 
+   
+   if (newGrade > MAX_GRADE_VAL || newGrade < MIN_GRADE_VAL) {
+      statusError ("The grade value was out of bounds", 5);
+      tableCell.text (oldGrade);
+      return;
+   }
+
+   tableCell.text (newGrade);
+   
    $.ajax ({
       type: "GET",
       url: sprintf ("ajax.php?action=saveGrade&cellIdentity=%s&grade=%s",
@@ -163,3 +179,17 @@ function onSaveGradeError (xmlHttpRequest, errorType, e)
    alert ("AJAX_saveGrade failed: " + errorType);
 }
 
+/*
+ * Updates the status div with an error message and resets after
+ * a few seconds.
+ */
+function statusError (message, secs)
+{
+   $('#gradeRecordStatus').text ("The grade value was out of bounds.");
+   $('#gradeRecordStatus').addClass ('errorStatus');
+
+   $('#gradeRecordStatus').oneTime (secs * 1000, function () {
+      $(this).text (STATUS_READY);
+      $(this).removeClass ('errorStatus');
+   });
+}

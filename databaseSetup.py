@@ -269,7 +269,7 @@ CREATE_TABLE_GRADES = """
 create table `Grades` (
    `ColumnID` int not null,
    `StudentID` int not null,
-   `Grade` decimal (5,2),
+   `Grade` decimal (9,2),
    constraint `FK_GradeColumnID` foreign key (`ColumnID`) references `GradeColumns` (`ColumnID`) on delete cascade,
    constraint `FK_GradeStudentID` foreign key (`StudentID`) references `Users` (`UserID`) on delete cascade,
    primary key (`ColumnID`, `StudentID`)

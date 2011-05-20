@@ -16,6 +16,9 @@ class GradeRecordForm extends Div {
       // Include the jquery.tablesorter javascript plugin.
       new Script ($this, 'lib/util/js/jquery.tablesorter.js');
 
+      // Include the jquery.timers javascript plugin.
+      new Script ($this, 'lib/util/js/jquery.timers.js');
+
       // Include the grade record init script.
       new Script ($this, 'lib/grade-record.js');
       
