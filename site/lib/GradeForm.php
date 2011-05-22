@@ -13,13 +13,11 @@ class GradeRecordForm extends Div {
    function __construct ($parent, $course) {
       parent::__construct ($parent, "grades");
 
-      // Include the jquery.tablesorter javascript plugin.
+      // Include the required javascript plugins.
       new Script ($this, 'lib/util/js/jquery.tablesorter.js');
-
-      // Include the jquery.timers javascript plugin.
       new Script ($this, 'lib/util/js/jquery.timers.js');
-
-      // Include the grade record init script.
+      new Script ($this, 'lib/util/js/facebox.js');
+      new Script ($this, 'lib/facebox-init.js');
       new Script ($this, 'lib/grade-record.js');
       
       // Create a div for the status message.

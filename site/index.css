@@ -376,6 +376,35 @@ a.folder:hover {
    background-position: 8px 4px;
 }
 
+div.buttonRow {
+   text-align: center;
+}
+
+div.buttonRow input {
+   font-size: 24pt;
+}
+
+div.buttonRow .yesButton {
+   background: #00AA00;
+   color: white;
+}
+
+div.buttonRow .noButton {
+   background: #AA0000;
+   color: white;
+}
+
+div.buttonRow .yesButton:hover {
+   background: #00FF00;
+}
+
+div.buttonRow .noButton:hover {
+   background: #FF0000;
+}
+
+
+
+
 /*----------------------------------------------------------------------------
  * CSS Rules for Search Results.
  */

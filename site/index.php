@@ -4,6 +4,8 @@
    <head>
       <meta http-equiv='Content-Type' content='text/html;charset=utf-8'/>
       <link rel='stylesheet' type='text/css' href='index.css'/>
+      <link rel='stylesheet' type='text/css' href='facebox.css'/>
+
       <script type='text/javascript' src='lib/util/js/jquery.js'></script>
       <script type='text/javascript' src='lib/util/js/sprintf-0.6.js'></script>
       <script type='text/javascript' src='lib/util/js/jssha256.js'></script>

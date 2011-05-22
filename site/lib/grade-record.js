@@ -9,6 +9,7 @@
  *    jquery.js, 
  *    jquery.tablesorter.js, 
  *    jquery.timers.js,
+ *    facebox.js,
  *    XMLEntity.js.
  */
 var graderecord_grade_regex = new RegExp ("^-?[0-9]+(\.[0-9][0-9]?)?$");
@@ -266,13 +267,39 @@ function isValidGrade (grade)
 function createColumnContextMenu (menuListXML, columnIdentity)
 {
    item = new Xc$ (menuListXML, 'li');
+   
    actionLink = new Xc$ (item, 'a').attr (
          'href', sprintf ('?action=editColumn&columnIdentity=%s',
             columnIdentity));
    new Tc$ (actionLink, 'Edit Column');
    
    actionLink = new Xc$ (item, 'a').attr (
-         'href', sprintf ('?action=deleteColumn&columnIdentity=%s',
+         'href', sprintf ('javascript:showConfirmDeleteColumn("%s")',
             columnIdentity));
    new Tc$ (actionLink, 'Delete Column');
+
+   actionLink = new Xc$ (item, 'a').attr (
+         'href', 'javascript:faceboxTest()');
+   new Tc$ (actionLink, 'Facebox Test');
 }
+
+/*
+ * LRS-DEBUG: Facebox Test.
+ */
+function faceboxTest ()
+{
+   $.facebox ({ ajax: 'contentLoad.php?action=welcome' });
+}
+
+/*
+ * Asks the server to provide a form to confirm deletion
+ * of a column.
+ */
+function showConfirmDeleteColumn (columnIdentity)
+{
+   $.facebox ({ ajax: 
+      sprintf (
+         'contentLoad.php?action=confirmDeleteColumn&columnIdentity=%s',
+         columnIdentity) });
+}
+

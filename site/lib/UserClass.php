@@ -48,6 +48,9 @@ class UserClass extends NonUserClass {
          'submitEnrollment'         => 'submitEnrollment',
          'submitPassword'           => 'submitPassword',
 
+         'confirmDeleteColumn'      => 'actionConfirmDeleteColumn',
+         'deleteColumn'             => 'actionDeleteColumn',
+
          'AJAX_saveGrade'           => 'AJAX_saveGrade'
       ));
 
@@ -538,60 +541,115 @@ class UserClass extends NonUserClass {
       new TextEntity ($p, "Success!  Your password has been changed.");
    }
 
+
    /*
-    * Overridden function from NonUserClass.
+    * Ask the user if it is okay to delete the given column.
     *
-    * Shows a welcome message instead of a login form.
+    * This action should be initiated from within a facebox.
     */
-   protected function showWelcome ($contentDiv)
+   protected function actionConfirmDeleteColumn ($contentDiv)
    {
-      $div = new Div ($contentDiv);
+      $column = NULL;
 
-      $header = new XMLEntity ($div, 'h3');
-      new TextEntity ($header, sprintf (
-         'Welcome, %s!', htmlentities ($_SESSION ['first_name'])));
-      $p = new Para ($div,
-         "Click on a course below to begin.");
-
-      $this->showCoursesList ($div);
-   }
-
-   /*
-    * Prints a list of Div links to the user's enrolled courses.
-    */
-   protected function showCoursesList ($contentDiv)
-   {
-      $courses = $this->getCourses ();
-      $enrollments = $this->getCourseEnrollments ();
-      $roles = enumerateCourseRoles ();
-
-      for ($x = 0; $x < count ($courses); $x++) {
-         $link = new Hyperlink ($contentDiv, sprintf (
-            "?action=view&path=%s", htmlentities ($courses [$x]->courseCode)));
-         $link->setAttribute ('class', 'content-item course');
-
-         new Span ($link, htmlentities ($courses [$x]->courseName), 'title');
+      if (empty ($_GET ['columnIdentity'])) {
+         throw new CinciException ("Delete Column Error",
+            "No column identity provided.");
       }
-   }
+      
+      $columnIdentity = $_GET ['columnIdentity'];
 
-   /*
-    * Adds a My Courses menu to the user's menu bar.
-    */
-   protected function generateMyCoursesMenu ()
-   {
-      $coursesMenu = new ActionMenu (); 
+      list ($courseID, $columnID) = explode (':', $columnIdentity);
 
-      if (count ($this->getCourses () > 0)) { 
-         foreach ($this->getCourses () as $course) {
-            $coursesMenu->addItem (
-               htmlentities ($course->courseName),
-               new HyperlinkAction (sprintf ("?action=view&path=%s",
-               htmlentities ($course->courseCode)))
-            );
+      $course = Course::byCourseID ($courseID);
+
+      if (empty ($course)) {
+         throw new CinciException ("Delete Column Error",
+            "The specified course does not exist.");
+      }
+
+      $enrollment = $course->getEnrollment ($this->getUser ());
+
+      if ($course->checkWriteGradesAbility ($this, $this->getUser (), $enrollment)) {
+         $column = GradeColumn::byColumnID ($columnID);
+
+         if (empty ($column)) {
+            throw new CinciException ("Delete Column Error",
+               "The specified grade column does not exist.");
          }
+
+      } else {
+         throw new CinciException ("Delete Column Error",
+            "You do not have permission to make changes to the grade record of this course.");
+      }
+      
+      $div = new Div ($contentDiv, 'prompt');
+      $header = new XMLEntity ($div, 'h3');
+      new TextEntity ($header, sprintf ("Delete Column: %s", $column->name));
+
+      new Para ($div, "Are you sure you wish to delete this column?");
+
+      $buttonDiv = new Div ($div, 'buttonRow'); 
+      $yesButton = new actionButton ($buttonDiv,
+         "Yes",
+         sprintf ("window.location.href=\"?action=deleteColumn&columnIdentity=%s\"", 
+         $columnIdentity));
+
+      new TextEntity ($buttonDiv, '&nbsp;');
+
+      $yesButton->setAttribute ('class', 'yesButton');
+
+      $noButton = new ActionButton ($buttonDiv,
+         "No",
+         "javascript:$.facebox.close()");
+      $noButton->setAttribute ('class', 'noButton');
+   }
+
+   /*
+    * Delete the specified grade column.
+    */
+   protected function actionDeleteColumn ($contentDiv)
+   {
+      if (empty ($_GET ['columnIdentity'])) {
+         throw new CinciException ("Delete Column Error",
+            "No column identity provided.");
+      }
+      
+      $columnIdentity = $_GET ['columnIdentity'];
+
+      list ($courseID, $columnID) = explode (':', $columnIdentity);
+
+      $course = Course::byCourseID ($courseID);
+
+      if (empty ($course)) {
+         throw new CinciException ("Delete Column Error",
+            "The specified course does not exist.");
       }
 
-      return $coursesMenu;
+      $enrollment = $course->getEnrollment ($this->getUser ());
+
+      if ($course->checkWriteGradesAbility ($this, $this->getUser (), $enrollment)) {
+         $column = GradeColumn::byColumnID ($columnID);
+
+         if (empty ($column)) {
+            throw new CinciException ("Delete Column Error",
+               "The specified grade column does not exist.");
+         }
+         
+         $column->delete ();
+      
+      } else {
+         throw new CinciException ("Delete Column Error",
+            "You do not have permission to make changes to the grade record of this course.");
+      }
+      
+      $div = new Div ($contentDiv, 'prompt');
+      $header = new XMLEntity ($div, 'h3');
+      new TextEntity ($header, sprintf ("Column Deleted: %s", $column->name));
+      new Para ($div, "The grade column has been deleted successfully.");
+      $p = new XMLEntity ($div, 'p');
+      new TextLink ($p, 
+         sprintf ("?action=gradeCourse&courseCode=%s", $course->courseCode),
+         "Return to the Grade Record.");
    }
 
    /*
@@ -679,6 +737,62 @@ class UserClass extends NonUserClass {
       new AJAXMessage ($ajaxReply, 'Grade submitted successfully!');
       $gradeXML = new XMLEntity ($ajaxReply, 'grade');
       new TextEntity ($gradeXML, sprintf ("%.2f", $grade));
+   }
+
+   /*
+    * Overridden function from NonUserClass.
+    *
+    * Shows a welcome message instead of a login form.
+    */
+   protected function showWelcome ($contentDiv)
+   {
+      $div = new Div ($contentDiv);
+
+      $header = new XMLEntity ($div, 'h3');
+      new TextEntity ($header, sprintf (
+         'Welcome, %s!', htmlentities ($_SESSION ['first_name'])));
+      $p = new Para ($div,
+         "Click on a course below to begin.");
+
+      $this->showCoursesList ($div);
+   }
+
+   /*
+    * Prints a list of Div links to the user's enrolled courses.
+    */
+   protected function showCoursesList ($contentDiv)
+   {
+      $courses = $this->getCourses ();
+      $enrollments = $this->getCourseEnrollments ();
+      $roles = enumerateCourseRoles ();
+
+      for ($x = 0; $x < count ($courses); $x++) {
+         $link = new Hyperlink ($contentDiv, sprintf (
+            "?action=view&path=%s", htmlentities ($courses [$x]->courseCode)));
+         $link->setAttribute ('class', 'content-item course');
+
+         new Span ($link, htmlentities ($courses [$x]->courseName), 'title');
+      }
+   }
+
+   /*
+    * Adds a My Courses menu to the user's menu bar.
+    */
+   protected function generateMyCoursesMenu ()
+   {
+      $coursesMenu = new ActionMenu (); 
+
+      if (count ($this->getCourses () > 0)) { 
+         foreach ($this->getCourses () as $course) {
+            $coursesMenu->addItem (
+               htmlentities ($course->courseName),
+               new HyperlinkAction (sprintf ("?action=view&path=%s",
+               htmlentities ($course->courseCode)))
+            );
+         }
+      }
+
+      return $coursesMenu;
    }
 }
 
