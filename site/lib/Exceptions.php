@@ -87,7 +87,7 @@ class CinciAccessException extends CinciException {
 class ExpiredSessionException extends CinciException {
    function __construct ()
    {
-      parent::__construct ("Session Expired", "");
+      parent::__construct ("Session Expired", "Your session has expired.  Please login again.");
    }
    
    public function logException ($logger)

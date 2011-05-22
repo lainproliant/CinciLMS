@@ -8,7 +8,7 @@
  * Requires jquery.js and sprintf.js.
  */
 
-xmlentity_attribute_regex = new RegExp ("^[A-Za-z_:][A-Za-z0-9_\\-.:]+$");
+var xmlentity_attribute_regex = new RegExp ("^[A-Za-z_:][A-Za-z0-9_\\-.:]+$");
 /**
  * Creates an XMLEntity object.
  *

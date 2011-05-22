@@ -19,6 +19,14 @@ include_once "Content.php";
 include_once "ContentForm.php";
 include_once "GradeForm.php";
 
+/*
+ * A method to confirm that the given text is a valid grade expression.
+ */
+function isValidGrade ($grade)
+{
+   return preg_match ('/^-?[0-9]+(\.[0-9][0-9]?)?$/', $grade);
+}
+
 class UserClass extends NonUserClass {
    function __construct ()
    {
@@ -648,6 +656,11 @@ class UserClass extends NonUserClass {
             throw new CinciException ("Grade Submit Error",
                "The specified user is not enrolled in the course.");
          }
+
+         if (! isValidGrade ($grade)) {
+            throw new CinciException ("Grade Submit Error",
+               "Invalid grade expression.  A grade should be a positive or negative number with an optional 2-digit decimal component.");
+         }
          
          // Sets the user's grade for the column.
          // If no grade exists, the grade is created.
@@ -663,7 +676,9 @@ class UserClass extends NonUserClass {
       // Construct a successful AJAXReply.
       new AJAXStatus ($ajaxReply, 'success');
       new AJAXHeader ($ajaxReply, 'Success');
-      new AJAXMessage ($ajaxReply, 'Grade submission successful');
+      new AJAXMessage ($ajaxReply, 'Grade submitted successfully!');
+      $gradeXML = new XMLEntity ($ajaxReply, 'grade');
+      new TextEntity ($gradeXML, sprintf ("%.2f", $grade));
    }
 }
 

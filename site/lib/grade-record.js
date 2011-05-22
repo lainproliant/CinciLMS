@@ -11,12 +11,10 @@
  *    jquery.timers.js,
  *    XMLEntity.js.
  */
+var graderecord_grade_regex = new RegExp ("^-?[0-9]+(\.[0-9][0-9]?)?$");
 
 var KEYCODE_ENTER = 13;
 var KEYCODE_ESC   = 27;
-
-var MAX_GRADE_VAL = 9999999.99;
-var MIN_GRADE_VAL = -9999999.99;
 
 var STATUS_READY = "Ready.";
 
@@ -84,57 +82,76 @@ $(document).ready (function () {
    /*
     * Begins editing of an editable cell when it is double clicked.
     */
-   $("table.sortable td.editable").dblclick (function (event) {
-      // Create the text input for editing.
-      var tableCell = $(this);
-      var textInput = $(X$ ('input').attr ('type', 'text').toString ());
-
-      var savedGrade = $.trim ($(this).text ());
-      var gradeSaved = false;
-
-      $(this).empty ();
-
-      textInput.val (savedGrade);
-      textInput.width ($(this).width ());
-      textInput.height ($(this).height ());
-      
-      /*
-       * Hide the text input when it loses focus.
-       */
-      textInput.blur (function (event) {
-         // If the grade has changed, try to save it to the server.
-         var newGrade = $(this).val ();
-         
-         $(this).remove ();
-
-         if (newGrade != savedGrade) {
-            saveGrade (tableCell, savedGrade, newGrade);
-         }
-         
-         $('table.sortable').trigger ('update');
-      });
-
-      /*
-       * Save the text input when it is submitted (via Return key).
-       */
-      textInput.keyup (function (event) {
-         switch (event.keyCode) {
-         case KEYCODE_ENTER:
-            $(this).blur ();
-            break;
-         case KEYCODE_ESC:
-            $(this).blur ();
-            break;
-         }
-      });
-     
-      $(this).append (textInput); 
-      
-      textInput.focus ();
-      textInput.select ();
-   });
+   $("table.sortable td.editable").click (onGradeCellClick);
 });
 
+/*
+ * Called when a grade cell is clicked.
+ */
+function onGradeCellClick (event) {
+   // Create the text input for editing.
+   var tableCell = $(this);
+
+   // Mark the table cell as being edited so further click
+   // events to not trigger this method.
+   if (tableCell.attr ('editing') == undefined) {
+      tableCell.attr ('editing', 'true');
+   } else {
+      return;
+   }
+
+   var textInput = $(X$ ('input').attr ('type', 'text').str ());
+
+   var savedGrade = $.trim ($(this).text ());
+
+   $(this).empty ();
+
+   textInput.val (savedGrade);
+   textInput.width ($(this).width ());
+   textInput.height ($(this).height ());
+   
+   /*
+    * Hide the text input when it loses focus.
+    */
+   textInput.blur (function (event) {
+      // If the grade has changed, try to save it to the server.
+      var newGrade = $(this).val ();
+      
+      $(this).remove ();
+      
+      if (isValidGrade (newGrade)) {
+         if (newGrade != savedGrade) {
+            saveGrade (tableCell, savedGrade, parseFloat (newGrade));
+            return;
+         }
+      } else {
+         errorStatus ("Invalid grade expression.  A grade should be a positive or negative number with an optional 2-digit decimal component.", 2);
+      }
+
+      tableCell.text (savedGrade);
+      tableCell.removeAttr ('editing');
+   });
+
+   /*
+    * Save the text input when it is submitted (via Return key).
+    */
+   textInput.keyup (function (event) {
+      switch (event.keyCode) {
+      case KEYCODE_ENTER:
+         $(this).blur ();
+         break;
+
+      case KEYCODE_ESC:
+         $(this).blur ();
+         break;
+      }
+   });
+  
+   $(this).append (textInput); 
+   
+   textInput.focus ();
+   textInput.select ();
+}
 
 /*
  * Attempts to save the given grade to the server.
@@ -143,40 +160,49 @@ function saveGrade (tableCell, oldGrade, newGrade)
 {
    var gradeCellIdentity = tableCell.attr ('data-cell');
 
-   if (newGrade > MAX_GRADE_VAL || newGrade < MIN_GRADE_VAL) {
-      statusError ("The grade value was out of bounds", 5);
-      tableCell.text (oldGrade);
-      return;
-   }
+   tableCell.append (X$ ('img').attr ('src', 'images/grade-submit.gif').str ());
 
-   tableCell.text (newGrade);
-   
    $.ajax ({
       type: "GET",
+
       url: sprintf ("ajax.php?action=saveGrade&cellIdentity=%s&grade=%s",
          gradeCellIdentity, newGrade),
+
       dataType: "xml",
-      success: onSaveGradeReply,
-      error: onSaveGradeError
+
+      success: function (xml) {
+         status = $(xml).find ('status').text ();
+         message = $(xml).find ('message').text ();
+
+         if (status == "success") {
+            newGrade = $(xml).find ('grade').text ();
+
+            successStatus (message, 2);
+            tableCell.text (newGrade);
+            $('table.sortable').trigger ('update');
+            tableCell.removeAttr ('editing');
+
+         } else if (status == "exception") {
+            errorStatus (message, 5);
+            tableCell.text (oldGrade);
+            tableCell.removeAttr ('editing');
+         
+         } else {
+            errorStatus (sprintf ("(%s): %s", status, message), 5);
+            tableCell.text (oldGrade);
+            tableCell.removeAttr ('editing');
+         }
+
+      },
+
+      error: function (xmlHttpRequest, errorType, e) {
+         errorStatus (sprintf ("AJAX Error (%s): %s", errorType, e)); 
+         tableCell.text (oldGrade);
+         tableCell.removeAttr ('editing');
+      }
    });
 }
 
-/*
- * Called when the AJAX_saveGrade request completes successfully.
- */
-function onSaveGradeReply (xml)
-{
-   status = $(xml).find ('status').text ();
-   message = $(xml).find ('message').text ();
-
-   if (status == "success") {
-      statusSuccess (message, 2);
-
-   } else if (status == "exception") {
-      statusError (message, 5);
-
-   }
-}
 
 /*
  * Called when the AJAX_saveGrade request could not be completed.
@@ -190,7 +216,7 @@ function onSaveGradeError (xmlHttpRequest, errorType, e)
  * Updates the status div with an error message and resets after
  * a few seconds.
  */
-function statusError (message, secs)
+function errorStatus (message, secs)
 {
    $('#gradeRecordStatus').text (message);
    $('#gradeRecordStatus').addClass ('errorStatus');
@@ -205,7 +231,7 @@ function statusError (message, secs)
  * Updates the status div with an error message and resets after
  * a few seconds.
  */
-function statusSuccess (message, secs)
+function successStatus (message, secs)
 {
    $('#gradeRecordStatus').text (message);
    $('#gradeRecordStatus').addClass ('successStatus');
@@ -214,4 +240,17 @@ function statusSuccess (message, secs)
       $(this).text (STATUS_READY);
       $(this).removeClass ('successStatus');
    });
+}
+
+/*
+ * Checks to see if the given string is a valid grade expression
+ * and within the bounds of [MIN_GRADE, MAX_GRADE].
+ */
+function isValidGrade (grade)
+{
+   if (grade.match (graderecord_grade_regex)) {
+      return true;
+   } else {
+      return false;
+   }
 }
