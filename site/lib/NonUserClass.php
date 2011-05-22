@@ -106,6 +106,9 @@ class NonUserClass extends AuthorityClass {
       new TextEntity ($h3, "Logging in...");
       $p = new XMLEntity ($div, 'p');
       new TextEntity ($p, "Logging in, please wait...");
+      $p = new XMLEntity ($div, 'p');
+      $p->setAttribute ('style', 'text-align: center;');
+      new Image ($p, 'images/redirect.gif', 'redirecting...');
    }
 
    protected function showWelcome ($contentDiv)
