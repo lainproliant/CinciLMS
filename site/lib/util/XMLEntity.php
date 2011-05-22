@@ -532,6 +532,8 @@ class UnorderedList extends XMLEntity {
             $this->addListItem ($child);
          }
       }
+      
+      $this->no_empty_tags = TRUE;
    }
 
    function addListItem ($child) 
@@ -562,6 +564,8 @@ class OrderedList extends XMLEntity {
             $this->addListItem ($child);
          }
       }
+      
+      $this->no_empty_tags = TRUE;
    }
 
    function addListItem ($child) 

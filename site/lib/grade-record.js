@@ -41,7 +41,10 @@ $(document).ready (function () {
       });
       
       menuListXML = new X$ ('ul').class ('L1 context');
-
+      
+      createColumnContextMenu (menuListXML, $(this).parent ().attr ('data-column'));
+      
+      /*
       for (var n = 0; n < 5; n++) {
          item = new Xc$ (menuListXML, 'li');
          header = new Xc$ (item, 'p').add (
@@ -59,6 +62,7 @@ $(document).ready (function () {
                   new T$ (sprintf ("Subitem %d", m))));
          }
       }
+      */
       
       columnContextMenu.empty ();
       columnContextMenu.append ($(menuListXML.toString ()));
@@ -254,4 +258,21 @@ function isValidGrade (grade)
    } else {
       return false;
    }
+}
+
+/*
+ * Creates a context menu for the given column.
+ */
+function createColumnContextMenu (menuListXML, columnIdentity)
+{
+   item = new Xc$ (menuListXML, 'li');
+   actionLink = new Xc$ (item, 'a').attr (
+         'href', sprintf ('?action=editColumn&columnIdentity=%s',
+            columnIdentity));
+   new Tc$ (actionLink, 'Edit Column');
+   
+   actionLink = new Xc$ (item, 'a').attr (
+         'href', sprintf ('?action=deleteColumn&columnIdentity=%s',
+            columnIdentity));
+   new Tc$ (actionLink, 'Delete Column');
 }

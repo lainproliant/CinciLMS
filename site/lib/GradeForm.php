@@ -42,7 +42,8 @@ class GradeRecordForm extends Div {
       foreach ($gradeRecord->getColumns () as $column) {
          $header = new TableHeader ($table->getHead ());
 
-         $header->setAttribute ('data-column', sprintf ("%d",
+         $header->setAttribute ('data-column', sprintf ("%d:%d",
+            $course->courseID,
             $column->columnID));
 
          new Image ($header, 'images/menu-context.png', 'context');
@@ -105,7 +106,8 @@ class GradeRecordForm extends Div {
       $contextMenu = new Div ($this);
       $contextMenu->setAttribute ('id', 'column-context-menu');
       $contextMenu->setAttribute ('class', 'menu');
-      new Para ($contextMenu, 'This is a context menu.');
+
+      $menuList = new UnorderedList ($this, 'L1 context');
    }
 }
 

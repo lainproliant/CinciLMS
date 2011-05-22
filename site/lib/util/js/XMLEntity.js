@@ -97,7 +97,7 @@ function XMLChildNode (parent, tag, attrs)
 }
 
 /**
- * Creates a text entity for an XMLEntity.
+ * Creates a text entity.
  */
 function TextNode (text) {
   
@@ -113,9 +113,22 @@ function TextNode (text) {
    return this;
 }
 
+/**
+ * Creates a child text entity for an XMLEntity.
+ */
+function TextChildNode (parent, text)
+{
+   var node = new TextNode (text);
+   parent.add (node);
+
+   return node;
+}
+
+
 X$ = XMLNode;
 Xc$ = XMLChildNode;
 T$ = TextNode;
+Tc$ = TextChildNode;
 
 /**
  * Checks to see if the given string is a valid attribut name.
