@@ -203,25 +203,21 @@ function saveGrade (tableCell, oldGrade, newGrade)
    });
 }
 
-
-/*
- * Called when the AJAX_saveGrade request could not be completed.
- */
-function onSaveGradeError (xmlHttpRequest, errorType, e)
-{
-   alert ("AJAX_saveGrade failed: " + errorType);
-}
-
 /*
  * Updates the status div with an error message and resets after
  * a few seconds.
  */
 function errorStatus (message, secs)
 {
-   $('#gradeRecordStatus').text (message);
-   $('#gradeRecordStatus').addClass ('errorStatus');
+   statusDiv = $('#gradeRecordStatus');
 
-   $('#gradeRecordStatus').oneTime (secs * 1000, function () {
+   statusDiv.text (message);
+   statusDiv.attr ('class', 'status');
+   statusDiv.addClass ('errorStatus');
+
+   statusDiv.stopTime ();
+
+   statusDiv.oneTime (secs * 1000, function () {
       $(this).text (STATUS_READY);
       $(this).removeClass ('errorStatus');
    });
@@ -233,10 +229,15 @@ function errorStatus (message, secs)
  */
 function successStatus (message, secs)
 {
-   $('#gradeRecordStatus').text (message);
-   $('#gradeRecordStatus').addClass ('successStatus');
+   statusDiv = $('#gradeRecordStatus');
+   
+   statusDiv.text (message);
+   statusDiv.attr ('class', 'status');
+   statusDiv.addClass ('successStatus');
+   
+   statusDiv.stopTime ();
 
-   $('#gradeRecordStatus').oneTime (secs * 1000, function () {
+   statusDiv.oneTime (secs * 1000, function () {
       $(this).text (STATUS_READY);
       $(this).removeClass ('successStatus');
    });
