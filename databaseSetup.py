@@ -130,6 +130,7 @@ create table `CourseContent` (
    `OwnerID` int not null,
    `TypeID` int not null,
    `Name` varchar (1023),
+   `SortOrder` int default 0,
    `AccessFlags` set ('UR','UW','MR','MW','OR','GR') not null,
    `CreationTime` timestamp not null default CURRENT_TIMESTAMP,
    constraint `FK_ContentParentID` foreign key (`ParentID`) references `CourseContent` (`ContentID`) on delete cascade,

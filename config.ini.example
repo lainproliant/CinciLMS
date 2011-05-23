@@ -30,6 +30,10 @@ pretty = 0
 ; What should the initial indent level be for pretty
 ; HTML output?
 initial_il = 3
+; Where should we write the log file?
+log_file = /tmp/cincilms.log
+; What level of errors should we log?
+log_level = 5
 
 [db]
 ; The hostname and port of the MySQL server.

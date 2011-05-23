@@ -31,6 +31,7 @@ class FolderJoinDAO {
             CourseContent.OwnerID,
             CourseContent.TypeID,
             CourseContent.Name,
+            CourseContent.SortOrder,
             CourseContent.AccessFlags,
             CourseContent.CreationTime
 
@@ -39,7 +40,10 @@ class FolderJoinDAO {
          where
             FactFolderContents.ContentID = CourseContent.ContentID
          and
-            FactFolderContents.FolderID = ?;
+            FactFolderContents.FolderID = ?
+
+         order by
+            CourseContent.SortOrder asc;
 QRY;
 
       $stmt = $this->db->prepare ($query);
@@ -55,6 +59,7 @@ QRY;
          $contentResults ["OwnerID"],
          $contentResults ["TypeID"],
          $contentResults ["Name"],
+         $contentResults ["SortOrder"],
          $contentResults ["AccessFlags"],
          $contentResults ["CreationTime"]);
 

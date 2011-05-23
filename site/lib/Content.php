@@ -291,6 +291,7 @@ abstract class CourseContentSubtype extends CourseContent {
          $this->ownerID = $contentItem->ownerID;
          $this->typeID = $contentItem->typeID;
          $this->name = $contentItem->name;
+         $this->sortOrder = $contentItem->sortOrder;
          $this->accessFlags = $contentItem->accessFlags;
       } else {
          $this->contentID = NULL;
@@ -298,6 +299,7 @@ abstract class CourseContentSubtype extends CourseContent {
          $this->ownerID = NULL;
          $this->typeID = NULL;
          $this->name = NULL;
+         $this->sortOrder = NULL;
          $this->accessFlags = CONTENT_DEFAULT_ACCESS;
       }
 
@@ -563,10 +565,20 @@ class ContentFolder extends CourseContentSubtype {
       $course, $enrollment)
    {
       $folderContents = $this->getFolderContents ();
+      $displayList = new UnorderedList ($contentDiv, 'content_list');
+
+      if ($this->checkWriteAccess ($authority, $user, $course, $enrollment)) {
+         $displayList->setAttribute ('class', 'sortable');
+         $displayList->setAttribute ('data-path', $this->pathName);
+      }
 
       foreach ($folderContents as $content) {
          $subpath = $path . '/' . $content->pathName;
-         $content->displayItem ($contentDiv, $subpath, $authority, $user,
+
+         $listItem = new ListItem ($displayList);
+         $listItem->setAttribute ('id', sprintf ('sort_%d',
+            $content->contentID));
+         $content->displayItem ($listItem, $subpath, $authority, $user,
             $course, $enrollment);
       }
    }

@@ -55,7 +55,8 @@ class UserClass extends NonUserClass {
          'submitNewColumn'          => 'submitNewColumn',
          'submitColumnEdit'         => 'submitColumnEdit',
 
-         'AJAX_saveGrade'           => 'AJAX_saveGrade'
+         'AJAX_saveGrade'           => 'AJAX_saveGrade',
+         'AJAX_submitContentSortOrder' => 'AJAX_submitContentSortOrder'
       ));
 
       // The user is already logged in under this class.
@@ -199,6 +200,12 @@ class UserClass extends NonUserClass {
 
       $user = User::byUserID ($_SESSION ['userid']);
       $course = Course::byCourseCode ($courseCode);
+
+      // Add the content init javascript and its dependencies.
+      new Script ($contentDiv, 'lib/util/js/jquery-ui.min.js');
+      new Script ($contentDiv, 'lib/util/js/facebox.js');
+      new Script ($contentDiv, 'lib/facebox-init.js');
+      new Script ($contentDiv, 'lib/content.js');
 
       // Show the course name in the header.
       new TextEntity ($courseNameHeader, htmlentities ($course->courseName));
@@ -378,6 +385,9 @@ class UserClass extends NonUserClass {
 
          try {
             $folder->insert ();
+            
+            $folder->sortOrder = $folder->contentID;
+            $folder->save (false);
 
          } catch (DAOException $e) {
             throw new CinciDatabaseException ("Content Creation Error", 
@@ -424,7 +434,14 @@ class UserClass extends NonUserClass {
          try {
             $item->insert ();
 
+            $item->sortOrder = $item->contentID;
+            $item->save (false);
+
          } catch (DAOException $e) {
+            global $SiteLog;
+
+            $SiteLog->logInfo (sprintf ("LRS-DEBUG: Content Creation Error: %s",
+               $e->getMessage ()));
             throw new CinciDatabaseException ("Content Creation Error", 
                "There was an error creating the new content item.",
                $e->error);
@@ -828,6 +845,70 @@ class UserClass extends NonUserClass {
       new AJAXMessage ($ajaxReply, 'Grade submitted successfully!');
       $gradeXML = new XMLEntity ($ajaxReply, 'grade');
       new TextEntity ($gradeXML, sprintf ("%.2f", $grade));
+   }
+
+   protected function AJAX_submitContentSortOrder ($ajaxReply) {
+      global $SiteLog;
+      
+      if (empty ($_POST ['sort']) or empty ($_GET ['path'])) {
+         throw new CinciException ("Content Sort Error",
+            "No sort order info was provided.");
+      }
+
+      $sortOrder = $_POST ['sort'];
+
+      $SiteLog->logInfo (sprintf ("LRS-DEBUG: %s", var_export ($sortOrder, true)));
+
+      // Convert the path to an array, and remove any empty path
+      // names therein.  This allows leniency in leading and trailing
+      // slashes, e.g. "/course/folder/" is the same as "course/folder".
+      $pathArray = explode ('/', $_GET ['path']);
+      $pathArray = array_diff ($pathArray, array (''));
+
+      if (count ($pathArray) < 1) {
+         throw new CinciException ("Content Sort Error", "No path specified.");
+      }
+
+      $user = User::byUserID ($_SESSION ['userid']);
+
+      list ($content, $course, $enrollment) = Course::getPath ($this, $user, $pathArray);
+     
+      if (! $content->checkWriteAccess ($this, $user, $course, $enrollment)) {
+         throw new CinciException ("Content Sort Error",
+            "You do not have permission to write to items in this path.");
+      }
+
+      if ($content->typeID != CONTENT_TYPE_FOLDER) {
+         throw new CinciException ("Content Sort Error",
+            "The given path is not a folder.");
+      }
+
+      $contentIDMap = array ();
+      $folderContents = $content->getFolderContents ();
+
+      foreach ($folderContents as $content) {
+         $contentIDMap [$content->contentID] = $content;
+      }
+
+      for ($x = 0; $x < sizeof ($sortOrder); $x++) {
+         if (array_key_exists ($sortOrder [$x], $contentIDMap)) {
+            $content = $contentIDMap [$sortOrder [$x]];
+            $content->sortOrder = $x;
+
+         } else {
+            throw new CinciException ("Content Sort Error",
+               "A given content ID does not exist in this folder path.");
+         } 
+      }
+
+      foreach ($folderContents as $content) {
+         $content->save (false);
+      }
+
+      // Construct a successful AJAXReply.
+      new AJAXStatus ($ajaxReply, 'success');
+      new AJAXHeader ($ajaxReply, 'Success');
+      new AJAXMessage ($ajaxReply, 'Sort order submitted successfully.');
    }
 
    /*
