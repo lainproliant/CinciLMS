@@ -21,8 +21,6 @@ $(document).ready (function () {
 
 function onContentSort () {
 
-   alert ($(this).sortable ("serialize"));
-
    $.ajax ({
       type: "POST",
 
