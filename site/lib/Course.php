@@ -474,6 +474,14 @@ class Course extends CoursesVO {
 
          $authority->getMenu ()->addItem ("Grade", new HyperlinkAction ($gradeCourseAction));
       }
+      
+      if ($enrollment->roleID == COURSE_ROLE_STUDENT) {
+         $gradeCourseAction = sprintf ("?action=gradeReport&courseCode=%s",
+            htmlentities ($this->courseCode));
+
+         $authority->getMenu ()->addItem ("My Grades", new HyperlinkAction ($gradeCourseAction));
+      }
+
    }
 }
 

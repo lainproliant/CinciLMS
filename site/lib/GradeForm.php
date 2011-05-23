@@ -151,5 +151,35 @@ class GradeColumnForm extends Form {
    }
 }
 
+class GradeReportForm extends Div {
+   function __construct ($parent, $course, $user, $authority) {
+      parent::__construct ($parent, "search_results");
+
+      $table = new Table ($this);
+
+      new TableHeader ($table->getHead (), "Name");
+      new TableHeader ($table->getHead (), "Grade");
+
+      $gradeRecord = new GradeRecord ($course);
+      
+      $gradeRow = $gradeRecord->fetchUserGradeRow ($user);
+
+      foreach ($gradeRow as $gradeCell) {
+         $column = $gradeCell [0];
+         $grade = $gradeCell [1];
+         
+         $row = new TableRow ($table->getBody ());
+
+         new TableColumn ($row, $column->name);
+
+         if (empty ($grade)) {
+            new TableColumn ($row, "-");
+         } else {
+            new TableColumn ($row, $grade->grade);
+         }
+      }
+   }
+}
+
 
 ?>

@@ -45,6 +45,7 @@ class UserClass extends NonUserClass {
          'enrollUser'               => 'actionEnrollUser',
          'editEnrollment'           => 'actionEditEnrollment',
          'gradeCourse'              => 'actionGradeCourse',
+         'gradeReport'              => 'actionGradeReport',
          'submitContent'            => 'submitContent',
          'submitContentEdit'        => 'submitContentEdit',
          'submitEnrollment'         => 'submitEnrollment',
@@ -342,6 +343,41 @@ class UserClass extends NonUserClass {
       new TextEntity ($header, $headerText);
 
       new GradeRecordForm ($contentDiv, $course, $this);
+   }
+
+   protected function actionGradeReport ($contentDiv)
+   {
+      $course = NULL;
+      $user = NULL;
+
+      if (! empty ($_GET ['courseCode'])) {
+         $courseCode = $_GET ['courseCode'];
+
+         $course = Course::byCourseCode ($courseCode);
+
+         if (empty ($course)) {
+            throw new CinciAccessException ("The specified course does not exist.");
+         }
+
+         $user = $this->getUser ();
+         $enrollment = $course->getEnrollment ($user);
+
+         if (empty ($enrollment)) {
+            throw new CinciAccessException ("You are not enrolled in this course.");
+         }
+
+      } else {
+         // A course code was not provided.
+         throw new CinciException ("My Grades Error", "No course code was provided.");
+      }
+
+      $div = new Div ($contentDiv, "prompt");
+      $header = new XMLEntity ($div, 'h3');
+      $headerText = sprintf ("Grade Report: %s", htmlentities ($course->courseName));
+
+      new TextEntity ($header, $headerText);
+
+      new GradeReportForm ($div, $course, $user, $this);
    }
 
    protected function submitContent ($contentDiv)
