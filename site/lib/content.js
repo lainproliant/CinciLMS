@@ -16,7 +16,33 @@ $(document).ready (function () {
       opacity: 0.5,
       cursor: 'move',
       update: onContentSort
-   }); 
+   });
+
+   $("img.context-menu").click (function (event) {
+      var itemContextMenu = $("#item-context-menu");
+      
+      var x = event.pageX - 8, y = event.pageY - 8;
+
+      itemContextMenu.css ({
+         top: y,
+         left: x
+      });
+      
+      menuListXML = new X$ ('ul').class ('L1 context');
+      
+      createItemContextMenu (menuListXML, $(this).attr ('data-content'));
+      
+      itemContextMenu.empty ();
+      itemContextMenu.append ($(menuListXML.toString ()));
+      itemContextMenu.show ();
+   });
+
+   $("#item-context-menu").mouseleave (function (event) {
+      $(this).fadeOut ();
+   });
+
+   $("#item-context-menu").hide ();
+
 });
 
 function onContentSort () {
@@ -58,4 +84,34 @@ function createWarningXML (header, message)
    Tc$ (Xc$ (div, 'p'), message);
    
    return div.str ();
+}
+
+/*
+ * Creates a context menu for the given content item.
+ */
+function createItemContextMenu (menuListXML, contentID)
+{
+   item = new Xc$ (menuListXML, 'li');
+   
+   actionLink = new Xc$ (item, 'a').attr (
+         'href', sprintf ('?action=editContent&columnID=%s',
+            contentID));
+   new Tc$ (actionLink, 'Edit Content');
+   
+   actionLink = new Xc$ (item, 'a').attr (
+         'href', sprintf ('javascript:showConfirmDeleteContent(%s)',
+            contentID));
+   new Tc$ (actionLink, 'Delete Content');
+}
+
+/*
+ * Asks the server to provide a form to confirm deletion
+ * of a column.
+ */
+function showConfirmDeleteContent (contentID)
+{
+   $.facebox ({ ajax: 
+      sprintf (
+         'contentLoad.php?action=confirmDeleteContent&contentID=%s',
+         contentID) });
 }

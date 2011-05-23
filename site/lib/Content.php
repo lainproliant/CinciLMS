@@ -403,7 +403,9 @@ class ContentItem extends CourseContentSubtype {
    
       $div = new Div ($contentDiv, 'content-item item');
       
+      
       $header = new XMLEntity ($div, 'h4');
+      
       new TextEntity ($header, $itemInfo->title);
       
       new TextEntity ($div, $itemInfo->text); 
@@ -572,10 +574,20 @@ class ContentFolder extends CourseContentSubtype {
          $displayList->setAttribute ('data-path', $this->pathName);
       }
 
+      // Create an item context menu div.
+      $this->createItemContextMenu ($contentDiv);
+
       foreach ($folderContents as $content) {
          $subpath = $path . '/' . $content->pathName;
 
          $listItem = new ListItem ($displayList);
+         $listItem->setAttribute ('class', 'content');
+         
+         if ($content->checkWriteAccess ($authority, $user, $course, $enrollment)) {
+            $img = new Image ($listItem, 'images/menu-context.png', 'Context Menu', 'context-menu');
+            $img->setAttribute ('data-content', $content->contentID);
+         }
+
          $listItem->setAttribute ('id', sprintf ('sort_%d',
             $content->contentID));
          $content->displayItem ($listItem, $subpath, $authority, $user,
@@ -600,7 +612,7 @@ class ContentFolder extends CourseContentSubtype {
       $link = new Hyperlink ($contentDiv, sprintf (
          "?action=view&path=%s", htmlentities ($path)));
       $link->setAttribute ('class', 'content-item folder');
-
+      
       new Span ($link, htmlentities ($this->name), 'title');
    }
 
@@ -613,6 +625,15 @@ class ContentFolder extends CourseContentSubtype {
    protected function createVO ()
    { 
       return NULL;
+   }
+
+   private function createItemContextMenu ($containerDiv)
+   {
+      $contextMenu = new Div ($containerDiv);
+      $contextMenu->setAttribute ('id', 'item-context-menu');
+      $contextMenu->setAttribute ('class', 'menu');
+
+      $menuList = new UnorderedList ($containerDiv, 'L1 context');
    }
 
 }

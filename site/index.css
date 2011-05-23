@@ -222,6 +222,18 @@ ul.content {
    padding: 0;
 }
 
+li.content {
+   display: block;
+   position: relative;
+}
+
+li.content img.context-menu {
+   display: block;
+   float: left;
+   left: 0px;
+   top: 0px;
+}
+
 /*----------------------------------------------------------------------------
  * Form specific CSS rules.
  */
@@ -521,7 +533,8 @@ div.grades td.editable input {
    margin: 0px;
 }
 
-div#column-context-menu {
+div#column-context-menu,
+div#item-context-menu {
    display: none;
    position: absolute;
    background: white;
@@ -530,5 +543,7 @@ div#column-context-menu {
    left: 0px;
 }
 
-
+img.context {
+   cursor: pointer;
+}
 

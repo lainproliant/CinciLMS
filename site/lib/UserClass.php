@@ -46,6 +46,7 @@ class UserClass extends NonUserClass {
          'editEnrollment'           => 'actionEditEnrollment',
          'gradeCourse'              => 'actionGradeCourse',
          'submitContent'            => 'submitContent',
+         'submitContentEdit'        => 'submitContentEdit',
          'submitEnrollment'         => 'submitEnrollment',
          'submitPassword'           => 'submitPassword',
 
@@ -479,6 +480,143 @@ class UserClass extends NonUserClass {
       $p->setAttribute ('style', 'text-align: center;');
       new Image ($p, 'images/redirect.gif', 'redirecting...');
    }
+   
+   protected function submitContentEdit ($contentDiv)
+   {
+      if (empty ($_POST ['contentType']) or empty ($_POST ['contentID'])) {
+         throw new CinciException ("Content Submission Error", "Content type or ID not specified.");
+      }
+
+      $contentType = $_POST ['contentType'];
+      $contentID = $_POST ['contentID'];
+
+      // Confirm that the parent path exists and that we have the rights
+      // to write to it.
+      $parentPathArray = explode ('/', $parentPath);
+      $parentPathArray = array_diff ($parentPathArray, array (''));
+
+      $user = User::byUserID ($_SESSION ['userid']);
+      $parentInfo = Course::getPath ($this, $user, $parentPathArray);
+      $parent = $parentInfo [0];
+      $course = $parentInfo [1];
+      $enrollment = $parentInfo [2];
+
+      if (! $parent->checkWriteAccess ($this, $user, $course, $enrollment)) {
+         throw new CinciAccessException ("You do not have permission to create content items on this path.");
+      }
+
+      $absolutePath = implode ('/', $parentPathArray);
+      $parent->pathName = $absolutePath;
+
+      $div = new Div ($contentDiv, 'prompt');
+
+      switch ($contentType) {
+      case 'folder':
+         $folderName = $_POST ['folderName'];
+         $folderPath = $_POST ['folderPath'];
+         $accessFlags = implode (',', $_POST ['accessFlags']);
+
+         if (empty ($folderPath)) {
+            $folderPath = anumfilter ($folderName);
+         }
+
+         $folder = new ContentFolder ();
+         $folder->name = $folderName;
+         $folder->ownerID = $user->userID;
+         $folder->accessFlags = $accessFlags;
+
+         try {
+            $folder->insert ();
+            
+            $folder->sortOrder = $folder->contentID;
+            $folder->save (false);
+
+         } catch (DAOException $e) {
+            throw new CinciDatabaseException ("Content Creation Error", 
+               "There was an error creating the new folder.",
+               $e->error);
+         }
+
+         try {
+            $parent->addContent ($folder, $folderPath);
+
+         } catch (DAOException $e) {
+            $folder->delete ();
+
+            throw new CinciDatabaseException ("Content Insertion Error", 
+               "There was an error adding the folder to its parent.",
+               $e->error);
+
+         }
+
+         $header = new XMLEntity ($div, 'h3');
+         new TextEntity ($header, "Success!");
+         $p = new XMLEntity ($div, 'p');
+         new TextEntity ($p, "The folder was created successfully!");
+         break;
+
+      case 'item':
+         $itemName = $_POST ['itemName'];
+         $itemPath = $_POST ['itemPath'];
+
+         if (empty ($itemPath)) {
+            $itemPath = anumfilter ($itemName);
+         }
+
+         $itemText = $_POST ['text'];
+         $accessFlags = implode (',', $_POST ['accessFlags']);
+
+         $item = new ContentItem ();
+         $item->name = $itemName;
+         $item->title = $itemName;
+         $item->text = $itemText;
+         $item->ownerID = $user->userID;
+         $item->accessFlags = $accessFlags;
+
+         try {
+            $item->insert ();
+
+            $item->sortOrder = $item->contentID;
+            $item->save (false);
+
+         } catch (DAOException $e) {
+            global $SiteLog;
+
+            $SiteLog->logInfo (sprintf ("LRS-DEBUG: Content Creation Error: %s",
+               $e->getMessage ()));
+            throw new CinciDatabaseException ("Content Creation Error", 
+               "There was an error creating the new content item.",
+               $e->error);
+         }
+
+         try {
+            $parent->addContent ($item, $itemPath);
+
+         } catch (DAOException $e) {
+            throw new CinciDatabaseException ("Content Insertion Error", 
+               "There was an error adding the content item to its parent.",
+               $e->error);
+         }
+
+         $header = new XMLEntity ($div, 'h3');
+         new TextEntity ($header, "Success!");
+         $p = new XMLEntity ($div, 'p');
+         new TextEntity ($p, "The content item was created successfully!");
+         break;
+
+      default:
+         throw new CinciException ('Content Creation Error', 'Unknown content type specified.');
+      }
+
+      header ('Refresh: 1; url=' . sprintf ("?action=view&path=%s",
+         htmlentities ($parent->pathName)));
+
+      $p = new XMLEntity ($div, 'p');
+      new TextEntity ($p, "Please wait...");
+      $p = new XMLEntity ($div, 'p');
+      $p->setAttribute ('style', 'text-align: center;');
+      new Image ($p, 'images/redirect.gif', 'redirecting...');
+   }
 
    protected function submitEnrollment ($contentDiv)
    {
@@ -769,6 +907,41 @@ class UserClass extends NonUserClass {
    }
 
    /*
+    * Edit an existing grade column.
+    */
+   protected function actionEditColumn ($contentDiv)
+   {
+      if (empty ($_GET ['columnIdentity'])) {
+         throw new CinciException ("Edit Grade Column Error",
+            "No column identity was provided.");
+      }
+
+      $columnIdentity = $_GET ['columnIdentity'];
+
+      list ($courseID, $columnID) = explode (':', $columnIdentity);
+
+      $course = Course::byCourseID ($courseID);
+
+      if (empty ($course)) {
+         throw new CinciException ("Edit Grade Column Error",
+            "The specified course was not found.");
+      }
+
+      $column = GradeColumn::byColumnID ($columnID);
+
+      if (empty ($column)) {
+         throw new CinciException ("Edit Grade Column Error",
+            "The specified column was not found.");
+      }
+
+      $div = new Div ($contentDiv, 'prompt');
+      $header = new XMLEntity ($div, 'h3');
+      new TextEntity ($header, sprintf ("Edit Grade Column: %s",
+         $column->name));
+      new GradeColumnForm ($div, '?action=submitColumnEdit', $course, $column);
+   }
+
+   /*
     * Submit a grade column.
     */
    protected function submitNewColumn ($contentDiv)
@@ -811,6 +984,54 @@ class UserClass extends NonUserClass {
       $header = new XMLEntity ($div, 'h3');
       new TextEntity ($header, sprintf ("New Grade Column: %s", $column->name));
       new Para ($div, "The grade column has been created successfully.");
+      
+      $p = new XMLEntity ($div, 'p');
+      new TextEntity ($p, "Please wait...");
+      $p = new XMLEntity ($div, 'p');
+      $p->setAttribute ('style', 'text-align: center;');
+      new Image ($p, 'images/redirect.gif', 'redirecting...');
+   }
+
+   protected function submitColumnEdit ($contentDiv)
+   {
+      if (empty ($_POST ['courseID']) or empty ($_POST ['columnID'])) {
+         throw new CinciException ("Edit Grade Column Error",
+            "The course or column ID was not provided.");
+      }
+
+      $courseID = $_POST ['courseID'];
+      $columnID = $_POST ['columnID'];
+
+
+      $course = Course::byCourseID ($courseID);
+      $column = GradeColumn::byColumnID ($columnID);
+
+      if (empty ($course) or empty ($column)) {
+         throw new CinciException ("Edit Grade Column Error",
+            "The specified course or grade column does not exist.");
+      }
+
+      $column->name = $_POST ['columnName'];
+      $column->pointsPossible = $_POST ['pointsPossible'];
+
+      $enrollment = $course->getEnrollment ($this->getUser ());
+
+      if ($course->checkWriteGradesAbility ($this, $this->getUser (), $enrollment)) {
+         
+         $column->save ();
+      
+      } else {
+         throw new CinciException ("Edit Grade Column Error",
+            "You do not have permission to make changes to the grade record of this course.");
+      }
+
+      header ('Refresh: 1; url=' . sprintf ("?action=gradeCourse&courseCode=%s", 
+         $course->courseCode));
+
+      $div = new Div ($contentDiv, 'prompt');
+      $header = new XMLEntity ($div, 'h3');
+      new TextEntity ($header, sprintf ("Edit Grade Column: %s", $column->name));
+      new Para ($div, "The grade column has been edited successfully.");
       
       $p = new XMLEntity ($div, 'p');
       new TextEntity ($p, "Please wait...");

@@ -275,7 +275,7 @@ function createColumnContextMenu (menuListXML, columnIdentity)
    item = new Xc$ (menuListXML, 'li');
    
    actionLink = new Xc$ (item, 'a').attr (
-         'href', sprintf ('?action=editColumn&columnIdentity=%s',
+         'href', sprintf ('javascript:showEditColumn("%s")',
             columnIdentity));
    new Tc$ (actionLink, 'Edit Column');
    
@@ -306,5 +306,16 @@ function showNewColumn (courseID)
       sprintf (
          'contentLoad.php?action=newColumn&courseID=%d',
          courseID) });
+}
+
+/*
+ * Prompts the user to edit a column.
+ */
+function showEditColumn (columnIdentity)
+{
+   $.facebox ({ ajax:
+      sprintf (
+         'contentLoad.php?action=editColumn&columnIdentity=%s',
+         columnIdentity) });
 }
 
