@@ -18,6 +18,7 @@ include_once "Content.php";
 
 include_once "ContentForm.php";
 include_once "GradeForm.php";
+include_once "UserForm.php";
 
 /*
  * A method to confirm that the given text is a valid grade expression.
@@ -47,6 +48,9 @@ class UserClass extends NonUserClass {
          'submitContent'            => 'submitContent',
          'submitEnrollment'         => 'submitEnrollment',
          'submitPassword'           => 'submitPassword',
+
+         'searchEnrollments'        => 'actionSearchEnrollments',
+         'submitEnrollmentSearch'   => 'submitEnrollmentSearch',
 
          'confirmDeleteColumn'      => 'actionConfirmDeleteColumn',
          'deleteColumn'             => 'actionDeleteColumn',
@@ -565,7 +569,63 @@ class UserClass extends NonUserClass {
       $p = new XMLEntity ($div, 'p');
       new TextEntity ($p, "Success!  Your password has been changed.");
    }
+   
+   protected function actionSearchEnrollments ($contentDiv)
+   {
+      if (empty ($_GET ['courseID'])) {
+         throw new CinciException ("Search Enrollments Error",
+            "No course ID specified.");
+      }
 
+      $course = Course::byCourseID ($_GET ['courseID']);
+
+      $div = new Div ($contentDiv, "prompt");
+      $header = new XMLEntity ($div, 'h3');
+      new TextEntity ($header, sprintf ("Search Enrollments: %s",
+         htmlentities ($course->courseName)));
+      new Para ($div, "Enter the search criterion below, then click Search.");
+      new UserSearchForm ($div, '?action=submitEnrollmentSearch', $course);
+   }
+
+   protected function submitEnrollmentSearch ($contentDiv)
+   {
+      $criterion = $_POST ['criterion'];
+      $search = $_POST ['search'];
+
+      $courseID = $_POST ['courseID'];
+
+      $course = Course::byCourseID ($courseID);
+
+      if (empty ($course)) {
+         throw new CinciException ("Enrollment Search Error",
+            "The specified course does not exist.");
+      }
+
+      $users = NULL;
+      
+      switch ($criterion) {
+      case 0:
+         list ($enrollments, $users) = CourseJoin::searchByUsername ($course->courseID, $search);
+         break;
+
+      case 1:
+         list ($enrollments, $users) = CourseJoin::searchByLastname ($course->courseID, $search);
+         break;
+
+      case 2:
+         list ($enrollments, $users) = CourseJoin::searchByFullName ($course->courseID, $search);
+         break;
+
+      default:
+         throw new CinciException ("Enrollment Search Error",
+            "Unknown search criterion.");
+      }
+
+      $div = new Div ($contentDiv, "prompt");
+      $header = new XMLEntity ($div, 'h3');
+      new TextEntity ($header, "Enrollment Search Results");
+      new UserSearchResults ($div, $this, $users); 
+   }
 
    /*
     * Ask the user if it is okay to delete the given column.

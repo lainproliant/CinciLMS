@@ -67,6 +67,227 @@ QRY;
       $stmt->close ();
       return $resultArrays;
    }
-}
+   
+   public function searchByUsername ($courseID, $search)
+   {
+      $resultArrays = array ();
+      $resultArrays [0] = array ();
+      $resultArrays [1] = array ();
 
+      $enrollmentResults = array ();
+      $userResults = array ();
+
+      $query = 
+         <<<QRY
+         select
+            FactCourseEnrollment.UserID,
+            FactCourseEnrollment.CourseID,
+            FactCourseEnrollment.RoleID,
+            FactCourseEnrollment.AccessFlags,
+            Users.UserID,
+            Users.ExternalID,
+            Users.Username,
+            Users.FirstName,
+            Users.MiddleInitial,
+            Users.LastName,
+            Users.EmailAddress,
+            Users.PasswordSalt,
+            Users.PasswordHash,
+            Users.Notes,
+            Users.LastLogin,
+            Users.IsActive,
+            Users.SystemRole
+
+         from FactCourseEnrollment, Users
+          
+         where
+            FactCourseEnrollment.CourseID = ?
+         and
+            FactCourseEnrollment.UserID = Users.UserID
+         and
+            Users.Username like ?
+QRY;
+
+      $stmt = $this->db->prepare ($query);
+      $match = sprintf ("%s%%", $search); 
+      $stmt->bind_param ("is", $courseID, $match);
+      $stmt->execute ();
+      $lambda = create_function ('$a', 'return $a;');
+      $stmt->bind_result (
+         $enrollmentResults ["UserID"],
+         $enrollmentResults ["CourseID"],
+         $enrollmentResults ["RoleID"], 
+         $enrollmentResults ["AccessFlags"],
+         $userResults ["UserID"],
+         $userResults ["ExternalID"],
+         $userResults ["Username"],
+         $userResults ["FirstName"],
+         $userResults ["MiddleInitial"],
+         $userResults ["LastName"],
+         $userResults ["EmailAddress"],
+         $userResults ["PasswordSalt"],
+         $userResults ["PasswordHash"],
+         $userResults ["Notes"],
+         $userResults ["LastLogin"],
+         $userResults ["IsActive"],
+         $userResults ["SystemRole"]);
+
+      while ($stmt->fetch ()) {
+         $resultArrays [0][] = array_map ($lambda, $enrollmentResults);
+         $resultArrays [1][] = array_map ($lambda, $userResults);
+      }
+
+      $stmt->close ();
+      return $resultArrays;
+   }
+
+   public function searchByLastName ($courseID, $search)
+   {
+      $resultArrays = array ();
+      $resultArrays [0] = array ();
+      $resultArrays [1] = array ();
+
+      $enrollmentResults = array ();
+      $userResults = array ();
+
+      $query = 
+         <<<QRY
+         select
+            FactCourseEnrollment.UserID,
+            FactCourseEnrollment.CourseID,
+            FactCourseEnrollment.RoleID,
+            FactCourseEnrollment.AccessFlags,
+            Users.UserID,
+            Users.ExternalID,
+            Users.Username,
+            Users.FirstName,
+            Users.MiddleInitial,
+            Users.LastName,
+            Users.EmailAddress,
+            Users.PasswordSalt,
+            Users.PasswordHash,
+            Users.Notes,
+            Users.LastLogin,
+            Users.IsActive,
+            Users.SystemRole
+
+         from FactCourseEnrollment, Users
+         
+         where
+            FactCourseEnrollment.CourseID = ?
+         and
+            FactCourseEnrollment.UserID = Users.UserID
+         and
+            Users.LastName like ?
+QRY;
+
+      $stmt = $this->db->prepare ($query);
+      $match = sprintf ("%s%%", $search); 
+      $stmt->bind_param ("is", $courseID, $match);
+      $stmt->execute ();
+      $lambda = create_function ('$a', 'return $a;');
+      $stmt->bind_result (
+         $enrollmentResults ["UserID"],
+         $enrollmentResults ["CourseID"],
+         $enrollmentResults ["RoleID"], 
+         $enrollmentResults ["AccessFlags"],
+         $userResults ["UserID"],
+         $userResults ["ExternalID"],
+         $userResults ["Username"],
+         $userResults ["FirstName"],
+         $userResults ["MiddleInitial"],
+         $userResults ["LastName"],
+         $userResults ["EmailAddress"],
+         $userResults ["PasswordSalt"],
+         $userResults ["PasswordHash"],
+         $userResults ["Notes"],
+         $userResults ["LastLogin"],
+         $userResults ["IsActive"],
+         $userResults ["SystemRole"]);
+
+      while ($stmt->fetch ()) {
+         $resultArrays [0][] = array_map ($lambda, $enrollmentResults);
+         $resultArrays [1][] = array_map ($lambda, $userResults);
+      }
+
+      $stmt->close ();
+      return $resultArrays;
+   }
+   
+   public function searchByFullName ($courseID, $firstSearch, $lastSearch)
+   {
+      $resultArrays = array ();
+      $resultArrays [0] = array ();
+      $resultArrays [1] = array ();
+
+      $enrollmentResults = array ();
+      $userResults = array ();
+
+      $query = 
+         <<<QRY
+         select
+            FactCourseEnrollment.UserID,
+            FactCourseEnrollment.CourseID,
+            FactCourseEnrollment.RoleID,
+            FactCourseEnrollment.AccessFlags,
+            Users.UserID,
+            Users.ExternalID,
+            Users.Username,
+            Users.FirstName,
+            Users.MiddleInitial,
+            Users.LastName,
+            Users.EmailAddress,
+            Users.PasswordSalt,
+            Users.PasswordHash,
+            Users.Notes,
+            Users.LastLogin,
+            Users.IsActive,
+            Users.SystemRole
+
+         from FactCourseEnrollment, Users
+         
+         where
+            FactCourseEnrollment.CourseID = ?
+         and
+            FactCourseEnrollment.UserID = Users.UserID
+         and
+            Users.FirstName like ?
+         and
+            Users.LastName like ?
+QRY;
+
+      $stmt = $this->db->prepare ($query);
+      $matchA = sprintf ("%s%%", $firstSearch);
+      $matchB = sprintf ("%s%%", $lastSearch);
+      $stmt->bind_param ("iss", $courseID, $matchA, $matchB);
+      $stmt->execute ();
+      $lambda = create_function ('$a', 'return $a;');
+      $stmt->bind_result (
+         $enrollmentResults ["UserID"],
+         $enrollmentResults ["CourseID"],
+         $enrollmentResults ["RoleID"], 
+         $enrollmentResults ["AccessFlags"],
+         $userResults ["UserID"],
+         $userResults ["ExternalID"],
+         $userResults ["Username"],
+         $userResults ["FirstName"],
+         $userResults ["MiddleInitial"],
+         $userResults ["LastName"],
+         $userResults ["EmailAddress"],
+         $userResults ["PasswordSalt"],
+         $userResults ["PasswordHash"],
+         $userResults ["Notes"],
+         $userResults ["LastLogin"],
+         $userResults ["IsActive"],
+         $userResults ["SystemRole"]);
+
+      while ($stmt->fetch ()) {
+         $resultArrays [0][] = array_map ($lambda, $enrollmentResults);
+         $resultArrays [1][] = array_map ($lambda, $userResults);
+      }
+
+      $stmt->close ();
+      return $resultArrays;
+   }
+}
 ?>

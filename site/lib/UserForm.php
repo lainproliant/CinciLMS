@@ -159,7 +159,7 @@ class UserEnrollmentForm extends Form {
 
 
 class UserSearchForm extends Form {
-   function __construct ($parent, $action)
+   function __construct ($parent, $action, $course = NULL)
    {
       global $SiteConfig;
 
@@ -199,6 +199,10 @@ class UserSearchForm extends Form {
       new Label ($div, '&nbsp;');
       new SubmitButton ($div, 'Search');
       new ResetButton ($div, 'Reset');
+
+      if (! empty ($course)) {
+         new HiddenField ($this, 'courseID', NULL, $course->courseID);
+      }
    }
 }
 
@@ -207,12 +211,6 @@ class UserSearchResults extends Div {
       $columnsAfter = array ())
    {
       parent::__construct ($parent, 'search_results');
-
-      // Include the jquery.tablesorter javascript plugin.
-      new Script ($this, 'lib/util/js/jquery.tablesorter.js');
-
-      // Include the user search results init script.
-      new Script ($this, 'lib/user-search-results.js');
 
       $columns = array ('Username' => NULL, 'Name' => NULL);
       $columns = array_merge ($columnsBefore, $columns);

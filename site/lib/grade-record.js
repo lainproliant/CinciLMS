@@ -283,18 +283,6 @@ function createColumnContextMenu (menuListXML, columnIdentity)
          'href', sprintf ('javascript:showConfirmDeleteColumn("%s")',
             columnIdentity));
    new Tc$ (actionLink, 'Delete Column');
-
-   actionLink = new Xc$ (item, 'a').attr (
-         'href', 'javascript:faceboxTest()');
-   new Tc$ (actionLink, 'Facebox Test');
-}
-
-/*
- * LRS-DEBUG: Facebox Test.
- */
-function faceboxTest ()
-{
-   $.facebox ({ ajax: 'contentLoad.php?action=welcome' });
 }
 
 /*

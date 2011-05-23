@@ -33,6 +33,71 @@ class CourseJoin {
 
       return array ($enrollments, $courses);
    }
+
+   public static function searchByUsername ($courseID, $search)
+   {
+      $enrollments = array ();
+      $users = array ();
+      
+      $dao = new CourseJoinDAO ();
+      $resultArrays = $dao->searchByUsername ($courseID, $search);
+
+      foreach ($resultArrays [0] as $enrollmentData) {
+         $enrollments [] = FactCourseEnrollmentVO::fromResult (
+            $enrollmentData);
+      }
+
+      foreach ($resultArrays [1] as $userData) {
+         $users [] = User::fromResult ($userData);
+      }
+
+      return array ($enrollments, $users);
+   }
+   
+   public static function searchByLastName ($courseID, $search)
+   {
+      $enrollments = array ();
+      $users = array ();
+      
+      $dao = new CourseJoinDAO ();
+      $resultArrays = $dao->searchByLastName ($courseID, $search);
+
+      foreach ($resultArrays [0] as $enrollmentData) {
+         $enrollments [] = FactCourseEnrollmentVO::fromResult (
+            $enrollmentData);
+      }
+
+      foreach ($resultArrays [1] as $userData) {
+         $users [] = User::fromResult ($userData);
+      }
+
+      return array ($enrollments, $users);
+   }
+   
+   public static function searchByFullName ($courseID, $search)
+   {
+      $enrollments = array ();
+      $users = array ();
+      
+      list ($lastSearch, $firstSearch) = explode (",", $search);
+      
+      $lastSearch = trim ($lastSearch);
+      $firstSearch = trim ($firstSearch);
+
+      $dao = new CourseJoinDAO ();
+      $resultArrays = $dao->searchByFullName ($courseID, $firstSearch, $lastSearch);
+
+      foreach ($resultArrays [0] as $enrollmentData) {
+         $enrollments [] = FactCourseEnrollmentVO::fromResult (
+            $enrollmentData);
+      }
+
+      foreach ($resultArrays [1] as $userData) {
+         $users [] = User::fromResult ($userData);
+      }
+
+      return array ($enrollments, $users);
+   }
 }
 
 ?>

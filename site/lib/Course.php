@@ -308,6 +308,41 @@ class Course extends CoursesVO {
          return FALSE;
       }
    }
+   /*
+    * Checks whether the specified user has the rights to view user enrollments 
+    * in the specified course, based on the given course enrollment.
+    *
+    * authority:     The user's current AuthorityClass instance.  Can be NULL,
+    *                in which case special AuthorityClass permissions are not
+    *                determined.
+    * user:          The User instance.
+    * enrollment:    The user's enrollment in the course.  May be NULL, in which
+    *                case the user is treated as a guest.
+    *
+    * Returns True if the user has the right to view enrollments, False otherwise.
+    */
+   public function checkReadEnrollmentAbility ($authority, $user, $enrollment)
+   {
+      // If the authority contains '_sysopEnrollAbility' permissions, grant ability.
+      if (! empty ($authority) and $authority->authorizeCheck ('_sysopEnrollAbility')) {
+         return TRUE;
+      }
+
+      // If the user is not enrolled in the course, do not allow them to enroll anyone.
+      // Only allow them to enroll if they have EnW rights.
+
+      $userPermissions = empty ($enrollment) ?
+         array () :
+         explode (',', $enrollment->accessFlags);
+
+      if (in_array ('EnR', $userPermissions)) {
+         // The user is enrolled and has EnW permissions, grant ability.
+         return TRUE;
+      } else {
+         // The user is not enrolled or does not have EnW permissions.  Deny ability.
+         return FALSE;
+      }
+   }
 
    /*
     * Checks whether the specified user has the rights to unenroll users
@@ -420,9 +455,17 @@ class Course extends CoursesVO {
          
          $enrollUserAction = sprintf ('?action=enrollUser&courseCode=%s', 
             htmlentities ($this->courseCode));
-
-         // Add course enrollment item.
+         
          $modifyMenu->addItem ('Enroll User', new HyperlinkAction ($enrollUserAction));
+      }
+
+      if ($this->checkReadEnrollmentAbility ($authority, $user, $enrollment)) {
+         $modifyMenu = $authority->getMenu ()->appendSubmenu ('Search');
+         
+         $searchEnrollmentsAction = sprintf ('?action=searchEnrollments&courseID=%s', 
+            htmlentities ($this->courseID));
+         
+         $modifyMenu->addItem ('Course Enrollments', new HyperlinkAction ($searchEnrollmentsAction));
       }
 
       if ($this->checkReadGradesAbility ($authority, $user, $enrollment)) {

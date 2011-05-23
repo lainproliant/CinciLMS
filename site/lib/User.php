@@ -114,7 +114,7 @@ class User extends UsersVO {
       $dao = new UsersDAO ();
       $users = array ();
 
-      list ($lastName, $firstName) = split (", ", $fullName);
+      list ($lastName, $firstName) = explode (",", $fullName);
       
       $lastName = trim ($lastName);
       $firstName = trim ($firstName);
