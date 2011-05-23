@@ -10,7 +10,7 @@ include_once "SiteConfig.php";
  * Released under the GNU General Public License, version 3.
  */
 class GradeRecordForm extends Div {
-   function __construct ($parent, $course) {
+   function __construct ($parent, $course, $authority) {
       parent::__construct ($parent, "grades");
 
       // Include the required javascript plugins.
@@ -28,7 +28,10 @@ class GradeRecordForm extends Div {
       // Create the context menu for columns.
       $this->createColumnContextMenu ();
 
+      // Fetch the grade record and ask it for context menu items.
       $gradeRecord = new GradeRecord ($course);
+      $gradeRecord->addContext ($authority);
+
       $enrollments = $course->getUserEnrollments ();
 
       $table = new Table ($this, "sortable");
@@ -106,6 +109,45 @@ class GradeRecordForm extends Div {
       $contextMenu->setAttribute ('class', 'menu');
 
       $menuList = new UnorderedList ($this, 'L1 context');
+   }
+}
+
+class GradeColumnForm extends Form {
+   function __construct ($parent, $action, $course, $column = NULL)
+   {
+      parent::__construct ($parent, $action, 'POST', 'grade_column_form');
+
+      new Script ($this, 'lib/grade-column-form.js');
+
+      $columnName = NULL;
+      $pointsPossible = 100;
+
+      if (! empty ($column)) {
+         $columnName = $column->name;
+         $pointsPossible = $column->pointsPossible;
+      }
+      
+      $fieldset = new FieldSet ($this);
+      $listDiv = new Div ($fieldset, 'list');
+
+      $div = new Div ($listDiv, 'row');
+      new Label ($div, 'Column Name:', 'columnName', 'first');
+      new TextInput ($div, 'columnName', 'columnName', $columnName);
+
+      $div = new Div ($listDiv, 'row');
+      new Label ($div, 'Points Possible:', 'pointsPossible', 'first');
+      new TextInput ($div, 'pointsPossible', 'pointsPossible', $pointsPossible);
+       
+      $div = new Div ($listDiv, 'row');
+      new Label ($div, '&nbsp;');
+      new SubmitButton ($div, 'Submit');
+      new ResetButton ($div, 'Reset');
+
+      new HiddenField ($this, 'courseID', NULL, $course->courseID);
+      
+      if (! empty ($column)) {
+         new HiddenField ($this, 'columnID', NULL, $column->columnID);
+      }
    }
 }
 

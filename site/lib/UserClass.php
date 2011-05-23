@@ -50,6 +50,10 @@ class UserClass extends NonUserClass {
 
          'confirmDeleteColumn'      => 'actionConfirmDeleteColumn',
          'deleteColumn'             => 'actionDeleteColumn',
+         'newColumn'                => 'actionNewColumn',
+         'editColumn'               => 'actionEditColumn',
+         'submitNewColumn'          => 'submitNewColumn',
+         'submitColumnEdit'         => 'submitColumnEdit',
 
          'AJAX_saveGrade'           => 'AJAX_saveGrade'
       ));
@@ -251,7 +255,6 @@ class UserClass extends NonUserClass {
          new ItemForm ($div, '?action=submitContent', $this, $parent);
          break;
 
-
       default:
          throw new CinciException ('Content Creation Error', 'Unknown content type specified.');
       }
@@ -326,7 +329,7 @@ class UserClass extends NonUserClass {
 
       new TextEntity ($header, $headerText);
 
-      new GradeRecordForm ($contentDiv, $course);
+      new GradeRecordForm ($contentDiv, $course, $this);
    }
 
    protected function submitContent ($contentDiv)
@@ -446,9 +449,14 @@ class UserClass extends NonUserClass {
          throw new CinciException ('Content Creation Error', 'Unknown content type specified.');
       }
 
+      header ('Refresh: 1; url=' . sprintf ("?action=view&path=%s",
+         htmlentities ($parent->pathName)));
+
       $p = new XMLEntity ($div, 'p');
-      new TextLink ($p, sprintf ("?action=view&path=%s", htmlentities ($parent->pathName)),
-         sprintf ("Return to %s (%s)", htmlentities ($parent->name), htmlentities ($course->courseName)));
+      new TextEntity ($p, "Please wait...");
+      $p = new XMLEntity ($div, 'p');
+      $p->setAttribute ('style', 'text-align: center;');
+      new Image ($p, 'images/redirect.gif', 'redirecting...');
    }
 
    protected function submitEnrollment ($contentDiv)
@@ -642,20 +650,103 @@ class UserClass extends NonUserClass {
             "You do not have permission to make changes to the grade record of this course.");
       }
       
+      header ('Refresh: 1; url=' . sprintf ("?action=gradeCourse&courseCode=%s", 
+         $course->courseCode));
+
       $div = new Div ($contentDiv, 'prompt');
       $header = new XMLEntity ($div, 'h3');
       new TextEntity ($header, sprintf ("Column Deleted: %s", $column->name));
       new Para ($div, "The grade column has been deleted successfully.");
+      
       $p = new XMLEntity ($div, 'p');
-      new TextLink ($p, 
-         sprintf ("?action=gradeCourse&courseCode=%s", $course->courseCode),
-         "Return to the Grade Record.");
+      new TextEntity ($p, "Please wait...");
+      $p = new XMLEntity ($div, 'p');
+      $p->setAttribute ('style', 'text-align: center;');
+      new Image ($p, 'images/redirect.gif', 'redirecting...');
+   }
+
+   /*
+    * Create a new grade column.
+    */
+   protected function actionNewColumn ($contentDiv)
+   {
+      if (empty ($_GET ['courseID'])) {
+         throw new CinciException ("New Grade Column Error", 
+            "No course was given in which to insert a new grade column.");
+      }
+
+      $courseID = $_GET ['courseID'];
+
+      $course = Course::byCourseID ($courseID);
+
+      if (empty ($course)) {
+         throw new CinciException ("New Grade Column Error", 
+            "The specified course does not exist.");
+      }
+
+      $div = new Div ($contentDiv, 'prompt');
+      $header = new XMLEntity ($div, 'h3');
+      new TextEntity ($header, sprintf ("New Grade Column: %s",
+         $course->courseName));
+      new GradeColumnForm ($div, '?action=submitNewColumn', $course);
+   }
+
+   /*
+    * Submit a grade column.
+    */
+   protected function submitNewColumn ($contentDiv)
+   {
+      if (empty ($_POST ['courseID'])) {
+         throw new CinciException ("New Grade Column Error",
+            "No course was given in which to insert a new grade column.");
+      }
+
+      $courseID = $_POST ['courseID'];
+
+      $course = Course::byCourseID ($courseID);
+
+      if (empty ($course)) {
+         throw new CinciException ("New Grade Column Error",
+            "The specified course does not exist.");
+      }
+
+      $column = new GradeColumn ();
+
+      $column->courseID = $course->courseID;
+      $column->name = $_POST ['columnName'];
+      $column->pointsPossible = $_POST ['pointsPossible'];
+
+      $enrollment = $course->getEnrollment ($this->getUser ());
+
+      if ($course->checkWriteGradesAbility ($this, $this->getUser (), $enrollment)) {
+         
+         $column->insert ();
+      
+      } else {
+         throw new CinciException ("New Grade Column Error",
+            "You do not have permission to make changes to the grade record of this course.");
+      }
+
+      header ('Refresh: 1; url=' . sprintf ("?action=gradeCourse&courseCode=%s", 
+         $course->courseCode));
+
+      $div = new Div ($contentDiv, 'prompt');
+      $header = new XMLEntity ($div, 'h3');
+      new TextEntity ($header, sprintf ("New Grade Column: %s", $column->name));
+      new Para ($div, "The grade column has been created successfully.");
+      
+      $p = new XMLEntity ($div, 'p');
+      new TextEntity ($p, "Please wait...");
+      $p = new XMLEntity ($div, 'p');
+      $p->setAttribute ('style', 'text-align: center;');
+      new Image ($p, 'images/redirect.gif', 'redirecting...');
    }
 
    /*
     * Save the given grade to the database via an AJAX request.
     */
-   protected function AJAX_saveGrade ($ajaxReply) {
+   protected function AJAX_saveGrade ($ajaxReply) 
+   {
       global $SiteLog;
 
       $SiteLog->logDebug ("AJAX_saveGrade method called.");

@@ -99,6 +99,20 @@ class GradeRecord {
 
       return $gradeRow;
    }
+
+   /*
+    * Adds grade-specific context items to the action menu.
+    */
+   public function addContext ($authority) {
+      $createMenu = $authority->getMenu ()->appendSubmenu ('Create');
+
+      $newColumnAction = sprintf ("?action=newColumn&courseID=%s",
+         htmlentities ($this->course->courseID));
+
+      $createMenu->addItem ('New Grade Column', 
+         new JavascriptAction (sprintf ("javascript:showNewColumn(%d);",
+            $this->course->courseID)));
+   }
 }
 
 ?>

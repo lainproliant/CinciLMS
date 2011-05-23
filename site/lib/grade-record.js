@@ -20,6 +20,12 @@ var KEYCODE_ESC   = 27;
 var STATUS_READY = "Ready.";
 
 $(document).ready (function () {
+   
+   /*
+    * Set initial facebox opacity.
+    */
+   $.facebox.settings.opacity = 0.5;
+
    /*
     * Applies the tablesorter to the grade record table
     * and enables dynamic zebra striping.
@@ -301,5 +307,16 @@ function showConfirmDeleteColumn (columnIdentity)
       sprintf (
          'contentLoad.php?action=confirmDeleteColumn&columnIdentity=%s',
          columnIdentity) });
+}
+
+/*
+ * Prompts the user to create a new column.
+ */
+function showNewColumn (courseID)
+{
+   $.facebox ({ ajax:
+      sprintf (
+         'contentLoad.php?action=newColumn&courseID=%d',
+         courseID) });
 }
 

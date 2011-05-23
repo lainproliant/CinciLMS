@@ -228,4 +228,18 @@ class HyperlinkAction {
    }
 }
 
+class JavascriptAction {
+   private $javascript;
+
+   function __construct ($javascript)
+   {
+      $this->javascript = $javascript;
+   }
+
+   public function getJavascript ()
+   {
+      return $this->javascript;
+   }
+}
+
 ?>

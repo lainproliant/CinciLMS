@@ -47,6 +47,12 @@ function populateMenu ($menuList, $class, $userMenu, $level = 1)
             $menuItem->getHyperlink (), $name);
          $menuList->addListItem ($link);
 
+      } elseif (is_object ($menuItem) and get_class ($menuItem) == "JavascriptAction") {
+         $link = new TextLink (NULL,
+            "javascript:void(0);", $name);
+         $link->setAttribute ('onclick', $menuItem->getJavascript ());
+         $menuList->addListItem ($link);
+
       } elseif (is_string ($menuItem) and $menuItem == "---") {
          $li = new ListItem ($menuList);
          $li->setAttribute ('class', 'separator');

@@ -64,8 +64,6 @@ class NonUserClass extends AuthorityClass {
       $user = User::byUsername ($username);
       
       if (empty ($user)) {
-         print 'LRS-DEBUG: $user is NULL!';
-         print sprintf ("(%s)", $username);
          throw new CinciLoginException ($username,
             "The username and password you provided were incorrect.");
       }

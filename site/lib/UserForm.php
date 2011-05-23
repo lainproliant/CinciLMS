@@ -18,10 +18,8 @@ class UserForm extends Form {
       parent::__construct ($parent, $action, 'POST', 'user_form');
 
       # Include the user validation script.
-      new Script ($this, 'lib/user.js');
+      new Script ($this, 'lib/user-form.js');
 
-      $this->setAttribute ('onSubmit', 'return userFormValidate (this);');
-      
       $username = NULL;
       $externalID = NULL;
       $firstName = NULL;
