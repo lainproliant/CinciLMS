@@ -568,7 +568,7 @@ class ContentFolder extends CourseContentSubtype {
       $displayList = new UnorderedList ($contentDiv, 'content_list');
 
       if ($this->checkWriteAccess ($authority, $user, $course, $enrollment)) {
-         $displayList->setAttribute ('class', 'sortable');
+         $displayList->setAttribute ('class', 'sortable content');
          $displayList->setAttribute ('data-path', $this->pathName);
       }
 

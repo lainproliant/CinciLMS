@@ -216,6 +216,12 @@ div.status.successStatus {
    color: #000000;
 }
 
+ul.content {
+   list-style: none;
+   margin: 0;
+   padding: 0;
+}
+
 /*----------------------------------------------------------------------------
  * Form specific CSS rules.
  */
