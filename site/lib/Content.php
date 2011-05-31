@@ -319,10 +319,12 @@ abstract class CourseContentSubtype extends CourseContent {
    {
       parent::insert ();
 
-      $vo = $this->createVO ();
+      $voArray = $this->createVO ();
 
-      if (! empty ($vo)) {
-         $vo->insert ();
+      foreach ($voArray as $vo) {
+         if (! empty ($vo)) {
+            $vo->insert ();
+         }
       }
    }
 
@@ -356,10 +358,12 @@ abstract class CourseContentSubtype extends CourseContent {
       $course, $enrollment);
 
    /* ABSTRACT
-    * Create an appropriate value object so that subtype
+    * Create appropriate value objects so that subtype
     * information can be saved.  Must be implemented.
-    * Subclass implementations may return NULL to inform
-    * that there is not an appropriate value object type.
+    *
+    * Should return an array of VO objects to be saved,
+    * or an empty array if there are no appropriate value
+    * object types.
     */
    protected abstract function createVO ();
 }
@@ -418,7 +422,7 @@ class ContentItem extends CourseContentSubtype {
       $vo->title = $this->title;
       $vo->text = $this->text;
 
-      return $vo;
+      return array ($vo);
    }
 }
 
@@ -624,7 +628,7 @@ class ContentFolder extends CourseContentSubtype {
     */
    protected function createVO ()
    { 
-      return NULL;
+      return array ();
    }
 
    private function createItemContextMenu ($containerDiv)
@@ -717,7 +721,7 @@ class ContentLink extends CourseContentSubtype {
       $vo->linkID = $this->contentID;
       $vo->destinationID = $this->destinationID;
 
-      return $vo;
+      return array ($vo);
    }
 }
 
