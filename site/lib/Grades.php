@@ -33,20 +33,25 @@ class GradeColumn extends GradeColumnsVO {
 
       $SiteLog->logDebug (sprintf ("setUserGrade: grade = %s",
          var_export ($gradeCell, true)));
+      
+      try {
+         if (empty ($gradeCell)) {
+            $gradeCell = new Grade ();
 
-      if (empty ($gradeCell)) {
-         $gradeCell = new Grade ();
+            $gradeCell->columnID = $this->columnID;
+            $gradeCell->studentID = $user->userID;
+            $gradeCell->grade = $grade;
 
-         $gradeCell->columnID = $this->columnID;
-         $gradeCell->studentID = $user->userID;
-         $gradeCell->grade = $grade;
+            $gradeCell->insert ();
+         } else {
 
-         $gradeCell->insert ();
-      } else {
+            $gradeCell->grade = $grade;
 
-         $gradeCell->grade = $grade;
-
-         $gradeCell->save ();
+            $gradeCell->save ();
+         }
+      } catch (Exception $e) {
+         $SiteLog->logError (sprintf ("ERROR: %s",
+            var_export ($e, true)));
       }
    }
 }

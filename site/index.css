@@ -533,6 +533,12 @@ div.grades td.editable input {
    margin: 0px;
 }
 
+div.grades td.editable span {
+   display: block;
+   min-width: 70%;
+   min-height: 100%;
+}
+
 div#column-context-menu,
 div#item-context-menu {
    display: none;

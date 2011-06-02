@@ -10,9 +10,10 @@ class GradeColumnsDAO {
       $stmt = $this->db->prepare ("select ColumnID, CourseID, Name, PointsPossible, AssignmentID, SortOrder from GradeColumns where ColumnID = ?");
       $stmt->bind_param ("i", $columnID);
       $stmt->execute ();
+      $stmt->store_result ();
       $stmt->bind_result ($results ["ColumnID"], $results ["CourseID"], $results ["Name"], $results ["PointsPossible"], $results ["AssignmentID"], $results ["SortOrder"]);
       $stmt->fetch ();
-      if ($stmt->num_rows < 0) {
+      if ($stmt->num_rows < 1) {
          $results = NULL;
       }
       
@@ -26,6 +27,7 @@ class GradeColumnsDAO {
       $stmt = $this->db->prepare ("select ColumnID, CourseID, Name, PointsPossible, AssignmentID, SortOrder from GradeColumns where CourseID = ?");
       $stmt->bind_param ("i", $courseID);
       $stmt->execute ();
+      $stmt->store_result ();
       $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["ColumnID"], $results ["CourseID"], $results ["Name"], $results ["PointsPossible"], $results ["AssignmentID"], $results ["SortOrder"]);
       while ($stmt->fetch ()) {
@@ -41,6 +43,7 @@ class GradeColumnsDAO {
       $query = "select ColumnID, CourseID, Name, PointsPossible, AssignmentID, SortOrder from GradeColumns";
       $stmt = $this->db->prepare ($query);
       $stmt->execute ();
+      $stmt->store_result ();
       $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["ColumnID"], $results ["CourseID"], $results ["Name"], $results ["PointsPossible"], $results ["AssignmentID"], $results ["SortOrder"]);
       while ($stmt->fetch ()) {
@@ -68,6 +71,7 @@ class GradeColumnsDAO {
       $stmt = $this->db->prepare ($query);
       call_user_func_array (array ($stmt, "bind_param"), $bindParamArgs);
       $stmt->execute ();
+      $stmt->store_result ();
       $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["ColumnID"], $results ["CourseID"], $results ["Name"], $results ["PointsPossible"], $results ["AssignmentID"], $results ["SortOrder"]);
       while ($stmt->fetch ()) {
@@ -115,9 +119,10 @@ class GradesDAO {
       $stmt = $this->db->prepare ("select ColumnID, StudentID, Grade from Grades where ColumnID = ? and StudentID = ?");
       $stmt->bind_param ("ii", $columnID, $studentID);
       $stmt->execute ();
+      $stmt->store_result ();
       $stmt->bind_result ($results ["ColumnID"], $results ["StudentID"], $results ["Grade"]);
       $stmt->fetch ();
-      if ($stmt->num_rows < 0) {
+      if ($stmt->num_rows < 1) {
          $results = NULL;
       }
       
@@ -131,6 +136,7 @@ class GradesDAO {
       $query = "select ColumnID, StudentID, Grade from Grades";
       $stmt = $this->db->prepare ($query);
       $stmt->execute ();
+      $stmt->store_result ();
       $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["ColumnID"], $results ["StudentID"], $results ["Grade"]);
       while ($stmt->fetch ()) {
@@ -158,6 +164,7 @@ class GradesDAO {
       $stmt = $this->db->prepare ($query);
       call_user_func_array (array ($stmt, "bind_param"), $bindParamArgs);
       $stmt->execute ();
+      $stmt->store_result ();
       $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["ColumnID"], $results ["StudentID"], $results ["Grade"]);
       while ($stmt->fetch ()) {

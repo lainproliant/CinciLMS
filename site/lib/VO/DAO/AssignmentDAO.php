@@ -10,9 +10,10 @@ class AssignmentsDAO {
       $stmt = $this->db->prepare ("select AssignmentID, TypeID, PointsPossible, DueDate from Assignments where AssignmentID = ?");
       $stmt->bind_param ("i", $assignmentID);
       $stmt->execute ();
+      $stmt->store_result ();
       $stmt->bind_result ($results ["AssignmentID"], $results ["TypeID"], $results ["PointsPossible"], $results ["DueDate"]);
       $stmt->fetch ();
-      if ($stmt->num_rows < 0) {
+      if ($stmt->num_rows < 1) {
          $results = NULL;
       }
       
@@ -26,6 +27,7 @@ class AssignmentsDAO {
       $stmt = $this->db->prepare ("select AssignmentID, TypeID, PointsPossible, DueDate from Assignments where AssignmentID = ?");
       $stmt->bind_param ("i", $assignmentID);
       $stmt->execute ();
+      $stmt->store_result ();
       $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["AssignmentID"], $results ["TypeID"], $results ["PointsPossible"], $results ["DueDate"]);
       while ($stmt->fetch ()) {
@@ -41,6 +43,7 @@ class AssignmentsDAO {
       $query = "select AssignmentID, TypeID, PointsPossible, DueDate from Assignments";
       $stmt = $this->db->prepare ($query);
       $stmt->execute ();
+      $stmt->store_result ();
       $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["AssignmentID"], $results ["TypeID"], $results ["PointsPossible"], $results ["DueDate"]);
       while ($stmt->fetch ()) {
@@ -68,6 +71,7 @@ class AssignmentsDAO {
       $stmt = $this->db->prepare ($query);
       call_user_func_array (array ($stmt, "bind_param"), $bindParamArgs);
       $stmt->execute ();
+      $stmt->store_result ();
       $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["AssignmentID"], $results ["TypeID"], $results ["PointsPossible"], $results ["DueDate"]);
       while ($stmt->fetch ()) {
@@ -115,9 +119,10 @@ class AssignmentFileSubmissionsDAO {
       $stmt = $this->db->prepare ("select SubmissionID, AssignmentID, StudentID, CourseID, SubmissionDate, FileName from AssignmentFileSubmissions where SubmissionID = ?");
       $stmt->bind_param ("i", $submissionID);
       $stmt->execute ();
+      $stmt->store_result ();
       $stmt->bind_result ($results ["SubmissionID"], $results ["AssignmentID"], $results ["StudentID"], $results ["CourseID"], $results ["SubmissionDate"], $results ["FileName"]);
       $stmt->fetch ();
-      if ($stmt->num_rows < 0) {
+      if ($stmt->num_rows < 1) {
          $results = NULL;
       }
       
@@ -131,6 +136,7 @@ class AssignmentFileSubmissionsDAO {
       $query = "select SubmissionID, AssignmentID, StudentID, CourseID, SubmissionDate, FileName from AssignmentFileSubmissions";
       $stmt = $this->db->prepare ($query);
       $stmt->execute ();
+      $stmt->store_result ();
       $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["SubmissionID"], $results ["AssignmentID"], $results ["StudentID"], $results ["CourseID"], $results ["SubmissionDate"], $results ["FileName"]);
       while ($stmt->fetch ()) {
@@ -158,6 +164,7 @@ class AssignmentFileSubmissionsDAO {
       $stmt = $this->db->prepare ($query);
       call_user_func_array (array ($stmt, "bind_param"), $bindParamArgs);
       $stmt->execute ();
+      $stmt->store_result ();
       $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["SubmissionID"], $results ["AssignmentID"], $results ["StudentID"], $results ["CourseID"], $results ["SubmissionDate"], $results ["FileName"]);
       while ($stmt->fetch ()) {
@@ -205,9 +212,10 @@ class AssignmentTypesDAO {
       $stmt = $this->db->prepare ("select AssignmentTypeID, TypeName from AssignmentTypes where AssignmentTypeID = ?");
       $stmt->bind_param ("i", $assignmentTypeID);
       $stmt->execute ();
+      $stmt->store_result ();
       $stmt->bind_result ($results ["AssignmentTypeID"], $results ["TypeName"]);
       $stmt->fetch ();
-      if ($stmt->num_rows < 0) {
+      if ($stmt->num_rows < 1) {
          $results = NULL;
       }
       
@@ -221,6 +229,7 @@ class AssignmentTypesDAO {
       $query = "select AssignmentTypeID, TypeName from AssignmentTypes";
       $stmt = $this->db->prepare ($query);
       $stmt->execute ();
+      $stmt->store_result ();
       $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["AssignmentTypeID"], $results ["TypeName"]);
       while ($stmt->fetch ()) {
@@ -248,6 +257,7 @@ class AssignmentTypesDAO {
       $stmt = $this->db->prepare ($query);
       call_user_func_array (array ($stmt, "bind_param"), $bindParamArgs);
       $stmt->execute ();
+      $stmt->store_result ();
       $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["AssignmentTypeID"], $results ["TypeName"]);
       while ($stmt->fetch ()) {
