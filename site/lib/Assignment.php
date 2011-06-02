@@ -38,8 +38,6 @@ class Assignment extends ContentItem {
    {
       $vo = new AssignmentsVO ();
       
-      printf ("(LRS-DEBUG A: %d)", $this->contentID);
-
       $vo->assignmentID = $this->contentID;
       $vo->typeID = $this->assignmentTypeID;
       $vo->pointsPossible = $this->pointsPossible;
@@ -64,8 +62,6 @@ class Assignment extends ContentItem {
       $column->assignmentID = $this->contentID;
 
       $enrollment = $course->getEnrollment ($user);
-
-      printf ("(LRS-DEBUG: %d)", $this->contentID);
 
       if ($course->checkWriteGradesAbility ($authority, $user, $enrollment)) {
 
