@@ -34,6 +34,8 @@ initial_il = 3
 log_file = /tmp/cincilms.log
 ; What level of errors should we log?
 log_level = 5
+; Where should data files go?
+data_files_dir = /tmp/cincilms-data
 
 [db]
 ; The hostname and port of the MySQL server.
