@@ -10,10 +10,9 @@ class UsersDAO {
       $stmt = $this->db->prepare ("select UserID, ExternalID, Username, FirstName, MiddleInitial, LastName, EmailAddress, PasswordSalt, PasswordHash, Notes, LastLogin, IsActive, SystemRole from Users where UserID = ?");
       $stmt->bind_param ("i", $userID);
       $stmt->execute ();
-      $stmt->store_result ();
       $stmt->bind_result ($results ["UserID"], $results ["ExternalID"], $results ["Username"], $results ["FirstName"], $results ["MiddleInitial"], $results ["LastName"], $results ["EmailAddress"], $results ["PasswordSalt"], $results ["PasswordHash"], $results ["Notes"], $results ["LastLogin"], $results ["IsActive"], $results ["SystemRole"]);
       $stmt->fetch ();
-      if ($stmt->num_rows < 1) {
+      if ($stmt->num_rows < 0) {
          $results = NULL;
       }
       
@@ -26,10 +25,9 @@ class UsersDAO {
       $stmt = $this->db->prepare ("select UserID, ExternalID, Username, FirstName, MiddleInitial, LastName, EmailAddress, PasswordSalt, PasswordHash, Notes, LastLogin, IsActive, SystemRole from Users where Username = ?");
       $stmt->bind_param ("s", $username);
       $stmt->execute ();
-      $stmt->store_result ();
       $stmt->bind_result ($results ["UserID"], $results ["ExternalID"], $results ["Username"], $results ["FirstName"], $results ["MiddleInitial"], $results ["LastName"], $results ["EmailAddress"], $results ["PasswordSalt"], $results ["PasswordHash"], $results ["Notes"], $results ["LastLogin"], $results ["IsActive"], $results ["SystemRole"]);
       $stmt->fetch ();
-      if ($stmt->num_rows < 1) {
+      if ($stmt->num_rows < 0) {
          $results = NULL;
       }
       $stmt->close ();
@@ -42,7 +40,6 @@ class UsersDAO {
       $query = "select UserID, ExternalID, Username, FirstName, MiddleInitial, LastName, EmailAddress, PasswordSalt, PasswordHash, Notes, LastLogin, IsActive, SystemRole from Users";
       $stmt = $this->db->prepare ($query);
       $stmt->execute ();
-      $stmt->store_result ();
       $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["UserID"], $results ["ExternalID"], $results ["Username"], $results ["FirstName"], $results ["MiddleInitial"], $results ["LastName"], $results ["EmailAddress"], $results ["PasswordSalt"], $results ["PasswordHash"], $results ["Notes"], $results ["LastLogin"], $results ["IsActive"], $results ["SystemRole"]);
       while ($stmt->fetch ()) {
@@ -70,7 +67,6 @@ class UsersDAO {
       $stmt = $this->db->prepare ($query);
       call_user_func_array (array ($stmt, "bind_param"), $bindParamArgs);
       $stmt->execute ();
-      $stmt->store_result ();
       $lambda = create_function ('$a', 'return $a;');
       $stmt->bind_result ($results ["UserID"], $results ["ExternalID"], $results ["Username"], $results ["FirstName"], $results ["MiddleInitial"], $results ["LastName"], $results ["EmailAddress"], $results ["PasswordSalt"], $results ["PasswordHash"], $results ["Notes"], $results ["LastLogin"], $results ["IsActive"], $results ["SystemRole"]);
       while ($stmt->fetch ()) {

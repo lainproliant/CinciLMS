@@ -5,13 +5,13 @@ stty -echo;
 read -p "Password: " PASSWORD;
 stty echo;
 
-echo "";
-
-mkdir -p DAO;
-
-echo "Generating VO Source Files..."
+mkdir -p site/lib/VO/DAO;
 
 cd site/lib/VO
+
+echo "";
+
+echo "Generating VO Source Files..."
 
 ppdao --database CinciLMS \
    --tables Courses,CourseRoles,FactCourseEnrollment \

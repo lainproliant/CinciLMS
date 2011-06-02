@@ -39,8 +39,7 @@ class CourseContent extends CourseContentVO {
          return new ContentItem ($this);
 
       case CONTENT_TYPE_ASSIGNMENT:
-         throw new CinciException ("Not Implemented",
-            "Assignment items are not yet implemented.");
+         return new Assignment ($this);
 
       case CONTENT_TYPE_FOLDER:
          return new ContentFolder ($this);
@@ -271,10 +270,12 @@ class CourseContent extends CourseContentVO {
          $creationParent = sprintf ("?parent=%s", htmlentities ($this->pathName));
          $newFolderAction = $creationParent . '&action=newContent&contentType=folder';
          $newItemAction = $creationParent . '&action=newContent&contentType=item';
+         $newAssignmentAction = $creationParent . '&action=newContent&contentType=assignment';
 
          $createMenu->addItems (array (
             'New Folder' =>      new HyperlinkAction ($newFolderAction),
-            'New Content Item' => new HyperlinkAction ($newItemAction)));
+            'New Content Item' => new HyperlinkAction ($newItemAction),
+            'New Assignment' => new HyperlinkAction ($newAssignmentAction)));
       }
    }
 }
@@ -406,7 +407,6 @@ class ContentItem extends CourseContentSubtype {
       $itemInfo = $this->getContentItemInfo ();
    
       $div = new Div ($contentDiv, 'content-item item');
-      
       
       $header = new XMLEntity ($div, 'h4');
       

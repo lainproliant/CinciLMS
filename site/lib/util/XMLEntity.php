@@ -261,6 +261,21 @@ class Form extends XMLEntity {
 }
 
 /*
+ * UploadForm: A convenience class for a single file upload form using POST.
+ */
+class UploadForm extends Form {
+   function __construct ($parent, $action, $label, $class = NULL) {
+      parent::__construct ($parent, $action, 'POST', $class);
+      
+      if (! empty ($label)) {
+         new Label ($this, $label, 'file');
+      }
+
+      new Input ($this, 'file', 'file', 'file');
+   }
+}
+
+/*
  * Label: A convenience class for defining a label.
  */
 class Label extends XMLEntity {

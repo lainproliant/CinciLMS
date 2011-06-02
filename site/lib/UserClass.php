@@ -15,6 +15,7 @@ include_once "Exceptions.php";
 include_once "User.php";
 include_once "Course.php";
 include_once "Content.php";
+include_once "Assignment.php";
 
 include_once "ContentForm.php";
 include_once "GradeForm.php";
@@ -268,6 +269,17 @@ class UserClass extends NonUserClass {
          new ItemForm ($div, '?action=submitContent', $this, $parent);
          break;
 
+      case 'assignment':
+         $div = new Div ($contentDiv, 'prompt');
+         $header = new XMLEntity ($div, 'h3');
+         new TextEntity ($header, "Create a New Assignment");
+         $p = new XMLEntity ($div, 'p');
+         new TextEntity ($p, "Enter the assignment info below, then click Submit.");
+
+         new AssignmentForm ($div, '?action=submitContent', $this, $parent);
+         break;
+         
+
       default:
          throw new CinciException ('Content Creation Error', 'Unknown content type specified.');
       }
@@ -502,6 +514,62 @@ class UserClass extends NonUserClass {
          $p = new XMLEntity ($div, 'p');
          new TextEntity ($p, "The content item was created successfully!");
          break;
+
+      case 'assignment':
+         $itemName = $_POST ['itemName'];
+         $itemPath = $_POST ['itemPath'];
+         $pointsPossible = $_POST ['pointsPossible'];
+         $dueDate = $_POST ['dueDate'];
+
+         if (empty ($itemPath)) {
+            $itemPath = anumfilter ($itemName);
+         }
+
+         $itemText = $_POST ['text'];
+         $accessFlags = implode (',', $_POST ['accessFlags']);
+
+         $item = new Assignment ();
+         $item->name = $itemName;
+         $item->title = $itemName;
+         $item->text = $itemText;
+         $item->ownerID = $user->userID;
+         $item->accessFlags = $accessFlags;
+         $item->pointsPossible = $pointsPossible;
+
+         try {
+            $item->insert ();
+
+            $item->sortOrder = $item->contentID;
+            $item->save (false);
+            
+            // Create a grade column for the newly created assignment.
+            $item->createGradeColumn ($this, $user, $course);
+
+         } catch (DAOException $e) {
+            global $SiteLog;
+
+            $SiteLog->logInfo (sprintf ("LRS-DEBUG: Content Creation Error: %s",
+               $e->getMessage ()));
+            throw new CinciDatabaseException ("Content Creation Error", 
+               "There was an error creating the new assignment.",
+               $e->error);
+         }
+
+         try {
+            $parent->addContent ($item, $itemPath);
+
+         } catch (DAOException $e) {
+            throw new CinciDatabaseException ("Content Insertion Error", 
+               "There was an error adding the assignment item to its parent.",
+               $e->error);
+         }
+
+         $header = new XMLEntity ($div, 'h3');
+         new TextEntity ($header, "Success!");
+         $p = new XMLEntity ($div, 'p');
+         new TextEntity ($p, "The assignment was created successfully!");
+         break;
+
 
       default:
          throw new CinciException ('Content Creation Error', 'Unknown content type specified.');
