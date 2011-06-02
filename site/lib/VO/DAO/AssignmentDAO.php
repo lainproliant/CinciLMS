@@ -20,6 +20,21 @@ class AssignmentsDAO {
       return $results;
    }
    
+   public function listByAssignmentID ($assignmentID) {
+      $resultsList = array ();
+      $results = array ();
+      $stmt = $this->db->prepare ("select AssignmentID, TypeID, PointsPossible, DueDate from Assignments where AssignmentID = ?");
+      $stmt->bind_param ("i", $assignmentID);
+      $stmt->execute ();
+      $lambda = create_function ('$a', 'return $a;');
+      $stmt->bind_result ($results ["AssignmentID"], $results ["TypeID"], $results ["PointsPossible"], $results ["DueDate"]);
+      while ($stmt->fetch ()) {
+         $resultsList [] = array_map ($lambda, $results);
+      }
+      $stmt->close ();
+      return $resultsList;
+   }
+   
    public function fetchAll () {
       $resultsList = array ();
       $results = array ();

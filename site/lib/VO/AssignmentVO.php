@@ -21,6 +21,15 @@ class AssignmentsVO {
       return $obj;
    }
    
+   public static function listByAssignmentID ($assignmentID) {
+      $dao = new AssignmentsDAO ();
+      $objs = array ();
+      foreach ($dao->listByAssignmentID ($assignmentID) as $result) {
+         $objs [] = self::fromResult ($result);
+      }
+      return $objs;
+   }
+   
    protected function toData () {
       $data = array ();
       $data ["AssignmentID"] = $this->assignmentID;

@@ -52,6 +52,8 @@ class UserClass extends NonUserClass {
          'submitEnrollment'         => 'submitEnrollment',
          'submitPassword'           => 'submitPassword',
 
+         'uploadAssignment'         => 'uploadAssignment',
+
          'searchEnrollments'        => 'actionSearchEnrollments',
          'submitEnrollmentSearch'   => 'submitEnrollmentSearch',
 
@@ -541,7 +543,7 @@ class UserClass extends NonUserClass {
 
             $item->sortOrder = $item->contentID;
             $item->save (false);
-            
+
             // Create a grade column for the newly created assignment.
             $item->createGradeColumn ($this, $user, $course);
 
@@ -810,6 +812,19 @@ class UserClass extends NonUserClass {
       new TextEntity ($header, "Password Changed");
       $p = new XMLEntity ($div, 'p');
       new TextEntity ($p, "Success!  Your password has been changed.");
+   }
+
+   protected function uploadAssignment ($contentDiv)
+   {
+      // LRS-DEBUG: Check to see if we can write in the ./data directory.
+
+      $file = fopen ('data/test.txt', 'w');
+
+      fprintf ($file, "Hello!  This is a test from uploadAssignment.\n");
+
+      fclose ($file);
+      
+      printf ("(LRS-DEBUG: Test Complete)");
    }
    
    protected function actionSearchEnrollments ($contentDiv)

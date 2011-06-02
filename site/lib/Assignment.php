@@ -37,6 +37,8 @@ class Assignment extends ContentItem {
    protected function createVO ()
    {
       $vo = new AssignmentsVO ();
+      
+      printf ("(LRS-DEBUG A: %d)", $this->contentID);
 
       $vo->assignmentID = $this->contentID;
       $vo->typeID = $this->assignmentTypeID;

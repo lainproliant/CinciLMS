@@ -192,7 +192,7 @@ create table `AssignmentTypes` (
 #-----------------------------------------------------------------------------
 CREATE_TABLE_ASSIGNMENTS = """
 create table `Assignments` (
-   `AssignmentID` int not null primary key,
+   `AssignmentID` int not null, INDEX (`AssignmentID`),
    `TypeID` int not null,
    `PointsPossible` int default 100,
    `DueDate` date default null,

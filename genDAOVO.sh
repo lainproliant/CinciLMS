@@ -36,6 +36,7 @@ ppdao --database CinciLMS \
 ppdao --database CinciLMS \
    --tables Assignments,AssignmentFileSubmissions,AssignmentTypes \
    --indexes AssignmentFileSubmissions=IDX_StudentAssignmentSubmissions \
+   --keys Assignments=AssignmentID \
    --vo --include DAO/AssignmentDAO.php --username ${USERNAME} --password ${PASSWORD} > AssignmentVO.php;
 
 echo "Generating DAO Source Files..."
@@ -63,5 +64,6 @@ ppdao --database CinciLMS \
 ppdao --database CinciLMS \
    --tables Assignments,AssignmentFileSubmissions,AssignmentTypes \
    --indexes AssignmentFileSubmissions=IDX_StudentAssignmentSubmissions \
+   --keys Assignments=AssignmentID \
    --dao --username ${USERNAME} --password ${PASSWORD} > DAO/AssignmentDAO.php;
 
