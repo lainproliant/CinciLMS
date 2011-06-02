@@ -112,10 +112,10 @@ class AssignmentFileSubmissionsDAO {
    }
    
    public function bySubmissionID ($submissionID) {
-      $stmt = $this->db->prepare ("select SubmissionID, AssignmentID, StudentID, CourseID, SubmissionDate, FileID from AssignmentFileSubmissions where SubmissionID = ?");
+      $stmt = $this->db->prepare ("select SubmissionID, AssignmentID, StudentID, CourseID, SubmissionDate, FileName from AssignmentFileSubmissions where SubmissionID = ?");
       $stmt->bind_param ("i", $submissionID);
       $stmt->execute ();
-      $stmt->bind_result ($results ["SubmissionID"], $results ["AssignmentID"], $results ["StudentID"], $results ["CourseID"], $results ["SubmissionDate"], $results ["FileID"]);
+      $stmt->bind_result ($results ["SubmissionID"], $results ["AssignmentID"], $results ["StudentID"], $results ["CourseID"], $results ["SubmissionDate"], $results ["FileName"]);
       $stmt->fetch ();
       if ($stmt->num_rows < 0) {
          $results = NULL;
@@ -128,11 +128,11 @@ class AssignmentFileSubmissionsDAO {
    public function fetchAll () {
       $resultsList = array ();
       $results = array ();
-      $query = "select SubmissionID, AssignmentID, StudentID, CourseID, SubmissionDate, FileID from AssignmentFileSubmissions";
+      $query = "select SubmissionID, AssignmentID, StudentID, CourseID, SubmissionDate, FileName from AssignmentFileSubmissions";
       $stmt = $this->db->prepare ($query);
       $stmt->execute ();
       $lambda = create_function ('$a', 'return $a;');
-      $stmt->bind_result ($results ["SubmissionID"], $results ["AssignmentID"], $results ["StudentID"], $results ["CourseID"], $results ["SubmissionDate"], $results ["FileID"]);
+      $stmt->bind_result ($results ["SubmissionID"], $results ["AssignmentID"], $results ["StudentID"], $results ["CourseID"], $results ["SubmissionDate"], $results ["FileName"]);
       while ($stmt->fetch ()) {
          $resultsList [] = array_map ($lambda, $results);
       }
@@ -149,7 +149,7 @@ class AssignmentFileSubmissionsDAO {
          elseif (is_string ($val)) { $bindTypes .= 's'; }
          elseif (is_float ($val)) { $bindTypes .= 'd'; }
       }
-      $query = sprintf ("select SubmissionID, AssignmentID, StudentID, CourseID, SubmissionDate, FileID from AssignmentFileSubmissions where %s", implode (" and ", array_keys ($params)));
+      $query = sprintf ("select SubmissionID, AssignmentID, StudentID, CourseID, SubmissionDate, FileName from AssignmentFileSubmissions where %s", implode (" and ", array_keys ($params)));
       $query .= ' ' . $postfix;
       $bindParamArgs = array (&$bindTypes);
       foreach ($params as $key => $value) {
@@ -159,7 +159,7 @@ class AssignmentFileSubmissionsDAO {
       call_user_func_array (array ($stmt, "bind_param"), $bindParamArgs);
       $stmt->execute ();
       $lambda = create_function ('$a', 'return $a;');
-      $stmt->bind_result ($results ["SubmissionID"], $results ["AssignmentID"], $results ["StudentID"], $results ["CourseID"], $results ["SubmissionDate"], $results ["FileID"]);
+      $stmt->bind_result ($results ["SubmissionID"], $results ["AssignmentID"], $results ["StudentID"], $results ["CourseID"], $results ["SubmissionDate"], $results ["FileName"]);
       while ($stmt->fetch ()) {
          $resultsList [] = array_map ($lambda, $results);
       }
@@ -168,8 +168,8 @@ class AssignmentFileSubmissionsDAO {
    }
    
    public function insert ($data) {
-      $stmt = $this->db->prepare ("insert into AssignmentFileSubmissions (AssignmentID, StudentID, CourseID, SubmissionDate, FileID) values (?, ?, ?, ?, ?)");
-      $stmt->bind_param ("iiisi", $data ["AssignmentID"], $data ["StudentID"], $data ["CourseID"], $data ["SubmissionDate"], $data ["FileID"]);
+      $stmt = $this->db->prepare ("insert into AssignmentFileSubmissions (AssignmentID, StudentID, CourseID, SubmissionDate, FileName) values (?, ?, ?, ?, ?)");
+      $stmt->bind_param ("iiiss", $data ["AssignmentID"], $data ["StudentID"], $data ["CourseID"], $data ["SubmissionDate"], $data ["FileName"]);
       $stmt->execute ();
       if ($stmt->affected_rows != 1) {
          throw new DAOException ("Couldn't insert record in the table \"AssignmentFileSubmissions\"", $stmt->error, $stmt->affected_rows);
@@ -178,8 +178,8 @@ class AssignmentFileSubmissionsDAO {
    }
    
    public function save ($data) {
-      $stmt = $this->db->prepare ("update AssignmentFileSubmissions set AssignmentID = ?, StudentID = ?, CourseID = ?, SubmissionDate = ?, FileID = ? where SubmissionID = ?");
-      $stmt->bind_param ("iiisii", $data ["AssignmentID"], $data ["StudentID"], $data ["CourseID"], $data ["SubmissionDate"], $data ["FileID"], $data ["SubmissionID"]);
+      $stmt = $this->db->prepare ("update AssignmentFileSubmissions set AssignmentID = ?, StudentID = ?, CourseID = ?, SubmissionDate = ?, FileName = ? where SubmissionID = ?");
+      $stmt->bind_param ("iiissi", $data ["AssignmentID"], $data ["StudentID"], $data ["CourseID"], $data ["SubmissionDate"], $data ["FileName"], $data ["SubmissionID"]);
       $stmt->execute ();
       if ($stmt->affected_rows != 1) {
          throw new DAOException ("Couldn't save record in table \"AssignmentFileSubmissions\"", $stmt->error, $stmt->affected_rows);

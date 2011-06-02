@@ -210,10 +210,9 @@ create table `AssignmentFileSubmissions` (
    `CourseID` int not null,
    INDEX IDX_StudentAssignmentSubmissions (`AssignmentID`, `StudentID`, `CourseID`),
    `SubmissionDate` date not null,
-   `FileID` int not null,
+   `FileName` varchar(1024) not null,
    constraint `FK_SubmissionAssignmentID` foreign key (`AssignmentID`) references `Assignments` (`AssignmentID`) on delete cascade,
-   constraint `FK_SubmissionStudentID` foreign key (`StudentID`) references `Users` (`UserID`) on delete cascade,
-   constraint `FK_SubmissionFileID` foreign key (`FileID`) references `FileManagement` (`FileID`)
+   constraint `FK_SubmissionStudentID` foreign key (`StudentID`) references `Users` (`UserID`) on delete cascade
 ) ENGINE=InnoDB;
 """.strip ()
 

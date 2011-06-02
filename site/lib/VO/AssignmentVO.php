@@ -56,7 +56,7 @@ class AssignmentsVO {
 }
 
 class AssignmentFileSubmissionsVO {
-   var $submissionID, $assignmentID, $studentID, $courseID, $submissionDate, $fileID;
+   var $submissionID, $assignmentID, $studentID, $courseID, $submissionDate, $fileName;
    
    public static function bySubmissionID ($submissionID) {
       $dao = new AssignmentFileSubmissionsDAO ();
@@ -73,7 +73,7 @@ class AssignmentFileSubmissionsVO {
       $obj->studentID = $result ["StudentID"];
       $obj->courseID = $result ["CourseID"];
       $obj->submissionDate = $result ["SubmissionDate"];
-      $obj->fileID = $result ["FileID"];
+      $obj->fileName = $result ["FileName"];
       return $obj;
    }
    
@@ -84,7 +84,7 @@ class AssignmentFileSubmissionsVO {
       $data ["StudentID"] = $this->studentID;
       $data ["CourseID"] = $this->courseID;
       $data ["SubmissionDate"] = $this->submissionDate;
-      $data ["FileID"] = $this->fileID;
+      $data ["FileName"] = $this->fileName;
       return $data;
    }
    

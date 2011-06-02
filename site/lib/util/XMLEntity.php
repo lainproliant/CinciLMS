@@ -271,6 +271,8 @@ class UploadForm extends Form {
          new Label ($this, $label, 'file');
       }
 
+      $this->setAttribute ('enctype', 'multipart/form-data');
+
       new Input ($this, 'file', 'file', 'file');
    }
 }

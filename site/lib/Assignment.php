@@ -19,7 +19,8 @@ class Assignment extends ContentItem {
       parent::__construct ($contentItem);
 
       $this->typeID = CONTENT_TYPE_ASSIGNMENT;
-
+      
+      $this->assignmentID = $contentItem->contentID;;
       $this->assignmentTypeID = ASSIGNMENT_TYPE_PROJECT;
       $this->pointsPossible = 100;
       $this->dueDate = NULL;
@@ -106,7 +107,7 @@ class Assignment extends ContentItem {
    }
 }
 
-class AssignmentSubmissions extends AssignmentFileSubmissionsVO {
+class AssignmentSubmission extends AssignmentFileSubmissionsVO {
    public static function listByCourseID_StudentID_AssignmentID ($courseID, $studentID, $assignmentID)
    {
       $dao = new AssignmentSubmissionsExtendedDAO ();

@@ -817,14 +817,72 @@ class UserClass extends NonUserClass {
    protected function uploadAssignment ($contentDiv)
    {
       // LRS-DEBUG: Check to see if we can write in the ./data directory.
+      global $SiteConfig;
 
-      $file = fopen ('data/test.txt', 'w');
+      if ($_FILES ['file']['error'] > 0) {
+         throw new CinciException ("Assignment Upload Error",
+            sprintf ("There was an error in the file upload: Error ID %d", $_FILES ['file']['error']));
+      }
 
-      fprintf ($file, "Hello!  This is a test from uploadAssignment.\n");
+      if (empty ($_GET ['assignmentIdentity'])) {
+         throw new CinciException ("Assignment Upload Error",
+            "The assignment identity was not provided.");
+      }
 
-      fclose ($file);
-      
-      printf ("(LRS-DEBUG: Test Complete)");
+      $assignmentIdentity = $_GET ['assignmentIdentity'];
+
+      list ($courseID, $assignmentID) = explode (':', $assignmentIdentity);
+
+      $course = Course::byCourseID ($courseID);
+      $assignment = CourseContent::byContentID ($assignmentID)->resolve (); 
+      printf ("(LRS-DEBUG: %s)", get_class ($assignment));
+
+      // Check to make sure the user is enrolled in the course.
+      $user = $this->getUser ();
+      $enrollment = $course->getEnrollment ($user);
+
+      if (empty ($enrollment)) {
+         throw new CinciException ("Assignment Upload Error",
+            "You cannot submit to this assignment because you are not enrolled in the course.");
+      }
+
+      // Check to make sure the user has read permissions on the item.
+      if (! $assignment->checkReadAccess ($this, $user, $course, $enrollment)) {
+         throw new CinciException ("Assignment Upload Error",
+            "You cannot submit to this assignment because you don't have access to it.");
+      }
+
+      // Create a submission item.
+      $submission = new AssignmentSubmission ();
+      $submission->assignmentID = $assignment->assignmentID;
+      $submission->studentID = $user->userID;
+      $submission->courseID = $course->courseID;
+      $submission->submissionDate = date ('c');
+      $submission->fileName = sprintf ("%s/%d-%d-%s",
+         $SiteConfig['site']['data'],
+         $course->courseID,
+         $assignment->assignmentID,
+         $_FILES ['file']['name']);
+
+
+      try {
+         $submission->insert ();
+
+         // Move the file into place.
+         move_uploaded_file ($_FILES ['file']['tmp_name'],
+            $submission->fileName);
+
+      } catch (DAOException $e) {
+         throw new CinciDatabaseException ("Assignment Upload Error",
+            "There was an error uploading the assignment submission.",
+            $e->error);
+      }
+
+      $div = new Div ($contentDiv, 'prompt');
+      $header = new XMLEntity ($div, 'h3');
+      new TextEntity ($header, "Success!");
+      $p = new XMLEntity ($div, 'p');
+      new TextEntity ($p, "The assignment was created successfully!");
    }
    
    protected function actionSearchEnrollments ($contentDiv)
