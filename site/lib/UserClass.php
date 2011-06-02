@@ -835,8 +835,6 @@ class UserClass extends NonUserClass {
 
       $course = Course::byCourseID ($courseID);
       $assignment = CourseContent::byContentID ($assignmentID)->resolve (); 
-      printf ("(LRS-DEBUG: %s)", get_class ($assignment));
-
       // Check to make sure the user is enrolled in the course.
       $user = $this->getUser ();
       $enrollment = $course->getEnrollment ($user);
