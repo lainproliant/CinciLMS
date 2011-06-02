@@ -192,11 +192,12 @@ create table `AssignmentTypes` (
 #-----------------------------------------------------------------------------
 CREATE_TABLE_ASSIGNMENTS = """
 create table `Assignments` (
-   `AssignmentID` int not null, INDEX (`AssignmentID`),
+   `AssignmentID` int not null primary key,
    `TypeID` int not null,
    `PointsPossible` int default 100,
    `DueDate` date default null,
-   constraint `FK_AssignmentTypeID` foreign key (`TypeID`) references `AssignmentTypes` (`AssignmentTypeID`)
+   constraint `FK_AssignmentTypeID` foreign key (`TypeID`) references `AssignmentTypes` (`AssignmentTypeID`),
+   constraint `FK_AssginmentID` foreign key (`AssignmentID`) references `CourseContent` (`ContentID`)
 ) ENGINE=InnoDB;
 """.strip ()
 

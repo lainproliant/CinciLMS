@@ -78,8 +78,8 @@ class AssignmentsDAO {
    }
    
    public function insert ($data) {
-      $stmt = $this->db->prepare ("insert into Assignments (TypeID, PointsPossible, DueDate) values (?, ?, ?)");
-      $stmt->bind_param ("iis", $data ["TypeID"], $data ["PointsPossible"], $data ["DueDate"]);
+      $stmt = $this->db->prepare ("insert into Assignments (AssignmentID, TypeID, PointsPossible, DueDate) values (?, ?, ?, ?)");
+      $stmt->bind_param ("iiis", $data ["AssignmentID"], $data ["TypeID"], $data ["PointsPossible"], $data ["DueDate"]);
       $stmt->execute ();
       if ($stmt->affected_rows != 1) {
          throw new DAOException ("Couldn't insert record in the table \"Assignments\"", $stmt->error, $stmt->affected_rows);

@@ -41,7 +41,7 @@ class AssignmentsVO {
    
    public function insert () {
       $dao = new AssignmentsDAO ();
-      $this->assignmentID = $dao->insert ($this->toData ());
+      $dao->insert ($this->toData ());
    }
    
    public function save () {
