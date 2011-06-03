@@ -212,7 +212,7 @@ class UserSearchResults extends Div {
    {
       parent::__construct ($parent, 'search_results');
 
-      $columns = array ('Username' => NULL, 'Name' => NULL);
+      $columns = array ('Username' => NULL, 'Name' => NULL, 'Email' => NULL);
       $columns = array_merge ($columnsBefore, $columns);
       $columns = array_merge ($columns, $columnsAfter);
 
@@ -255,6 +255,16 @@ class UserSearchResults extends Div {
          }
 
          new TableColumn ($row, htmlentities ($nameString));
+         break;
+
+      case "Email":
+         $col = new TableColumn ($row);
+
+         if (! empty ($user->emailAddress)) {
+            new TextLink ($col, sprintf ("mailto:%s", $user->emailAddress),
+               htmlentities ($user->emailAddress));
+         }
+         
          break;
 
       case "Default":
