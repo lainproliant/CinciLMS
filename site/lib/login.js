@@ -12,6 +12,9 @@
 const CINCI_DEBUG = false;
 
 var regexUsername = new RegExp ('^[A-Za-z0-9_]*$');
+var regexCapitalLetter = new RegExp ('[A-Z]');
+var regexLowerCaseLetter = new RegExp ('[a-z]');
+var regexNumber = new RegExp ('[0-9]');
 
 /* 
  * Validates the user login form.  Set as the 'onSubmit' method.
@@ -58,6 +61,16 @@ function loginFormValidate (loginForm)
  */
 function changePasswordFormValidate (loginForm)
 {
+   // Verify that the password meets UCit password standards.
+   
+   if (loginForm.new_password_A.value.length < 8 ||
+         ! regexCapitalLetter.test (loginForm.new_password_A.value) ||
+         ! regexLowerCaseLetter.test (loginForm.new_password_A.value) ||
+         ! regexNumber.test (loginForm.new_password_A.value)) {
+      alert ("New password must be at least 8 characters and must contain one capital letter, one lower case letter, and one number.");
+      return false;
+   }
+
    // Verify that the two passwords match.
    if (loginForm.new_password_A.value != loginForm.new_password_B.value) {
       alert ("The passwords do not match.  Please try again.");

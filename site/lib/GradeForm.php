@@ -159,6 +159,7 @@ class GradeReportForm extends Div {
 
       new TableHeader ($table->getHead (), "Name");
       new TableHeader ($table->getHead (), "Grade");
+      new TableHeader ($table->getHead (), "Points Possible");
 
       $gradeRecord = new GradeRecord ($course);
       
@@ -177,6 +178,8 @@ class GradeReportForm extends Div {
          } else {
             new TableColumn ($row, $grade->grade);
          }
+
+         new TableColumn ($row, sprintf ("%.2f", $column->pointsPossible));
       }
    }
 }

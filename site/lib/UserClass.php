@@ -387,7 +387,10 @@ class UserClass extends NonUserClass {
 
       $div = new Div ($contentDiv, "prompt");
       $header = new XMLEntity ($div, 'h3');
-      $headerText = sprintf ("Grade Report: %s", htmlentities ($course->courseName));
+      $headerText = sprintf ("%s, %s: Grade Report: %s", 
+         htmlentities ($user->lastName),
+         htmlentities ($user->firstName),
+         htmlentities ($course->courseName));
 
       new TextEntity ($header, $headerText);
 
