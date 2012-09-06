@@ -5,7 +5,7 @@
  *
  * (c) 2011 Lee Supe (lain_proliant)
  *
- * Released under the GNU General Public License, verion 3.
+ * Released under the GNU General Public License, version 3.
  */
 
 include_once "lib/SiteConfig.php";
